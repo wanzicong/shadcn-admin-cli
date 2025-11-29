@@ -42,27 +42,35 @@ type AuthenticatedLayoutProps = {
 }
 
 export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
+     // 从 Cookie 读取侧边栏默认开关状态，支持用户偏好记忆
      const defaultOpen = getCookie('sidebar_state') !== 'false'
+
      return (
           <SearchProvider>
+               {/* 提供布局配置管理 */}
                <LayoutProvider>
+                    {/* 提供侧边栏状态管理 */}
                     <SidebarProvider defaultOpen={defaultOpen}>
+                         {/* 无障碍访问支持 */}
                          <SkipToMain />
+
+                         {/* 侧边栏组件 */}
                          <AppSidebar />
+
+                         {/* 主内容区域 */}
                          <SidebarInset
                               className={cn(
-                                   // Set content container, so we can use container queries
+                                   // 设置内容容器，支持容器查询
                                    '@container/content',
 
-                                   // If layout is fixed, set the height
-                                   // to 100svh to prevent overflow
+                                   // 固定布局时设置高度为视窗高度，防止溢出
                                    'has-data-[layout=fixed]:h-svh',
 
-                                   // If layout is fixed and sidebar is inset,
-                                   // set the height to 100svh - spacing (total margins) to prevent overflow
-                                   'peer-data-[variant=inset]:has-data-[layout=fixed]:h-[calc(100svh-(var(--spacing)*4))]'
+                                   // 固定布局且侧边栏为内嵌模式时，计算精确高度
+                                   'peer-data-[variant=inset]:has-data-[layout=fixed]:h-[calc(100svh-(var(--spacing)*4)]'
                               )}
                          >
+                              {/* 条件渲染：子组件或路由出口 */}
                               {children ?? <Outlet />}
                          </SidebarInset>
                     </SidebarProvider>
