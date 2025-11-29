@@ -8,9 +8,15 @@ import { callTypes, roles } from '../data/data.ts'
 import { type User } from '../data/schema.ts'
 import { DataTableRowActions } from './data-table-row-actions.tsx'
 
+/**
+ * 用户表格列定义配置
+ * 定义了用户管理表格中显示的所有列及其渲染逻辑
+ */
 export const usersColumns: ColumnDef<User>[] = [
+     // 选择列：用于批量选择用户行
      {
           id: 'select',
+          // 全选复选框 - 选中/取消选中当前页所有行
           header: ({ table }) => (
                <Checkbox
                     checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
@@ -19,9 +25,7 @@ export const usersColumns: ColumnDef<User>[] = [
                     className='translate-y-[2px]'
                />
           ),
-          meta: {
-               className: cn('max-md:sticky start-0 z-10 rounded-tl-[inherit]'),
-          },
+          // 单行选择复选框 - 选中/取消选中单行
           cell: ({ row }) => (
                <Checkbox
                     checked={row.getIsSelected()}
@@ -30,9 +34,13 @@ export const usersColumns: ColumnDef<User>[] = [
                     className='translate-y-[2px]'
                />
           ),
-          enableSorting: false,
-          enableHiding: false,
+          enableSorting: false,   // 选择列不支持排序
+          enableHiding: false,    // 选择列不允许隐藏
+          meta: {
+               className: cn('max-md:sticky start-0 z-10 rounded-tl-[inherit]'), // 移动端固定在左侧
+          },
      },
+     // 用户名列：显示用户登录名
      {
           accessorKey: 'username',
           header: ({ column }) => <DataTableColumnHeader column={column} title='Username' />,
@@ -43,8 +51,9 @@ export const usersColumns: ColumnDef<User>[] = [
                     'ps-0.5 max-md:sticky start-6 @4xl/content:table-cell @4xl/content:drop-shadow-none'
                ),
           },
-          enableHiding: false,
+          enableHiding: false,    // 用户名是重要信息，不允许隐藏
      },
+     // 全名列：组合显示用户的名字和姓氏
      {
           id: 'fullName',
           header: ({ column }) => <DataTableColumnHeader column={column} title='Name' />,
@@ -53,25 +62,28 @@ export const usersColumns: ColumnDef<User>[] = [
                const fullName = `${firstName} ${lastName}`
                return <LongText className='max-w-36'>{fullName}</LongText>
           },
-          meta: { className: 'w-36' },
+          meta: { className: 'w-36' }, // 限制列宽
      },
+     // 邮箱列：显示用户邮箱地址
      {
           accessorKey: 'email',
           header: ({ column }) => <DataTableColumnHeader column={column} title='Email' />,
           cell: ({ row }) => <div className='w-fit ps-2 text-nowrap'>{row.getValue('email')}</div>,
      },
+     // 电话号码列：显示用户联系方式
      {
           accessorKey: 'phoneNumber',
           header: ({ column }) => <DataTableColumnHeader column={column} title='Phone Number' />,
           cell: ({ row }) => <div>{row.getValue('phoneNumber')}</div>,
-          enableSorting: false,
+          enableSorting: false,   // 电话号码不需要排序
      },
+     // 状态列：显示用户当前状态，使用不同颜色的徽章
      {
           accessorKey: 'status',
           header: ({ column }) => <DataTableColumnHeader column={column} title='Status' />,
           cell: ({ row }) => {
                const { status } = row.original
-               const badgeColor = callTypes.get(status)
+               const badgeColor = callTypes.get(status) // 获取状态对应的样式
                return (
                     <div className='flex space-x-2'>
                          <Badge variant='outline' className={cn('capitalize', badgeColor)}>
@@ -81,11 +93,12 @@ export const usersColumns: ColumnDef<User>[] = [
                )
           },
           filterFn: (row, id, value) => {
-               return value.includes(row.getValue(id))
+               return value.includes(row.getValue(id)) // 状态过滤器逻辑
           },
-          enableHiding: false,
-          enableSorting: false,
+          enableHiding: false,    // 状态是重要信息，不允许隐藏
+          enableSorting: false,    // 状态不参与排序
      },
+     // 角色列：显示用户权限角色，包含图标
      {
           accessorKey: 'role',
           header: ({ column }) => <DataTableColumnHeader column={column} title='Role' />,
@@ -94,7 +107,7 @@ export const usersColumns: ColumnDef<User>[] = [
                const userType = roles.find(({ value }) => value === role)
 
                if (!userType) {
-                    return null
+                    return null // 如果找不到对应的角色配置，显示为空
                }
 
                return (
@@ -105,13 +118,14 @@ export const usersColumns: ColumnDef<User>[] = [
                )
           },
           filterFn: (row, id, value) => {
-               return value.includes(row.getValue(id))
+               return value.includes(row.getValue(id)) // 角色过滤器逻辑
           },
-          enableSorting: false,
-          enableHiding: false,
+          enableSorting: false,    // 角色不参与排序
+          enableHiding: false,    // 角色是重要信息，不允许隐藏
      },
+     // 操作列：显示每行可执行的操作（编辑、删除等）
      {
           id: 'actions',
-          cell: DataTableRowActions,
+          cell: DataTableRowActions, // 使用专门的行操作组件
      },
 ]

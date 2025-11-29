@@ -228,3 +228,4 @@ import { useAuth } from '@/hooks/use-auth'
 5. **未使用代码检测**: Knip 集成用于包大小优化
 
 此代码库代表了一个现代化的、生产就绪的 React 管理后台模板，具有出色的开发者体验、全面的工具和深思熟虑的架构模式，优先考虑可维护性、性能和可访问性。
+- always speak chinese

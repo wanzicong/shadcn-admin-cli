@@ -3,7 +3,8 @@
     "allow": [
       "Bash(find:*)",
       "Bash(npx tsc:*)",
-      "Bash(gh repo create:*)"
+      "Bash(gh repo create:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []
