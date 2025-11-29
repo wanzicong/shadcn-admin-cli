@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
-import { SignIn } from '@/develop/(views)/auth/sign-in'
+import { SignIn } from '@/develop/(views)/official/auth/sign-in'
 
 const searchSchema = z.object({
      redirect: z.string().optional(),

@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router'
-import { AuthenticatedLayout } from '@/develop/(components)/layout/authenticated-layout'
-import { Main } from '@/develop/(components)/layout/main'
+import { AuthenticatedLayout } from '@/develop/(layout)/authenticated-layout.tsx'
+import { Main } from '@/develop/(layout)/main.tsx'
 import { ClerkProvider } from '@clerk/clerk-react'
 import { ExternalLink, Key } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'

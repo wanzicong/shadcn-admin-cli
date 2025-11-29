@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { sidebarData } from '@/develop/(components)/data/sidebar-data'
+import { sidebarData } from '@/develop/(layout)/data/sidebar-data'
 import { useSearch } from '@/develop/(context)/search-provider.tsx'
 import { useTheme } from '@/develop/(context)/theme-provider.tsx'
 import { ArrowRight, ChevronRight, Laptop, Moon, Sun } from 'lucide-react'

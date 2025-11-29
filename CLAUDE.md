@@ -82,7 +82,7 @@ src/
 
 **TanStack Router** 提供这些路由组的文件系统路由：
 - `/` - 根布局
-- `/_authenticated/` - 需要认证的受保护路由
+- `/_authenticated/official/` - 需要认证的受保护路由
 - `/(auth)/` - 认证页面 (登录, 注册等)
 - `/(errors)/` - 错误页面 (401, 403, 404, 500, 503)
 - `/clerk/` - Clerk 认证集成路由
