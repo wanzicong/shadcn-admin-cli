@@ -22,7 +22,7 @@
 VITE_API_BASE_URL=http://localhost:8080
 VITE_API_TIMEOUT=30000
 VITE_API_PREFIX=
-VITE_APP_TITLE=Shadcn Admin
+VITE_APP_TITLE=Shadcn Admin 脚手架
 VITE_APP_ENV=development
 ```
 

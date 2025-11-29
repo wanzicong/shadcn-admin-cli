@@ -14,7 +14,7 @@ function ClerkAuthLayout() {
                     <div className='absolute inset-0 bg-slate-500' />
                     <Link to='/' className='relative z-20 flex items-center text-lg font-medium'>
                          <Logo className='me-2' />
-                         Shadcn Admin
+                         Shadcn Admin 脚手架
                     </Link>
 
                     <ClerkFullLogo className='relative m-auto size-96' />
