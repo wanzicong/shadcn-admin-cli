@@ -21,36 +21,59 @@ import {
 } from 'lucide-react'
 import { ClerkLogo } from '@/assets/clerk-logo.tsx'
 
+/**
+ * 导航菜单数据配置
+ * 
+ * 定义侧边栏的所有导航组和导航项
+ * 包含官方示例和自定义案例两个导航组
+ * 
+ * 导航项类型：
+ * - 普通链接：直接跳转到指定路由
+ * - 可折叠菜单：包含子项的导航项，可以展开/收起
+ * 
+ * 导航项属性：
+ * - title: 导航项标题
+ * - url: 路由路径（普通链接必需）
+ * - icon: 图标组件（可选）
+ * - badge: 徽章文本（可选，用于显示未读数量等）
+ * - items: 子导航项数组（可折叠菜单必需）
+ */
 export const menus = [
      {
           title: '官方示例',
           items: [
+               // 仪表板：首页
                {
                     title: '仪表板',
                     url: '/',
                     icon: LayoutDashboard,
                },
+               // 任务管理
                {
                     title: '任务',
                     url: '/official/tasks',
                     icon: ListTodo,
                },
+               // 应用列表
                {
                     title: '应用',
                     url: '/official/apps',
                     icon: Package,
                },
+               // 聊天：带未读消息徽章
                {
                     title: '聊天',
                     url: '/official/chats',
-                    badge: '3',
+                    badge: '3',  // 显示 3 条未读消息
                     icon: MessagesSquare,
                },
+               // 用户管理
                {
                     title: '用户',
                     url: '/official/users',
                     icon: Users,
                },
+               // Clerk 安全认证：可折叠菜单
                {
                     title: 'Clerk 安全认证',
                     icon: ClerkLogo,
@@ -69,6 +92,7 @@ export const menus = [
                          },
                     ],
                },
+               // 认证：可折叠菜单
                {
                     title: '认证',
                     icon: ShieldCheck,
@@ -95,6 +119,7 @@ export const menus = [
                          },
                     ],
                },
+               // 错误页面：可折叠菜单
                {
                     title: '错误页面',
                     icon: Bug,
@@ -126,6 +151,7 @@ export const menus = [
                          },
                     ],
                },
+               // 设置：可折叠菜单
                {
                     title: '设置',
                     icon: Settings,
@@ -157,6 +183,7 @@ export const menus = [
                          },
                     ],
                },
+               // 帮助中心
                {
                     title: '帮助中心',
                     url: '/official/help-center',
@@ -166,6 +193,6 @@ export const menus = [
      },
      {
           title: '自定义案例',
-          items: [],
+          items: [],  // 空数组，可以添加自定义导航项
      },
 ]
