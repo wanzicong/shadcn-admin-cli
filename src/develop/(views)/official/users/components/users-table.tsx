@@ -1,12 +1,4 @@
 import { useEffect, useState } from 'react'
-import { DataTablePagination, DataTableToolbar } from '@/develop/(components)/data-table'
-import { type NavigateFn, useTableUrlState } from '@/develop/(hooks)/use-table-url-state.ts'
-import { cn } from '@/develop/(lib)/utils.ts'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
-import { roles } from '../data/data.ts'
-import { type User } from '../data/schema.ts'
-import { DataTableBulkActions } from './actions/data-table-bulk-actions.tsx'
-import { usersColumns as columns } from './users-columns.tsx'
 import {
      type SortingState,
      type VisibilityState,
@@ -19,6 +11,14 @@ import {
      getSortedRowModel,
      useReactTable, // Main hook for creating table instance
 } from '@tanstack/react-table'
+import { DataTablePagination, DataTableToolbar } from '@/develop/(components)/data-table'
+import { type NavigateFn, useTableUrlState } from '@/develop/(hooks)/use-table-url-state.ts'
+import { cn } from '@/develop/(lib)/utils.ts'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
+import { roles } from '../data/data.ts'
+import { type User } from '../data/schema.ts'
+import { DataTableBulkActions } from './actions/data-table-bulk-actions.tsx'
+import { usersColumns as columns } from './users-columns.tsx'
 
 // 组件属性类型定义
 type DataTableProps = {

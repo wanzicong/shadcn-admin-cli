@@ -7,8 +7,8 @@ import { Search } from '@/components/search.tsx'
 import { ThemeSwitch } from '@/components/theme-switch.tsx'
 import { UsersDialogs } from './components/dialogs/users-dialogs.tsx'
 import { UsersPrimaryButtons } from './components/users-primary-buttons.tsx'
-import { UsersProvider } from './context/users-provider.tsx'
 import { UsersTable } from './components/users-table.tsx'
+import { UsersProvider } from './context/users-provider.tsx'
 import { users } from './data/users.ts'
 
 const route = getRouteApi('/_authenticated/official/users/')

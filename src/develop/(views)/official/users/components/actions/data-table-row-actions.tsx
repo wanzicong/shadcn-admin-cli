@@ -10,8 +10,8 @@ import {
      DropdownMenuShortcut,
      DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx'
-import { type User } from '../../data/schema.ts'
 import { useUsers } from '../../context/use-users.tsx'
+import { type User } from '../../data/schema.ts'
 
 type DataTableRowActionsProps = {
      row: Row<User>
