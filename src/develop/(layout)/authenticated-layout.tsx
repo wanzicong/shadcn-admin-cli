@@ -1,3 +1,30 @@
+/**
+ * 认证布局组件 (AuthenticatedLayout)
+ *
+ * 为需要认证的页面提供完整的布局结构和上下文支持
+ *
+ * === 布局结构组成 ===
+ * 1. SearchProvider - 提供全局搜索功能和状态管理
+ * 2. LayoutProvider - 提供布局配置（固定/浮动、侧边栏变体等）
+ * 3. SidebarProvider - 提供侧边栏状态管理（展开/折叠）
+ * 4. AppSidebar - 渲染侧边栏导航和用户菜单
+ * 5. SidebarInset - 主内容区域容器
+ * 6. SkipToMain - 无障碍访问支持
+ *
+ * === 核心功能特性 ===
+ * ✅ Cookie 持久化：侧边栏开关状态保存到浏览器 Cookie
+ * ✅ 响应式设计：自适应不同屏幕尺寸和设备类型
+ * ✅ 固定布局支持：防止内容溢出，适配移动端视窗
+ * ✅ 容器查询：支持基于容器尺寸的样式调整
+ * ✅ 条件渲染：支持子组件优先或路由出口
+ *
+ * === 使用场景 ===
+ * 适用于所有需要用户认证的页面，如：
+ * • 仪表板和管理工作台
+ * • 用户设置和个人资料页面
+ * • 数据表格和报表页面
+ * • 应用配置和系统管理
+ */
 import { Outlet } from '@tanstack/react-router'
 import { LayoutProvider } from '@/develop/(context)/layout-provider.tsx'
 import { SearchProvider } from '@/develop/(context)/search-provider.tsx'
@@ -7,8 +34,11 @@ import { cn } from '@/develop/(lib)/utils.ts'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar.tsx'
 import { SkipToMain } from '@/components/skip-to-main.tsx'
 
+/**
+ * 认证布局组件属性类型
+ */
 type AuthenticatedLayoutProps = {
-     children?: React.ReactNode
+     children?: React.ReactNode // 可选的子组件内容
 }
 
 export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
