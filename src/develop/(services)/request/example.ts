@@ -3,7 +3,7 @@
  * 此文件仅作为示例参考，不会被实际使用
  */
 import { get, post, put, patch, del, upload, download } from './index'
-import type { RequestConfig, ResponseData, PageResponseData } from './types'
+import type { PageResponseData } from './types'
 
 // ==================== 类型定义示例 ====================
 
@@ -117,7 +117,7 @@ export async function deleteUser(id: number): Promise<void> {
 export async function uploadAvatar(userId: number, file: File): Promise<{ url: string }> {
      return upload<{ url: string }>(`/users/${userId}/avatar`, file, {
           onUploadProgress: (progress) => {
-               const percent = Math.round((progress.loaded / progress.total) * 100)
+               const percent = progress.total ? Math.round((progress.loaded / progress.total) * 100) : 0
                // eslint-disable-next-line no-console
                console.log(`上传进度: ${percent}%`)
           },
@@ -155,10 +155,11 @@ export async function getUserWithCustomError(id: number): Promise<User> {
           {},
           {
                customErrorHandler: (error) => {
-                    if (error.errorCode === 404) {
+                    const requestError = error as import('./types').RequestError
+                    if (requestError.errorCode === 404) {
                          // eslint-disable-next-line no-console
                          console.error('用户不存在')
-                    } else if (error.errorCode === 403) {
+                    } else if (requestError.errorCode === 403) {
                          // eslint-disable-next-line no-console
                          console.error('没有权限访问')
                     }

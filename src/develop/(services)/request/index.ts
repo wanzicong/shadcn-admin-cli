@@ -1,4 +1,4 @@
-import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios'
+import axios, { type AxiosInstance } from 'axios'
 import { apiConfig } from './config'
 import { requestInterceptor, requestErrorInterceptor, responseInterceptor, responseErrorInterceptor } from './interceptors'
 import type { RequestConfig, ResponseData } from './types'
@@ -33,35 +33,35 @@ const request = createAxiosInstance()
  * GET 请求
  */
 export function get<T = unknown>(url: string, params?: Record<string, unknown>, config?: RequestConfig): Promise<T> {
-     return request.get<ResponseData<T>, T>(url, { ...config, params }).then((res) => res.data)
+     return request.get<ResponseData<T>>(url, { ...config, params }).then((res) => res.data as T)
 }
 
 /**
  * POST 请求
  */
 export function post<T = unknown>(url: string, data?: unknown, config?: RequestConfig): Promise<T> {
-     return request.post<ResponseData<T>, T>(url, data, config).then((res) => res.data)
+     return request.post<ResponseData<T>>(url, data, config).then((res) => res.data as T)
 }
 
 /**
  * PUT 请求
  */
 export function put<T = unknown>(url: string, data?: unknown, config?: RequestConfig): Promise<T> {
-     return request.put<ResponseData<T>, T>(url, data, config).then((res) => res.data)
+     return request.put<ResponseData<T>>(url, data, config).then((res) => res.data as T)
 }
 
 /**
  * PATCH 请求
  */
 export function patch<T = unknown>(url: string, data?: unknown, config?: RequestConfig): Promise<T> {
-     return request.patch<ResponseData<T>, T>(url, data, config).then((res) => res.data)
+     return request.patch<ResponseData<T>>(url, data, config).then((res) => res.data as T)
 }
 
 /**
  * DELETE 请求
  */
 export function del<T = unknown>(url: string, params?: Record<string, unknown>, config?: RequestConfig): Promise<T> {
-     return request.delete<ResponseData<T>, T>(url, { ...config, params }).then((res) => res.data)
+     return request.delete<ResponseData<T>>(url, { ...config, params }).then((res) => res.data as T)
 }
 
 /**
@@ -84,14 +84,14 @@ export function upload<T = unknown>(
                  })()
 
      return request
-          .post<ResponseData<T>, T>(url, formData, {
+          .post<ResponseData<T>>(url, formData, {
                ...config,
                headers: {
                     'Content-Type': 'multipart/form-data',
                     ...config?.headers,
                },
           })
-          .then((res) => res.data)
+          .then((res) => res.data as T)
 }
 
 /**
@@ -104,7 +104,8 @@ export function download(url: string, params?: Record<string, unknown>, filename
                params,
                responseType: 'blob',
           })
-          .then((blob) => {
+          .then((response) => {
+               const blob = response.data
                const link = document.createElement('a')
                link.href = URL.createObjectURL(blob)
                link.download = filename || `download-${Date.now()}`

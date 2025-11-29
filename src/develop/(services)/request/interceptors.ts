@@ -55,7 +55,7 @@ export function requestErrorInterceptor(error: AxiosError): Promise<AxiosError> 
 /**
  * 响应拦截器
  */
-export function responseInterceptor(response: AxiosResponse<ResponseData>): AxiosResponse<ResponseData> | Promise<never> {
+export function responseInterceptor<T = unknown>(response: AxiosResponse<ResponseData<T>>): AxiosResponse<T> | Promise<never> {
      const { data, config } = response
      const requestConfig = config as AxiosRequestConfig & RequestConfig
 
@@ -71,7 +71,7 @@ export function responseInterceptor(response: AxiosResponse<ResponseData>): Axio
      // 处理业务错误
      if (data.code !== undefined && data.code !== RESPONSE_CODE.SUCCESS) {
           const error: RequestError = new Error(data.message || '请求失败') as RequestError
-          error.response = response
+          error.response = response as AxiosResponse<ResponseData>
           error.config = config
           error.errorCode = data.code
           error.errorMessage = data.message
@@ -91,10 +91,10 @@ export function responseInterceptor(response: AxiosResponse<ResponseData>): Axio
           return {
                ...response,
                data: data.data,
-          } as AxiosResponse<ResponseData>
+          } as AxiosResponse<T>
      }
 
-     return response
+     return response as AxiosResponse<T>
 }
 
 /**
