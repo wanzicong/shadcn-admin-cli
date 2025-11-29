@@ -7,6 +7,10 @@ import { Button } from '@/components/ui/button.tsx'
 import { Separator } from '@/components/ui/separator.tsx'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip.tsx'
 
+/**
+ * 批量操作工具栏组件的 Props 类型定义
+ * @template TData 表格数据的类型
+ */
 type DataTableBulkActionsProps<TData> = {
      table: Table<TData>
      entityName: string
@@ -14,91 +18,117 @@ type DataTableBulkActionsProps<TData> = {
 }
 
 /**
- * A modular toolbar for displaying bulk actions when table rows are selected.
+ * 数据表格批量操作工具栏组件
  *
- * @template TData The type of data in the table.
- * @param {object} props The component props.
- * @param {Table<TData>} props.table The react-table instance.
- * @param {string} props.entityName The name of the entity being acted upon (e.g., "task", "user").
- * @param {React.ReactNode} props.children The action buttons to be rendered inside the toolbar.
- * @returns {React.ReactNode | null} The rendered component or null if no rows are selected.
+ * 提供批量操作工具栏，当选中多行时显示浮动工具栏，包括：
+ * - 选中行数量显示
+ * - 浮动工具栏（固定在底部）
+ * - 键盘导航支持（方向键、Home、End、Escape）
+ * - 无障碍支持（ARIA 标签、屏幕阅读器）
+ * - 清除选择功能
+ *
+ * @template TData 表格数据的类型
+ * @param props 组件属性
+ * @param props.table TanStack Table 实例
+ * @param props.entityName 实体名称（如 "task"、"user"），用于显示选中信息
+ * @param props.children 要渲染在工具栏内的操作按钮
+ * @returns 批量操作工具栏组件，如果没有选中行则返回 null
  */
 export function DataTableBulkActions<TData>({ table, entityName, children }: DataTableBulkActionsProps<TData>): React.ReactNode | null {
+     // 获取过滤后的选中行（只计算当前可见的选中行）
      const selectedRows = table.getFilteredSelectedRowModel().rows
+     // 选中行的数量
      const selectedCount = selectedRows.length
+     // 工具栏 DOM 引用，用于键盘导航
      const toolbarRef = useRef<HTMLDivElement>(null)
+     // 屏幕阅读器公告文本
      const [announcement, setAnnouncement] = useState('')
 
-     // Announce selection changes to screen readers
+     // 当选中数量变化时，向屏幕阅读器公告选中信息
      useEffect(() => {
           if (selectedCount > 0) {
+               // 生成公告消息（处理单复数）
                const message = `${selectedCount} ${entityName}${selectedCount > 1 ? 's' : ''} selected. Bulk actions toolbar is available.`
 
-               // Use queueMicrotask to defer state update and avoid cascading renders
+               // 使用 queueMicrotask 延迟状态更新，避免级联渲染
                queueMicrotask(() => {
                     setAnnouncement(message)
                })
 
-               // Clear announcement after a delay
+               // 3 秒后清除公告
                const timer = setTimeout(() => setAnnouncement(''), 3000)
                return () => clearTimeout(timer)
           }
      }, [selectedCount, entityName])
 
+     /**
+      * 清除所有选中行
+      */
      const handleClearSelection = () => {
           table.resetRowSelection()
      }
 
+     /**
+      * 处理键盘导航事件
+      * 支持方向键、Home、End、Escape 键
+      */
      const handleKeyDown = (event: React.KeyboardEvent) => {
+          // 获取工具栏中的所有按钮
           const buttons = toolbarRef.current?.querySelectorAll('button')
           if (!buttons) return
 
+          // 找到当前聚焦的按钮索引
           const currentIndex = Array.from(buttons).findIndex((button) => button === document.activeElement)
 
           switch (event.key) {
                case 'ArrowRight': {
+                    // 右箭头：聚焦下一个按钮（循环）
                     event.preventDefault()
                     const nextIndex = (currentIndex + 1) % buttons.length
                     buttons[nextIndex]?.focus()
                     break
                }
                case 'ArrowLeft': {
+                    // 左箭头：聚焦上一个按钮（循环）
                     event.preventDefault()
                     const prevIndex = currentIndex === 0 ? buttons.length - 1 : currentIndex - 1
                     buttons[prevIndex]?.focus()
                     break
                }
                case 'Home':
+                    // Home 键：聚焦第一个按钮
                     event.preventDefault()
                     buttons[0]?.focus()
                     break
                case 'End':
+                    // End 键：聚焦最后一个按钮
                     event.preventDefault()
                     buttons[buttons.length - 1]?.focus()
                     break
                case 'Escape': {
-                    // Check if the Escape key came from a dropdown trigger or content
-                    // We can't check dropdown state because Radix UI closes it before our handler runs
+                    // Escape 键：清除选中（除非焦点在下拉菜单中）
+                    // 检查 Escape 键是否来自下拉菜单触发器或内容
+                    // 因为 Radix UI 会在我们的处理器运行之前关闭下拉菜单，所以无法检查下拉菜单状态
                     const target = event.target as HTMLElement
                     const activeElement = document.activeElement as HTMLElement
 
-                    // Check if the event target or currently focused element is a dropdown trigger
+                    // 检查事件目标或当前聚焦的元素是否是下拉菜单触发器
                     const isFromDropdownTrigger =
                          target?.getAttribute('data-slot') === 'dropdown-menu-trigger' ||
                          activeElement?.getAttribute('data-slot') === 'dropdown-menu-trigger' ||
                          target?.closest('[data-slot="dropdown-menu-trigger"]') ||
                          activeElement?.closest('[data-slot="dropdown-menu-trigger"]')
 
-                    // Check if the focused element is inside dropdown content (which is portaled)
+                    // 检查聚焦的元素是否在下拉菜单内容中（下拉菜单内容是通过 portal 渲染的）
                     const isFromDropdownContent =
                          activeElement?.closest('[data-slot="dropdown-menu-content"]') || target?.closest('[data-slot="dropdown-menu-content"]')
 
                     if (isFromDropdownTrigger || isFromDropdownContent) {
-                         // Escape was meant for the dropdown - don't clear selection
+                         // Escape 键是用于下拉菜单的，不清除选中
                          return
                     }
 
-                    // Escape was meant for the toolbar - clear selection
+                    // Escape 键是用于工具栏的，清除选中
                     event.preventDefault()
                     handleClearSelection()
                     break
@@ -106,17 +136,19 @@ export function DataTableBulkActions<TData>({ table, entityName, children }: Dat
           }
      }
 
+     // 如果没有选中行，不渲染组件
      if (selectedCount === 0) {
           return null
      }
 
      return (
           <>
-               {/* Live region for screen reader announcements */}
+               {/* 屏幕阅读器公告区域：用于无障碍访问 */}
                <div aria-live='polite' aria-atomic='true' className='sr-only' role='status'>
                     {announcement}
                </div>
 
+               {/* 工具栏容器：固定在底部中央，支持键盘导航 */}
                <div
                     ref={toolbarRef}
                     role='toolbar'
@@ -130,6 +162,7 @@ export function DataTableBulkActions<TData>({ table, entityName, children }: Dat
                          'focus-visible:ring-ring/50 focus-visible:ring-2 focus-visible:outline-none'
                     )}
                >
+                    {/* 工具栏内容：包含清除按钮、选中信息和使用者提供的操作按钮 */}
                     <div
                          className={cn(
                               'p-2 shadow-xl',
@@ -138,6 +171,7 @@ export function DataTableBulkActions<TData>({ table, entityName, children }: Dat
                               'flex items-center gap-x-2'
                          )}
                     >
+                         {/* 清除选中按钮：带提示工具 */}
                          <Tooltip>
                               <TooltipTrigger asChild>
                                    <Button
@@ -157,12 +191,15 @@ export function DataTableBulkActions<TData>({ table, entityName, children }: Dat
                               </TooltipContent>
                          </Tooltip>
 
+                         {/* 分隔符 */}
                          <Separator className='h-5' orientation='vertical' aria-hidden='true' />
 
+                         {/* 选中信息显示：显示选中数量和实体名称 */}
                          <div className='flex items-center gap-x-1 text-sm' id='bulk-actions-description'>
                               <Badge variant='default' className='min-w-8 rounded-lg' aria-label={`${selectedCount} selected`}>
                                    {selectedCount}
                               </Badge>{' '}
+                              {/* 移动端隐藏实体名称 */}
                               <span className='hidden sm:inline'>
                                    {entityName}
                                    {selectedCount > 1 ? 's' : ''}
@@ -170,8 +207,10 @@ export function DataTableBulkActions<TData>({ table, entityName, children }: Dat
                               selected
                          </div>
 
+                         {/* 分隔符 */}
                          <Separator className='h-5' orientation='vertical' aria-hidden='true' />
 
+                         {/* 使用者提供的操作按钮 */}
                          {children}
                     </div>
                </div>
