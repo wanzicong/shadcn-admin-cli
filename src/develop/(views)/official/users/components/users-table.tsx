@@ -1,41 +1,24 @@
-// Import React hooks for state management and side effects
 import { useEffect, useState } from 'react'
-// Import TanStack Table utilities for building powerful data tables
-import {
-     type SortingState,
-     // Type for table sorting state
-     type VisibilityState,
-     // Type for column visibility state
-     flexRender,
-     // Utility to render table cell content
-     getCoreRowModel,
-     // Core row model for basic table functionality
-     getFacetedRowModel,
-     // Row model for faceted filtering (counts)
-     getFacetedUniqueValues,
-     // Utility for getting unique values for filters
-     getFilteredRowModel,
-     // Row model for filtering functionality
-     getPaginationRowModel,
-     // Row model for pagination
-     getSortedRowModel,
-     // Row model for sorting
-     useReactTable, // Main hook for creating table instance
-} from '@tanstack/react-table'
-// Import shared data table components
 import { DataTablePagination, DataTableToolbar } from '@/develop/(components)/data-table'
-// Import custom hook for URL state management
 import { type NavigateFn, useTableUrlState } from '@/develop/(hooks)/use-table-url-state.ts'
-// Import utility functions
 import { cn } from '@/develop/(lib)/utils.ts'
-// Import UI components from Shadcn
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
-// Import data types and mock data
 import { roles } from '../data/data.ts'
 import { type User } from '../data/schema.ts'
-// Import component-specific components
-import { DataTableBulkActions } from './data-table-bulk-actions.tsx'
+import { DataTableBulkActions } from './actions/data-table-bulk-actions.tsx'
 import { usersColumns as columns } from './users-columns.tsx'
+import {
+     type SortingState,
+     type VisibilityState,
+     flexRender,
+     getCoreRowModel,
+     getFacetedRowModel,
+     getFacetedUniqueValues,
+     getFilteredRowModel,
+     getPaginationRowModel,
+     getSortedRowModel,
+     useReactTable, // Main hook for creating table instance
+} from '@tanstack/react-table'
 
 // Component props interface
 type DataTableProps = {

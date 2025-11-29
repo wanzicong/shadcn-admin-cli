@@ -1,6 +1,6 @@
 import { MailPlus, UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button.tsx'
-import { useUsers } from '../hooks/use-users.tsx'
+import { useUsers } from '../context/use-users.tsx'
 
 // 用户管理主要操作按钮组件 - 提供邀请用户和添加用户的快捷操作入口
 export function UsersPrimaryButtons() {

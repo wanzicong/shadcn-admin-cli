@@ -1,7 +1,8 @@
 import React from 'react'
 
 // 从 context 文件导入类型和上下文
-import { UsersContext, type UsersContextType } from '../context/users-context.tsx'
+import { UsersContext, } from './users-context.tsx'
+import { type UsersContextType } from './users-context-types.tsx'
 
 // 用户管理状态Hook - 用于在组件中访问用户管理的共享状态
 export const useUsers = (): UsersContextType => {

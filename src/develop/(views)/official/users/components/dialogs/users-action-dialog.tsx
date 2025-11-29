@@ -10,8 +10,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input.tsx'
 import { PasswordInput } from '@/components/password-input.tsx'
 import { SelectDropdown } from '@/components/select-dropdown.tsx'
-import { roles } from '../data/data.ts'
-import { type User } from '../data/schema.ts'
+import { roles } from '../../data/data.ts'
+import { type User } from '../../data/schema.ts'
 
 const formSchema = z
      .object({

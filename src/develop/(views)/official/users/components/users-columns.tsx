@@ -6,7 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox.tsx'
 import { LongText } from '@/components/long-text.tsx'
 import { callTypes, roles } from '../data/data.ts'
 import { type User } from '../data/schema.ts'
-import { DataTableRowActions } from './data-table-row-actions.tsx'
+import { DataTableRowActions } from './actions/data-table-row-actions.tsx'
 
 // 用户表格列定义
 export const usersColumns: ColumnDef<User>[] = [

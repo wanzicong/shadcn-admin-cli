@@ -7,7 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert.tsx'
 import { Input } from '@/components/ui/input.tsx'
 import { Label } from '@/components/ui/label.tsx'
 import { ConfirmDialog } from '@/components/confirm-dialog.tsx'
-import { type User } from '../data/schema.ts'
+import { type User } from '../../data/schema.ts'
 
 /**
  * 用户删除对话框组件的属性类型定义

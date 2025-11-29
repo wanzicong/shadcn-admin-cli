@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge.tsx'
 import { Checkbox } from '@/components/ui/checkbox.tsx'
 import { labels, priorities, statuses } from '../data/data.tsx'
 import { type Task } from '../data/schema.ts'
-import { DataTableRowActions } from './data-table-row-actions.tsx'
+import { DataTableRowActions } from './actions/data-table-row-actions.tsx'
 
 // 任务表格列定义
 export const tasksColumns: ColumnDef<Task>[] = [

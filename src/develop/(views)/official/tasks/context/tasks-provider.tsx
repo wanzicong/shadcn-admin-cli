@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import useDialogState from '@/develop/(hooks)/use-dialog-state.tsx'
 import { type Task } from '../data/schema.ts'
-import { TasksContext } from '../context/tasks-context.tsx'
+import { TasksContext } from './tasks-context.tsx'
 
 // 任务提供者组件 - 为所有子组件提供共享状态
 export function TasksProvider({ children }: { children: React.ReactNode }) {
