@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils'
+import { cn } from '@/routes/(lib)/utils.ts'
 import {
   AlertDialog,
   AlertDialogCancel,

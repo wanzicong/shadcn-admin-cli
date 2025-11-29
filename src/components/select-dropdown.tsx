@@ -1,5 +1,5 @@
 import { Loader } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/routes/(lib)/utils.ts'
 import { FormControl } from '@/components/ui/form'
 import {
   Select,

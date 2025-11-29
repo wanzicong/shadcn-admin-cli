@@ -1,5 +1,5 @@
 import { type SVGProps } from 'react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/routes/(lib)/utils.ts'
 
 export function IconWhatsapp({ className, ...props }: SVGProps<SVGSVGElement>) {
   return (
