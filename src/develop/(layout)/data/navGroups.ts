@@ -52,6 +52,12 @@ export const menus = [
                     url: '/',
                     icon: LayoutDashboard,
                },
+               // 用户管理
+               {
+                    title: '用户',
+                    url: '/official/users',
+                    icon: Users,
+               },
                // 任务管理
                {
                     title: '任务',
@@ -70,12 +76,6 @@ export const menus = [
                     url: '/official/chats',
                     badge: '3', // 显示 3 条未读消息
                     icon: MessagesSquare,
-               },
-               // 用户管理
-               {
-                    title: '用户',
-                    url: '/official/users',
-                    icon: Users,
                },
                // Clerk 安全认证：可折叠菜单
                {
