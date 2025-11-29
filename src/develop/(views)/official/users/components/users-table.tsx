@@ -1,45 +1,47 @@
 // Import React hooks for state management and side effects
 import { useEffect, useState } from 'react'
-
 // Import TanStack Table utilities for building powerful data tables
 import {
-     type SortingState,              // Type for table sorting state
-     type VisibilityState,           // Type for column visibility state
-     flexRender,                     // Utility to render table cell content
-     getCoreRowModel,                // Core row model for basic table functionality
-     getFacetedRowModel,             // Row model for faceted filtering (counts)
-     getFacetedUniqueValues,         // Utility for getting unique values for filters
-     getFilteredRowModel,            // Row model for filtering functionality
-     getPaginationRowModel,          // Row model for pagination
-     getSortedRowModel,              // Row model for sorting
-     useReactTable,                  // Main hook for creating table instance
+     type SortingState,
+     // Type for table sorting state
+     type VisibilityState,
+     // Type for column visibility state
+     flexRender,
+     // Utility to render table cell content
+     getCoreRowModel,
+     // Core row model for basic table functionality
+     getFacetedRowModel,
+     // Row model for faceted filtering (counts)
+     getFacetedUniqueValues,
+     // Utility for getting unique values for filters
+     getFilteredRowModel,
+     // Row model for filtering functionality
+     getPaginationRowModel,
+     // Row model for pagination
+     getSortedRowModel,
+     // Row model for sorting
+     useReactTable, // Main hook for creating table instance
 } from '@tanstack/react-table'
-
 // Import shared data table components
 import { DataTablePagination, DataTableToolbar } from '@/develop/(components)/data-table'
-
 // Import custom hook for URL state management
 import { type NavigateFn, useTableUrlState } from '@/develop/(hooks)/use-table-url-state.ts'
-
 // Import utility functions
 import { cn } from '@/develop/(lib)/utils.ts'
-
 // Import UI components from Shadcn
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
-
 // Import data types and mock data
 import { roles } from '../data/data.ts'
 import { type User } from '../data/schema.ts'
-
 // Import component-specific components
 import { DataTableBulkActions } from './data-table-bulk-actions.tsx'
 import { usersColumns as columns } from './users-columns.tsx'
 
 // Component props interface
 type DataTableProps = {
-     data: User[]                     // Array of user data to display
-     search: Record<string, unknown>  // URL search parameters from route
-     navigate: NavigateFn            // Navigation function for URL updates
+     data: User[] // Array of user data to display
+     search: Record<string, unknown> // URL search parameters from route
+     navigate: NavigateFn // Navigation function for URL updates
 }
 
 /**
@@ -69,14 +71,14 @@ export function UsersTable({ data, search, navigate }: DataTableProps) {
      // This enables shareable URLs that preserve table state across browser sessions
 
      const { columnFilters, onColumnFiltersChange, pagination, onPaginationChange, ensurePageInRange } = useTableUrlState({
-          search,                            // Current URL search parameters
-          navigate,                          // Navigation function for URL updates
+          search, // Current URL search parameters
+          navigate, // Navigation function for URL updates
           pagination: {
-               defaultPage: 1,               // Default page number
-               defaultPageSize: 10           // Default page size (rows per page)
+               defaultPage: 1, // Default page number
+               defaultPageSize: 10, // Default page size (rows per page)
           },
           globalFilter: {
-               enabled: false                // Disable global search filtering
+               enabled: false, // Disable global search filtering
           },
           columnFilters: [
                // Define column filters that sync with URL parameters
@@ -97,26 +99,26 @@ export function UsersTable({ data, search, navigate }: DataTableProps) {
      // a false positive with the react-hooks-incompatible-library rule
      // eslint-disable-next-line react-hooks/incompatible-library
      const table = useReactTable({
-          data,                             // User data array
-          columns,                          // Column definitions from users-columns.tsx
+          data, // User data array
+          columns, // Column definitions from users-columns.tsx
           state: {
-               sorting,                     // Current sorting state
-               pagination,                  // Current pagination state (URL-synced)
-               rowSelection,                // Selected rows state
-               columnFilters,               // Column filters state (URL-synced)
-               columnVisibility,            // Column visibility state
+               sorting, // Current sorting state
+               pagination, // Current pagination state (URL-synced)
+               rowSelection, // Selected rows state
+               columnFilters, // Column filters state (URL-synced)
+               columnVisibility, // Column visibility state
           },
-          enableRowSelection: true,         // Enable row selection functionality
-          onPaginationChange,              // Handler for pagination changes (updates URL)
-          onColumnFiltersChange,            // Handler for column filter changes (updates URL)
-          onRowSelectionChange: setRowSelection,  // Handler for row selection changes
-          onSortingChange: setSorting,      // Handler for sorting changes
+          enableRowSelection: true, // Enable row selection functionality
+          onPaginationChange, // Handler for pagination changes (updates URL)
+          onColumnFiltersChange, // Handler for column filter changes (updates URL)
+          onRowSelectionChange: setRowSelection, // Handler for row selection changes
+          onSortingChange: setSorting, // Handler for sorting changes
           onColumnVisibilityChange: setColumnVisibility, // Handler for column visibility changes
           getPaginationRowModel: getPaginationRowModel(), // Enable pagination
-          getCoreRowModel: getCoreRowModel(),           // Core table functionality
-          getFilteredRowModel: getFilteredRowModel(),   // Enable filtering
-          getSortedRowModel: getSortedRowModel(),       // Enable sorting
-          getFacetedRowModel: getFacetedRowModel(),     // Enable faceted filtering (counts)
+          getCoreRowModel: getCoreRowModel(), // Core table functionality
+          getFilteredRowModel: getFilteredRowModel(), // Enable filtering
+          getSortedRowModel: getSortedRowModel(), // Enable sorting
+          getFacetedRowModel: getFacetedRowModel(), // Enable faceted filtering (counts)
           getFacetedUniqueValues: getFacetedUniqueValues(), // Enable unique value extraction
      })
 
@@ -145,11 +147,11 @@ export function UsersTable({ data, search, navigate }: DataTableProps) {
                <DataTableToolbar
                     table={table}
                     searchPlaceholder='Filter users...'
-                    searchKey='username'             // Column to search when using global search
+                    searchKey='username' // Column to search when using global search
                     filters={[
                          {
-                              columnId: 'status',      // Status column filter
-                              title: 'Status',         // Filter title in dropdown
+                              columnId: 'status', // Status column filter
+                              title: 'Status', // Filter title in dropdown
                               options: [
                                    { label: 'Active', value: 'active' },
                                    { label: 'Inactive', value: 'inactive' },
@@ -158,8 +160,8 @@ export function UsersTable({ data, search, navigate }: DataTableProps) {
                               ],
                          },
                          {
-                              columnId: 'role',        // Role column filter
-                              title: 'Role',           // Filter title in dropdown
+                              columnId: 'role', // Role column filter
+                              title: 'Role', // Filter title in dropdown
                               options: roles.map((role) => ({ ...role })), // Use roles from data.ts
                          },
                     ]}
@@ -202,11 +204,7 @@ export function UsersTable({ data, search, navigate }: DataTableProps) {
                               {table.getRowModel().rows?.length ? (
                                    // Render data rows when available
                                    table.getRowModel().rows.map((row) => (
-                                        <TableRow
-                                             key={row.id}
-                                             data-state={row.getIsSelected() && 'selected'}
-                                             className='group/row'
-                                        >
+                                        <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'} className='group/row'>
                                              {row.getVisibleCells().map((cell) => (
                                                   <TableCell
                                                        key={cell.id}

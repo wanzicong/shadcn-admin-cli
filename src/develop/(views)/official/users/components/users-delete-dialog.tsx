@@ -13,9 +13,9 @@ import { type User } from '../data/schema.ts'
  * 用户删除对话框组件的属性类型定义
  */
 type UserDeleteDialogProps = {
-     open: boolean               // 对话框显示状态
+     open: boolean // 对话框显示状态
      onOpenChange: (open: boolean) => void // 对话框状态变更回调
-     currentRow: User            // 当前要删除的用户数据
+     currentRow: User // 当前要删除的用户数据
 }
 
 /**
@@ -49,40 +49,27 @@ export function UsersDeleteDialog({ open, onOpenChange, currentRow }: UserDelete
                disabled={value.trim() !== currentRow.username} // 只有输入正确的用户名才能确认
                title={
                     <span className='text-destructive'>
-                         <AlertTriangle
-                              className='stroke-destructive me-1 inline-block'
-                              size={18}
-                         />
-                         {' '}Delete User
+                         <AlertTriangle className='stroke-destructive me-1 inline-block' size={18} /> Delete User
                     </span>
                }
                desc={
                     <div className='space-y-4'>
                          {/* 删除确认信息 */}
                          <p className='mb-2'>
-                              Are you sure you want to delete{' '}
-                              <span className='font-bold'>{currentRow.username}</span>?
-                              {' '}This action will permanently remove the user with the role of{' '}
-                              <span className='font-bold'>{currentRow.role.toUpperCase()}</span>
-                              {' '}from the system. This cannot be undone.
+                              Are you sure you want to delete <span className='font-bold'>{currentRow.username}</span>? This action will permanently remove the
+                              user with the role of <span className='font-bold'>{currentRow.role.toUpperCase()}</span> from the system. This cannot be undone.
                          </p>
 
                          {/* 安全确认输入 */}
                          <Label className='my-2'>
                               Username:
-                              <Input
-                                   value={value}
-                                   onChange={(e) => setValue(e.target.value)}
-                                   placeholder='Enter username to confirm deletion.'
-                              />
+                              <Input value={value} onChange={(e) => setValue(e.target.value)} placeholder='Enter username to confirm deletion.' />
                          </Label>
 
                          {/* 危险警告提示 */}
                          <Alert variant='destructive'>
                               <AlertTitle>Warning!</AlertTitle>
-                              <AlertDescription>
-                                   Please be careful, this operation cannot be rolled back.
-                              </AlertDescription>
+                              <AlertDescription>Please be careful, this operation cannot be rolled back.</AlertDescription>
                          </Alert>
                     </div>
                }

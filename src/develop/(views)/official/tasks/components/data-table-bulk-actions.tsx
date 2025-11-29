@@ -15,10 +15,15 @@ type DataTableBulkActionsProps<TData> = {
      table: Table<TData>
 }
 
+// 批量操作工具栏组件 - 提供多选任务时的批量操作功能
 export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps<TData>) {
+     // 删除确认对话框状态
      const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
+     // 获取当前选中的行数据
      const selectedRows = table.getFilteredSelectedRowModel().rows
 
+     // 批量更新任务状态处理函数
      const handleBulkStatusChange = (status: string) => {
           const selectedTasks = selectedRows.map((row) => row.original as Task)
           toast.promise(sleep(2000), {
@@ -32,6 +37,7 @@ export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps
           table.resetRowSelection()
      }
 
+     // 批量更新任务优先级处理函数
      const handleBulkPriorityChange = (priority: string) => {
           const selectedTasks = selectedRows.map((row) => row.original as Task)
           toast.promise(sleep(2000), {
@@ -45,6 +51,7 @@ export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps
           table.resetRowSelection()
      }
 
+     // 批量导出任务处理函数
      const handleBulkExport = () => {
           const selectedTasks = selectedRows.map((row) => row.original as Task)
           toast.promise(sleep(2000), {
@@ -61,6 +68,7 @@ export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps
      return (
           <>
                <BulkActionsToolbar table={table} entityName='task'>
+                    {/* 更新状态下拉菜单 */}
                     <DropdownMenu>
                          <Tooltip>
                               <TooltipTrigger asChild>
@@ -85,6 +93,7 @@ export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps
                          </DropdownMenuContent>
                     </DropdownMenu>
 
+                    {/* 更新优先级下拉菜单 */}
                     <DropdownMenu>
                          <Tooltip>
                               <TooltipTrigger asChild>
@@ -113,6 +122,7 @@ export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps
                          </DropdownMenuContent>
                     </DropdownMenu>
 
+                    {/* 导出任务按钮 */}
                     <Tooltip>
                          <TooltipTrigger asChild>
                               <Button
@@ -132,6 +142,7 @@ export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps
                          </TooltipContent>
                     </Tooltip>
 
+                    {/* 删除选中任务按钮 */}
                     <Tooltip>
                          <TooltipTrigger asChild>
                               <Button
@@ -152,6 +163,7 @@ export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps
                     </Tooltip>
                </BulkActionsToolbar>
 
+               {/* 批量删除确认对话框 */}
                <TasksMultiDeleteDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm} table={table} />
           </>
      )

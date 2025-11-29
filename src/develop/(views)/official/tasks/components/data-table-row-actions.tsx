@@ -17,18 +17,22 @@ import {
 } from '@/components/ui/dropdown-menu.tsx'
 import { labels } from '../data/data.tsx'
 import { taskSchema } from '../data/schema.ts'
-import { useTasks } from './tasks-provider.tsx'
+import { useTasks } from '../hooks/use-tasks.tsx'
 
 type DataTableRowActionsProps<TData> = {
      row: Row<TData>
 }
 
+// 表格行操作组件 - 为单个任务行提供上下文操作菜单
 export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TData>) {
+     // 解析并验证行数据为标准任务对象
      const task = taskSchema.parse(row.original)
 
+     // 获取任务上下文操作函数
      const { setOpen, setCurrentRow } = useTasks()
 
      return (
+          // 下拉菜单组件 - 提供上下文操作选项
           <DropdownMenu modal={false}>
                <DropdownMenuTrigger asChild>
                     <Button variant='ghost' className='data-[state=open]:bg-muted flex h-8 w-8 p-0'>
@@ -36,7 +40,9 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
                          <span className='sr-only'>Open menu</span>
                     </Button>
                </DropdownMenuTrigger>
+
                <DropdownMenuContent align='end' className='w-[160px]'>
+                    {/* 编辑任务 */}
                     <DropdownMenuItem
                          onClick={() => {
                               setCurrentRow(task)
@@ -45,9 +51,14 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
                     >
                          Edit
                     </DropdownMenuItem>
+
+                    {/* 扩展功能 - 当前禁用 */}
                     <DropdownMenuItem disabled>Make a copy</DropdownMenuItem>
                     <DropdownMenuItem disabled>Favorite</DropdownMenuItem>
+
                     <DropdownMenuSeparator />
+
+                    {/* 标签管理 */}
                     <DropdownMenuSub>
                          <DropdownMenuSubTrigger>Labels</DropdownMenuSubTrigger>
                          <DropdownMenuSubContent>
@@ -60,7 +71,10 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
                               </DropdownMenuRadioGroup>
                          </DropdownMenuSubContent>
                     </DropdownMenuSub>
+
                     <DropdownMenuSeparator />
+
+                    {/* 删除任务 */}
                     <DropdownMenuItem
                          onClick={() => {
                               setCurrentRow(task)

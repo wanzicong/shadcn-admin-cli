@@ -16,9 +16,9 @@ export const callTypes = new Map<UserStatus, string>([
 // 定义系统中支持的所有用户角色及其显示信息
 export const roles = [
      {
-          label: 'Superadmin',        // 显示标签
-          value: 'superadmin',        // 内部值
-          icon: Shield,              // 对应的图标组件
+          label: 'Superadmin', // 显示标签
+          value: 'superadmin', // 内部值
+          icon: Shield, // 对应的图标组件
      },
      {
           label: 'Admin',
