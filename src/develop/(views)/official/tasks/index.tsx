@@ -13,6 +13,7 @@ import { tasks } from './data/tasks.ts'
 export function Tasks() {
      return (
           <TasksProvider>
+               {/* 顶部导航栏 */}
                <Header fixed>
                     <Search />
                     <div className='ms-auto flex items-center space-x-4'>
@@ -22,7 +23,9 @@ export function Tasks() {
                     </div>
                </Header>
 
+               {/* 主要内容区域 */}
                <Main className='flex flex-1 flex-col gap-4 sm:gap-6'>
+                    {/* 页面标题和操作按钮 */}
                     <div className='flex flex-wrap items-end justify-between gap-2'>
                          <div>
                               <h2 className='text-2xl font-bold tracking-tight'>Tasks</h2>
@@ -31,9 +34,11 @@ export function Tasks() {
                          <TasksPrimaryButtons />
                     </div>
 
+                    {/* 任务列表 */}
                     <TasksTable data={tasks} />
                </Main>
 
+               {/* 任务弹窗 */}
                <TasksDialogs />
           </TasksProvider>
      )
