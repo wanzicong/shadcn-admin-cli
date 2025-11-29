@@ -59,8 +59,8 @@ function UserManagement() {
                                              <LearnMore open={opened} onOpenChange={setOpened} contentProps={{ side: 'right' }}>
                                                   <p>
                                                        This is the same as{' '}
-                                                       <Link to='/users' className='text-blue-500 underline decoration-dashed underline-offset-2'>
-                                                            '/users'
+                                                       <Link to='/official/users' className='text-blue-500 underline decoration-dashed underline-offset-2'>
+                                                            '/official/users'
                                                        </Link>
                                                   </p>
 
@@ -122,8 +122,8 @@ function Unauthorized() {
                               <LearnMore open={opened} onOpenChange={setOpened}>
                                    <p>
                                         This is the same as{' '}
-                                        <Link to='/users' className='text-blue-500 underline decoration-dashed underline-offset-2'>
-                                             '/users'
+                                        <Link to='/official/users' className='text-blue-500 underline decoration-dashed underline-offset-2'>
+                                             '/official/users'
                                         </Link>
                                         .{' '}
                                    </p>

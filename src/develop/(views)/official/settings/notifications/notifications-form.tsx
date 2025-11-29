@@ -148,7 +148,7 @@ export function NotificationsForm() {
                                         <FormLabel>Use different settings for my mobile devices</FormLabel>
                                         <FormDescription>
                                              You can manage your mobile notifications in the{' '}
-                                             <Link to='/settings' className='underline decoration-dashed underline-offset-4 hover:decoration-solid'>
+                                             <Link to='/official/settings' className='underline decoration-dashed underline-offset-4 hover:decoration-solid'>
                                                   mobile settings
                                              </Link>{' '}
                                              page.
