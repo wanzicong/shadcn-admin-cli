@@ -20,140 +20,121 @@ import {
      useReactTable, // Main hook for creating table instance
 } from '@tanstack/react-table'
 
-// Component props interface
+// 组件属性类型定义
 type DataTableProps = {
-     data: User[] // Array of user data to display
-     search: Record<string, unknown> // URL search parameters from route
-     navigate: NavigateFn // Navigation function for URL updates
+     data: User[] // 用户数据数组
+     search: Record<string, unknown> // URL 搜索参数
+     navigate: NavigateFn // 导航函数
 }
 
 /**
- * UsersTable - A comprehensive data table component for managing users
- * Features: sorting, filtering, pagination, row selection, and URL state synchronization
+ * 用户数据表格组件
+ * 功能：排序、筛选、分页、行选择和 URL 状态同步
  */
 export function UsersTable({ data, search, navigate }: DataTableProps) {
-     // ============= LOCAL UI STATES =============
-     // These states are managed locally and not synced with URL
+     // ============= 本地 UI 状态 =============
+     // 这些状态仅本地管理，不与 URL 同步
 
-     // Row selection state - tracks which rows are currently selected
-     const [rowSelection, setRowSelection] = useState({})
+     const [rowSelection, setRowSelection] = useState({}) // 行选择状态
+     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({}) // 列可见性状态
+     const [sorting, setSorting] = useState<SortingState>([]) // 排序状态
 
-     // Column visibility state - controls which columns are visible/hidden
-     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
-
-     // Sorting state - manages column sorting (column id + direction)
-     const [sorting, setSorting] = useState<SortingState>([])
-
-     // ============= LOCAL-ONLY STATES (DISABLED) =============
-     // Uncomment to use local state instead of URL-synced state
+     // ============= 仅本地状态 (已禁用) =============
+     // 取消注释可使用本地状态替代 URL 同步状态
      // const [columnFilters, onColumnFiltersChange] = useState<ColumnFiltersState>([])
      // const [pagination, onPaginationChange] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 })
 
-     // ============= URL-SYNCED STATES =============
-     // These states are automatically synchronized with URL search parameters
-     // This enables shareable URLs that preserve table state across browser sessions
+     // ============= URL 同步状态 =============
+     // 这些状态自动与 URL 搜索参数同步，支持可分享的链接
 
      const { columnFilters, onColumnFiltersChange, pagination, onPaginationChange, ensurePageInRange } = useTableUrlState({
-          search, // Current URL search parameters
-          navigate, // Navigation function for URL updates
+          search, // 当前 URL 搜索参数
+          navigate, // 导航函数
           pagination: {
-               defaultPage: 1, // Default page number
-               defaultPageSize: 10, // Default page size (rows per page)
+               defaultPage: 1, // 默认页码
+               defaultPageSize: 10, // 默认每页大小
           },
           globalFilter: {
-               enabled: false, // Disable global search filtering
+               enabled: false, // 禁用全局搜索
           },
           columnFilters: [
-               // Define column filters that sync with URL parameters
-               // username filter: text-based search
-               { columnId: 'username', searchKey: 'username', type: 'string' },
-
-               // status filter: array-based multi-select (e.g., ?status=active&status=inactive)
-               { columnId: 'status', searchKey: 'status', type: 'array' },
-
-               // role filter: array-based multi-select (e.g., ?role=admin&role=user)
-               { columnId: 'role', searchKey: 'role', type: 'array' },
+               // 定义与 URL 参数同步的列筛选器
+               { columnId: 'username', searchKey: 'username', type: 'string' }, // 用户名文本搜索
+               { columnId: 'status', searchKey: 'status', type: 'array' }, // 状态多选筛选
+               { columnId: 'role', searchKey: 'role', type: 'array' }, // 角色多选筛选
           ],
      })
 
-     // ============= TABLE INSTANCE CREATION =============
-     // Create the main table instance with TanStack Table
-     // Note: ESLint rule disabled because this hook is used correctly but triggers
-     // a false positive with the react-hooks-incompatible-library rule
+     // ============= 表格实例创建 =============
+     // 创建 TanStack Table 实例
      // eslint-disable-next-line react-hooks/incompatible-library
      const table = useReactTable({
-          data, // User data array
-          columns, // Column definitions from users-columns.tsx
+          data, // 用户数据
+          columns, // 列定义
           state: {
-               sorting, // Current sorting state
-               pagination, // Current pagination state (URL-synced)
-               rowSelection, // Selected rows state
-               columnFilters, // Column filters state (URL-synced)
-               columnVisibility, // Column visibility state
+               sorting, // 排序状态
+               pagination, // 分页状态 (URL 同步)
+               rowSelection, // 行选择状态
+               columnFilters, // 列筛选状态 (URL 同步)
+               columnVisibility, // 列可见性状态
           },
-          enableRowSelection: true, // Enable row selection functionality
-          onPaginationChange, // Handler for pagination changes (updates URL)
-          onColumnFiltersChange, // Handler for column filter changes (updates URL)
-          onRowSelectionChange: setRowSelection, // Handler for row selection changes
-          onSortingChange: setSorting, // Handler for sorting changes
-          onColumnVisibilityChange: setColumnVisibility, // Handler for column visibility changes
-          getPaginationRowModel: getPaginationRowModel(), // Enable pagination
-          getCoreRowModel: getCoreRowModel(), // Core table functionality
-          getFilteredRowModel: getFilteredRowModel(), // Enable filtering
-          getSortedRowModel: getSortedRowModel(), // Enable sorting
-          getFacetedRowModel: getFacetedRowModel(), // Enable faceted filtering (counts)
-          getFacetedUniqueValues: getFacetedUniqueValues(), // Enable unique value extraction
+          enableRowSelection: true, // 启用行选择
+          onPaginationChange, // 分页变化处理
+          onColumnFiltersChange, // 列筛选变化处理
+          onRowSelectionChange: setRowSelection, // 行选择变化处理
+          onSortingChange: setSorting, // 排序变化处理
+          onColumnVisibilityChange: setColumnVisibility, // 列可见性变化处理
+          getPaginationRowModel: getPaginationRowModel(), // 启用分页
+          getCoreRowModel: getCoreRowModel(), // 核心表格功能
+          getFilteredRowModel: getFilteredRowModel(), // 启用筛选
+          getSortedRowModel: getSortedRowModel(), // 启用排序
+          getFacetedRowModel: getFacetedRowModel(), // 启用分面筛选
+          getFacetedUniqueValues: getFacetedUniqueValues(), // 启用唯一值提取
      })
 
-     // ============= PAGE VALIDATION =============
-     // Ensure current page is within valid range when table state changes
-     // This prevents users from landing on invalid pages after filters change
+     // ============= 页面验证 =============
+     // 确保当前页面在有效范围内，防止筛选后跳转到无效页面
      useEffect(() => {
           ensurePageInRange(table.getPageCount())
      }, [table, ensurePageInRange])
 
-     // ============= RENDER =============
+     // ============= 渲染 =============
      return (
           <div
                className={cn(
-                    // Add margin bottom on mobile when toolbar is visible
-                    // This prevents the toolbar from covering the table content
+                    // 移动端工具栏可见时添加底部边距，防止覆盖表格内容
                     'max-sm:has-[div[role="toolbar"]]:mb-16',
                     'flex flex-1 flex-col gap-4'
                )}
           >
-               {/* ============= TABLE TOOLBAR =============
-                   - Global search input
-                   - Column filter dropdowns (Status, Role)
-                   - Column visibility toggle
-                   - Clear filters button */}
+               {/* 表格工具栏 - 全局搜索、列筛选、可见性切换 */}
                <DataTableToolbar
                     table={table}
-                    searchPlaceholder='Filter users...'
-                    searchKey='username' // Column to search when using global search
+                    searchPlaceholder='筛选用户...'
+                    searchKey='username' // 全局搜索的列
                     filters={[
                          {
-                              columnId: 'status', // Status column filter
-                              title: 'Status', // Filter title in dropdown
+                              columnId: 'status', // 状态列筛选
+                              title: '状态',
                               options: [
-                                   { label: 'Active', value: 'active' },
-                                   { label: 'Inactive', value: 'inactive' },
-                                   { label: 'Invited', value: 'invited' },
-                                   { label: 'Suspended', value: 'suspended' },
+                                   { label: '活跃', value: 'active' },
+                                   { label: '非活跃', value: 'inactive' },
+                                   { label: '已邀请', value: 'invited' },
+                                   { label: '已暂停', value: 'suspended' },
                               ],
                          },
                          {
-                              columnId: 'role', // Role column filter
-                              title: 'Role', // Filter title in dropdown
-                              options: roles.map((role) => ({ ...role })), // Use roles from data.ts
+                              columnId: 'role', // 角色列筛选
+                              title: '角色',
+                              options: roles.map((role) => ({ ...role })), // 使用 data.ts 中的角色
                          },
                     ]}
                />
 
-               {/* ============= DATA TABLE ============= */}
+               {/* 数据表格 */}
                <div className='overflow-hidden rounded-md border'>
                     <Table>
-                         {/* ============= TABLE HEADER ============= */}
+                         {/* 表头 */}
                          <TableHeader>
                               {table.getHeaderGroups().map((headerGroup) => (
                                    <TableRow key={headerGroup.id} className='group/row'>
@@ -163,17 +144,14 @@ export function UsersTable({ data, search, navigate }: DataTableProps) {
                                                        key={header.id}
                                                        colSpan={header.colSpan}
                                                        className={cn(
-                                                            // Dynamic background colors based on state:
-                                                            // - Regular: bg-background
-                                                            // - Row hover: group-hover/row:bg-muted
-                                                            // - Row selected: group-data-[state=selected]/row:bg-muted
+                                                            // 动态背景色：常规/悬停/选中状态
                                                             'bg-background group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted',
-                                                            // Apply custom classes from column definitions
+                                                            // 应用列定义中的自定义类
                                                             header.column.columnDef.meta?.className,
                                                             header.column.columnDef.meta?.thClassName
                                                        )}
                                                   >
-                                                       {/* Render column header (sortable, resizble, etc) */}
+                                                       {/* 渲染列标题 */}
                                                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                                                   </TableHead>
                                              )
@@ -182,34 +160,34 @@ export function UsersTable({ data, search, navigate }: DataTableProps) {
                               ))}
                          </TableHeader>
 
-                         {/* ============= TABLE BODY ============= */}
+                         {/* 表体 */}
                          <TableBody>
                               {table.getRowModel().rows?.length ? (
-                                   // Render data rows when available
+                                   // 渲染数据行
                                    table.getRowModel().rows.map((row) => (
                                         <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'} className='group/row'>
                                              {row.getVisibleCells().map((cell) => (
                                                   <TableCell
                                                        key={cell.id}
                                                        className={cn(
-                                                            // Dynamic background colors matching header pattern
+                                                            // 动态背景色，与表头保持一致
                                                             'bg-background group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted',
-                                                            // Apply custom classes from column definitions
+                                                            // 应用列定义中的自定义类
                                                             cell.column.columnDef.meta?.className,
                                                             cell.column.columnDef.meta?.tdClassName
                                                        )}
                                                   >
-                                                       {/* Render cell content (data, actions, etc) */}
+                                                       {/* 渲染单元格内容 */}
                                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                                   </TableCell>
                                              ))}
                                         </TableRow>
                                    ))
                               ) : (
-                                   // Show empty state when no data matches filters
+                                   // 无数据时的空状态
                                    <TableRow>
                                         <TableCell colSpan={columns.length} className='h-24 text-center'>
-                                             No results.
+                                             无结果。
                                         </TableCell>
                                    </TableRow>
                               )}
@@ -217,12 +195,10 @@ export function UsersTable({ data, search, navigate }: DataTableProps) {
                     </Table>
                </div>
 
-               {/* ============= TABLE PAGINATION ============= */}
-               {/* Shows: Page navigation, rows per page selector, row count */}
+               {/* 表格分页 - 页面导航、每页行数选择器、行数统计 */}
                <DataTablePagination table={table} className='mt-auto' />
 
-               {/* ============= BULK ACTIONS ============= */}
-               {/* Appears when rows are selected, provides actions like delete, edit */}
+               {/* 批量操作 - 选中行时显示，提供删除、编辑等操作 */}
                <DataTableBulkActions table={table} />
           </div>
      )
