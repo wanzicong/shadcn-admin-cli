@@ -1,0 +1,38 @@
+# Claude Code 本地配置文件
+settings.local.json
+
+# 环境变量文件
+.env
+.env.local
+.env.*.local
+
+# API 密钥和认证文件
+auth.json
+tokens.json
+credentials.json
+
+# 日志文件
+*.log
+command-history.log
+quality-report.json
+build-report.json
+build-analysis.json
+
+# 临时文件
+tmp/
+temp/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 编辑器文件
+.vscode/settings.json
+.idea/
+
+# 缓存文件
+.cache/
+.parcel-cache/
+
+# 依赖目录（通常不应在 .claude 中，但以防万一）
+node_modules/

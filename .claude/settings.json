@@ -1,0 +1,86 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(*)",
+      "Write(src/**/*)",
+      "Write(*.config.*)",
+      "Write(*.json)",
+      "Write(*.md)",
+      "Edit(src/**/*)",
+      "Edit(*.config.*)",
+      "Edit(*.json)",
+      "Edit(*.md)",
+      "Glob(*)",
+      "Grep(*)",
+      "Bash(pnpm:*)",
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(git status)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git restore:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(tsc:*)",
+      "Bash(node:*)",
+      "Bash(vite:*)",
+      "Bash(prettier:*)",
+      "Bash(eslint:*)",
+      "Bash(knip:*)",
+      "Task(*)",
+      "AskUserQuestion(*)",
+      "SlashCommand(*)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git merge:*)",
+      "Bash(git rebase:*)",
+      "Bash(npm publish:*)",
+      "Bash(pnpm publish:*)",
+      "Bash(rm -rf *)",
+      "Bash(sudo:*)",
+      "Bash(chmod:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf node_modules)",
+      "Bash(rm -rf .git)",
+      "Bash(rm -rf src)",
+      "Bash(sudo rm -rf *)",
+      "Bash(format:*)",
+      "Bash(fdisk:*)",
+      "Bash(mkfs:*)"
+    ]
+  },
+  "hooks": {
+    "preCommand": "./hooks/pre-command.js",
+    "postCommand": "./hooks/post-command.js",
+    "preCommit": "./hooks/pre-commit.js",
+    "postBuild": "./hooks/post-build.js",
+    "preFormat": "./hooks/pre-format.js"
+  },
+  "alwaysThinkingEnabled": true,
+  "customCommands": {
+    "dev": "pnpm dev",
+    "build": "pnpm build",
+    "preview": "pnpm preview",
+    "test": "pnpm lint && pnpm type-check",
+    "format": "pnpm format",
+    "check": "pnpm check",
+    "clean": "pnpm knip",
+    "full-check": "pnpm check && pnpm build && pnpm knip"
+  },
+  "env": {
+    "NODE_ENV": "development",
+    "VITE_API_BASE_URL": "http://localhost:8080",
+    "TS_NODE_COMPILER_OPTIONS": "{\"module\": \"ESNext\", \"target\": \"ESNext\"}"
+  },
+  "model": "claude-sonnet-4-5-20250929",
+  "maxTokens": 8192,
+  "temperature": 0.1,
+  "responseFormat": "markdown"
+}

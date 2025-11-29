@@ -1,17 +1,27 @@
 {
+  "env": {
+    "ANTHROPIC_API_KEY": "",
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:3456",
+    "NO_PROXY": "127.0.0.1",
+    "DISABLE_TELEMETRY": "true",
+    "DISABLE_COST_WARNINGS": "true",
+    "API_TIMEOUT_MS": "600000"
+  },
   "permissions": {
     "allow": [
+      "Bash(docker:*)",
+      "Bash(docker-compose:*)",
+      "Bash(git push:*)",
+      "Bash(gh:*)",
       "Bash(find:*)",
       "Bash(npx tsc:*)",
-      "Bash(gh repo create:*)",
       "Bash(ls:*)",
       "Bash(npm run lint)",
       "Bash(git restore:*)",
-      "Bash(git push:*)",
-      "Bash(gh:*)",
       "Bash(git remote remove:*)",
       "Bash(git remote add:*)",
-      "Bash(pnpm format:*)"
+      "Bash(pnpm format:*)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []
