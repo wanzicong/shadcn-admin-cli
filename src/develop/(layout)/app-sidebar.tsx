@@ -1,6 +1,6 @@
 // import { AppTitle } from './app-title'
-import { sidebarData } from '@/develop/(layout)/data/sidebar-data.ts'
 import { useLayout } from '@/develop/(context)/layout-provider.tsx'
+import { sidebarData } from '@/develop/(layout)/data/sidebar-data.ts'
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from '@/components/ui/sidebar.tsx'
 import { NavGroup } from './nav-group.tsx'
 import { NavUser } from './nav-user.tsx'

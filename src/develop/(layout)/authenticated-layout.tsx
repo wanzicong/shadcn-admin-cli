@@ -1,7 +1,7 @@
 import { Outlet } from '@tanstack/react-router'
-import { AppSidebar } from '@/develop/(layout)/app-sidebar.tsx'
 import { LayoutProvider } from '@/develop/(context)/layout-provider.tsx'
 import { SearchProvider } from '@/develop/(context)/search-provider.tsx'
+import { AppSidebar } from '@/develop/(layout)/app-sidebar.tsx'
 import { getCookie } from '@/develop/(lib)/cookies.ts'
 import { cn } from '@/develop/(lib)/utils.ts'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar.tsx'
