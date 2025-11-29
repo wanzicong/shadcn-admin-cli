@@ -1,5 +1,5 @@
 import { type SVGProps } from 'react'
-import { cn } from '@/routes/(lib)/utils.ts'
+import { cn } from '@/develop/(lib)/utils.ts'
 
 export function IconSkype({ className, ...props }: SVGProps<SVGSVGElement>) {
      return (

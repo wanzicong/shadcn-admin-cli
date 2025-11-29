@@ -10,6 +10,10 @@ export default defineConfig({
           tanstackRouter({
                target: 'react',
                autoCodeSplitting: true,
+               // 路由文件夹配置（可选，优先使用 tsr.config.json）
+               // 使用 ./src/develop
+               // routesDirectory: './src/routes',
+               // generatedRouteTree: './src/routeTree.gen.ts',
           }),
           react(),
           tailwindcss(),

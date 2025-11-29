@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
-import { useTheme } from '@/routes/(context)/theme-provider.tsx'
-import { cn } from '@/routes/(lib)/utils.ts'
+import { useTheme } from '@/develop/(context)/theme-provider.tsx'
+import { cn } from '@/develop/(lib)/utils.ts'
 import { Check, Moon, Sun } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
