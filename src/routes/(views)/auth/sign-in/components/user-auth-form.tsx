@@ -6,7 +6,7 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { Loader2, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
 import { IconFacebook, IconGithub } from '@/assets/brand-icons'
-import { useAuthStore } from '@/stores/auth-store.ts'
+import { useAuthStore } from '@/routes/(stores)/auth-store.ts'
 import { sleep, cn } from '@/routes/(lib)/utils.ts'
 import { Button } from '@/components/ui/button.tsx'
 import {

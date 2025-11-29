@@ -8,7 +8,7 @@ import {
 } from '@tanstack/react-query'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { toast } from 'sonner'
-import { useAuthStore } from '@/stores/auth-store'
+import { useAuthStore } from '@/routes/(stores)/auth-store.ts'
 import { handleServerError } from '@/routes/(lib)/handle-server-error.ts'
 import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
