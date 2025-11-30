@@ -34,7 +34,11 @@
       "Bash(curl:*)",
       "Bash(uvicorn:*)",
       "Bash(npm run format:*)",
-      "Bash(pnpm --version:*)"
+      "Bash(pnpm --version:*)",
+      "Bash(else)",
+      "Bash(fi:*)",
+      "Bash(pkill:*)",
+      "Bash(echo:*)"
     ],
     "deny": [],
     "ask": []
