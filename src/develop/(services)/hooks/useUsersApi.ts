@@ -20,7 +20,7 @@ export function useUsers(params?: UserQueryParams) {
 export function useUser(userId: string) {
      return useQuery({
           queryKey: ['user', userId],
-          queryFn: () => usersApi.getUser(userId),
+          queryFn: () => usersApi.getUser({ user_id: userId }),
           enabled: !!userId,
      })
 }

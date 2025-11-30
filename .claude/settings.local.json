@@ -28,7 +28,12 @@
       "Bash(pnpm type-check:*)",
       "Bash(npm run check)",
       "Bash(npm run build)",
-      "Bash(pnpm build)"
+      "Bash(pnpm build)",
+      "Bash(python:*)",
+      "Bash(pip:*)",
+      "Bash(curl:*)",
+      "Bash(uvicorn:*)",
+      "Bash(npm run format:*)"
     ],
     "deny": [],
     "ask": []

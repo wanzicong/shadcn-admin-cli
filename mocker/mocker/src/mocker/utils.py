@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional, Any, List
 from passlib.context import CryptContext
 from jose import JWTError, jwt
@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
+from .database import get_db
 from .models import User
 from .schemas import TokenData
 
@@ -182,6 +183,3 @@ def create_paginated_response(
     }
 
 
-# 导入缺失的模块
-from datetime import timedelta
-from .database import get_db

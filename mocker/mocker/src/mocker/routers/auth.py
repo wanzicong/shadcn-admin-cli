@@ -42,7 +42,7 @@ async def login(request: LoginRequest, db: Session = Depends(get_db)):
     }
 
 
-@router.get("/profile", response_model=UserProfile)
+@router.post("/profile", response_model=UserProfile)
 async def get_profile(current_user: User = Depends(get_current_user)):
     """获取当前用户信息"""
     return UserProfile(
@@ -58,7 +58,7 @@ async def get_profile(current_user: User = Depends(get_current_user)):
 
 
 @router.post("/logout")
-async def logout(current_user: User = Depends(get_current_user)):
+async def logout(request: dict, current_user: User = Depends(get_current_user)):
     """用户登出"""
     # 在实际应用中，这里可以将令牌加入黑名单
     # 由于我们使用无状态的JWT，客户端删除令牌即可

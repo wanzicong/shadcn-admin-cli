@@ -32,20 +32,22 @@ from ..utils import (
 router = APIRouter()
 
 
-@router.get("/", response_model=TaskListResponse)
+@router.post("/", response_model=TaskListResponse)
 async def get_tasks(
-    page: int = Query(1, ge=1, description="页码"),
-    page_size: int = Query(10, ge=1, le=100, description="每页数量"),
-    search: Optional[str] = Query(None, description="搜索关键词"),
-    status: Optional[TaskStatus] = Query(None, description="任务状态筛选"),
-    label: Optional[TaskLabel] = Query(None, description="任务标签筛选"),
-    priority: Optional[TaskPriority] = Query(None, description="优先级筛选"),
-    assignee: Optional[str] = Query(None, description="分配人员筛选"),
-    sort_by: Optional[str] = Query("createdAt", description="排序字段"),
-    sort_order: str = Query("desc", description="排序方向"),
+    request: dict,  # 使用对象接收所有参数
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    # 从对象中提取参数
+    page = request.get("page", 1)
+    page_size = request.get("page_size", 10)
+    search = request.get("search")
+    status = request.get("status")
+    label = request.get("label")
+    priority = request.get("priority")
+    assignee = request.get("assignee")
+    sort_by = request.get("sort_by", "createdAt")
+    sort_order = request.get("sort_order", "desc")
     """获取任务列表"""
     # 构建查询
     query = db.query(Task)
@@ -91,12 +93,13 @@ async def get_tasks(
     )
 
 
-@router.get("/{task_id}", response_model=TaskResponse)
+@router.post("/detail", response_model=TaskResponse)
 async def get_task(
-    task_id: str,
+    request: dict,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    task_id = request.get("task_id")
     """获取单个任务详情"""
     task = db.query(Task).filter(Task.id == task_id).first()
     if not task:
@@ -108,16 +111,18 @@ async def get_task(
     return TaskResponse.model_validate(task)
 
 
-@router.post("/", response_model=TaskResponse)
+@router.post("/create", response_model=TaskResponse)
 async def create_task(
-    task_data: TaskCreate,
+    request: dict,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """创建新任务"""
+    task_data_dict = request.get("task_data", {})
+
     # 验证分配人员是否存在
-    if task_data.assignee:
-        assignee = db.query(User).filter(User.id == task_data.assignee).first()
+    if task_data_dict.get("assignee"):
+        assignee = db.query(User).filter(User.id == task_data_dict["assignee"]).first()
         if not assignee:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -127,7 +132,7 @@ async def create_task(
     # 创建新任务
     new_task = Task(
         id=generate_task_id(),
-        **task_data.model_dump()
+        **task_data_dict
     )
 
     db.add(new_task)
@@ -137,14 +142,16 @@ async def create_task(
     return TaskResponse.model_validate(new_task)
 
 
-@router.put("/{task_id}", response_model=TaskResponse)
+@router.post("/update", response_model=TaskResponse)
 async def update_task(
-    task_id: str,
-    task_data: TaskUpdate,
+    request: dict,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """更新任务信息"""
+    task_id = request.get("task_id")
+    task_data_dict = request.get("task_data", {})
+
     task = db.query(Task).filter(Task.id == task_id).first()
     if not task:
         raise HTTPException(
@@ -153,8 +160,8 @@ async def update_task(
         )
 
     # 验证分配人员是否存在
-    if task_data.assignee:
-        assignee = db.query(User).filter(User.id == task_data.assignee).first()
+    if task_data_dict.get("assignee"):
+        assignee = db.query(User).filter(User.id == task_data_dict["assignee"]).first()
         if not assignee:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -162,8 +169,7 @@ async def update_task(
             )
 
     # 更新任务信息
-    update_data = task_data.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
+    for field, value in task_data_dict.items():
         setattr(task, field, value)
 
     db.commit()
@@ -172,13 +178,14 @@ async def update_task(
     return TaskResponse.model_validate(task)
 
 
-@router.delete("/{task_id}")
+@router.post("/delete")
 async def delete_task(
-    task_id: str,
+    request: dict,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """删除单个任务"""
+    task_id = request.get("task_id")
     task = db.query(Task).filter(Task.id == task_id).first()
     if not task:
         raise HTTPException(
@@ -192,9 +199,9 @@ async def delete_task(
     return create_response(message="任务删除成功")
 
 
-@router.delete("/", response_model=BulkOperationResponse)
+@router.post("/bulk-delete", response_model=BulkOperationResponse)
 async def bulk_delete_tasks(
-    request: BulkDeleteRequest,
+    request: dict,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -203,7 +210,7 @@ async def bulk_delete_tasks(
     failed_count = 0
     failed_ids = []
 
-    for task_id in request.ids:
+    for task_id in request.get("ids", []):
         try:
             task = db.query(Task).filter(Task.id == task_id).first()
             if not task:
@@ -227,13 +234,14 @@ async def bulk_delete_tasks(
     )
 
 
-@router.put("/{task_id}/status")
+@router.post("/status")
 async def update_task_status(
-    task_id: str,
-    status: TaskStatus,
+    request: dict,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    task_id = request.get("task_id")
+    status = request.get("status")
     """更新任务状态"""
     task = db.query(Task).filter(Task.id == task_id).first()
     if not task:
@@ -248,13 +256,14 @@ async def update_task_status(
     return create_response(message="任务状态更新成功")
 
 
-@router.put("/{task_id}/assign")
+@router.post("/assign")
 async def assign_task(
-    task_id: str,
-    assignee_id: str,
+    request: dict,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    task_id = request.get("task_id")
+    assignee_id = request.get("assignee_id")
     """分配任务"""
     task = db.query(Task).filter(Task.id == task_id).first()
     if not task:
@@ -301,7 +310,7 @@ async def import_tasks(
             # 创建任务
             new_task = Task(
                 id=generate_task_id(),
-                **task_data.model_dump()
+                **task_data.__dict__
             )
             db.add(new_task)
             imported_count += 1
@@ -319,14 +328,16 @@ async def import_tasks(
     )
 
 
-@router.get("/export")
+@router.post("/export")
 async def export_tasks(
-    status: Optional[TaskStatus] = Query(None, description="任务状态筛选"),
-    label: Optional[TaskLabel] = Query(None, description="任务标签筛选"),
-    priority: Optional[TaskPriority] = Query(None, description="优先级筛选"),
+    request: dict,  # 使用对象接收所有参数
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    # 从对象中提取参数
+    status = request.get("status")
+    label = request.get("label")
+    priority = request.get("priority")
     """导出任务数据"""
     # 构建查询
     query = db.query(Task)
@@ -364,8 +375,9 @@ async def export_tasks(
     )
 
 
-@router.get("/stats/summary", response_model=TaskStats)
+@router.post("/stats", response_model=TaskStats)
 async def get_task_stats(
+    request: dict,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -404,8 +416,9 @@ async def get_task_stats(
     )
 
 
-@router.get("/dashboard")
+@router.post("/dashboard")
 async def get_dashboard_data(
+    request: dict,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):

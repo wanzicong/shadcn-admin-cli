@@ -31,18 +31,20 @@ from ..utils import (
 router = APIRouter()
 
 
-@router.get("/", response_model=UserListResponse)
+@router.post("/", response_model=UserListResponse)
 async def get_users(
-    page: int = Query(1, ge=1, description="页码"),
-    page_size: int = Query(10, ge=1, le=100, description="每页数量"),
-    search: Optional[str] = Query(None, description="搜索关键词"),
-    status: Optional[UserStatus] = Query(None, description="用户状态筛选"),
-    role: Optional[UserRole] = Query(None, description="用户角色筛选"),
-    sort_by: Optional[str] = Query("createdAt", description="排序字段"),
-    sort_order: str = Query("desc", description="排序方向"),
+    request: dict,  # 使用对象接收所有参数
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    # 从对象中提取参数
+    page = request.get("page", 1)
+    page_size = request.get("page_size", 10)
+    search = request.get("search")
+    status = request.get("status")
+    role = request.get("role")
+    sort_by = request.get("sort_by", "createdAt")
+    sort_order = request.get("sort_order", "desc")
     """获取用户列表"""
     # 构建查询
     query = db.query(User)
@@ -82,12 +84,13 @@ async def get_users(
     )
 
 
-@router.get("/{user_id}", response_model=UserResponse)
+@router.post("/detail", response_model=UserResponse)
 async def get_user(
-    user_id: str,
+    request: dict,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    user_id = request.get("user_id")
     """获取单个用户详情"""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -99,22 +102,24 @@ async def get_user(
     return UserResponse.model_validate(user)
 
 
-@router.post("/", response_model=UserResponse)
+@router.post("/create", response_model=UserResponse)
 async def create_user(
-    user_data: UserCreate,
+    request: dict,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """创建新用户"""
+    user_data_dict = request.get("user_data", {})
+
     # 检查用户名是否已存在
-    if db.query(User).filter(User.username == user_data.username).first():
+    if user_data_dict.get("username") and db.query(User).filter(User.username == user_data_dict["username"]).first():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="用户名已存在"
         )
 
     # 检查邮箱是否已存在
-    if db.query(User).filter(User.email == user_data.email).first():
+    if user_data_dict.get("email") and db.query(User).filter(User.email == user_data_dict["email"]).first():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="邮箱已存在"
@@ -123,8 +128,8 @@ async def create_user(
     # 创建新用户
     new_user = User(
         id=generate_uuid(),
-        **user_data.model_dump(exclude={"password"}),
-        hashedPassword=get_password_hash(user_data.password)
+        **{k: v for k, v in user_data_dict.items() if k != "password"},
+        hashedPassword=get_password_hash(user_data_dict.get("password", ""))
     )
 
     db.add(new_user)
@@ -134,14 +139,16 @@ async def create_user(
     return UserResponse.model_validate(new_user)
 
 
-@router.put("/{user_id}", response_model=UserResponse)
+@router.post("/update", response_model=UserResponse)
 async def update_user(
-    user_id: str,
-    user_data: UserUpdate,
+    request: dict,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """更新用户信息"""
+    user_id = request.get("user_id")
+    user_data_dict = request.get("user_data", {})
+
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(
@@ -150,24 +157,23 @@ async def update_user(
         )
 
     # 检查用户名唯一性
-    if user_data.username and user_data.username != user.username:
-        if db.query(User).filter(User.username == user_data.username).first():
+    if "username" in user_data_dict and user_data_dict["username"] != user.username:
+        if db.query(User).filter(User.username == user_data_dict["username"]).first():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="用户名已存在"
             )
 
     # 检查邮箱唯一性
-    if user_data.email and user_data.email != user.email:
-        if db.query(User).filter(User.email == user_data.email).first():
+    if "email" in user_data_dict and user_data_dict["email"] != user.email:
+        if db.query(User).filter(User.email == user_data_dict["email"]).first():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="邮箱已存在"
             )
 
     # 更新用户信息
-    update_data = user_data.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
+    for field, value in user_data_dict.items():
         setattr(user, field, value)
 
     db.commit()
@@ -176,13 +182,14 @@ async def update_user(
     return UserResponse.model_validate(user)
 
 
-@router.delete("/{user_id}")
+@router.post("/delete")
 async def delete_user(
-    user_id: str,
+    request: dict,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """删除单个用户"""
+    user_id = request.get("user_id")
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(
@@ -203,9 +210,9 @@ async def delete_user(
     return create_response(message="用户删除成功")
 
 
-@router.delete("/", response_model=BulkOperationResponse)
+@router.post("/bulk-delete", response_model=BulkOperationResponse)
 async def bulk_delete_users(
-    request: BulkDeleteRequest,
+    request: dict,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -214,7 +221,7 @@ async def bulk_delete_users(
     failed_count = 0
     failed_ids = []
 
-    for user_id in request.ids:
+    for user_id in request.get("ids", []):
         try:
             user = db.query(User).filter(User.id == user_id).first()
             if not user:
@@ -244,12 +251,15 @@ async def bulk_delete_users(
     )
 
 
-@router.post("/invite", response_model=UserInviteResponse)
+@router.post("/invite")
 async def invite_users(
-    request: UserInviteRequest,
+    request: dict,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    # 从对象中提取参数
+    email = request.get("email")
+    role = request.get("role", "user")
     """邀请用户"""
     # 检查邮箱是否已存在
     existing_user = db.query(User).filter(User.email == request.email).first()
@@ -280,12 +290,13 @@ async def invite_users(
     )
 
 
-@router.post("/{user_id}/activate")
+@router.post("/activate")
 async def activate_user(
-    user_id: str,
+    request: dict,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    user_id = request.get("user_id")
     """激活用户"""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -300,12 +311,13 @@ async def activate_user(
     return create_response(message="用户激活成功")
 
 
-@router.post("/{user_id}/suspend")
+@router.post("/suspend")
 async def suspend_user(
-    user_id: str,
+    request: dict,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    user_id = request.get("user_id")
     """暂停用户"""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -327,8 +339,9 @@ async def suspend_user(
     return create_response(message="用户暂停成功")
 
 
-@router.get("/stats/summary", response_model=UserStats)
+@router.post("/stats", response_model=UserStats)
 async def get_user_stats(
+    request: dict,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):

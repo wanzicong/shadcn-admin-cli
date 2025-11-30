@@ -20,7 +20,7 @@ export function useTasks(params?: TaskQueryParams) {
 export function useTask(taskId: string) {
      return useQuery({
           queryKey: ['task', taskId],
-          queryFn: () => tasksApi.getTask(taskId),
+          queryFn: () => tasksApi.getTask({ task_id: taskId }),
           enabled: !!taskId,
      })
 }
