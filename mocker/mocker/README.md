@@ -1,6 +1,7 @@
 # Mocker API Server
 
- FastAPI  Mock API h: Shadcn Admin y API /
+ FastAPI  Mock API 
+h: Shadcn Admin y API /
 
 ## = /
 
@@ -32,19 +33,21 @@ poetry run python -m mocker.seed
 poetry run python -m mocker.run
 ```
 
-( `http://localhost:8000` /
+
+( `http://localhost:9000` /
 
 ### 4.  API 
 
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-- **OpenAPI JSON**: http://localhost:8000/openapi.json
+- **Swagger UI**: http://localhost:9000/docs
+- **ReDoc**: http://localhost:9000/redoc
+- **OpenAPI JSON**: http://localhost:9000/openapi.json
 
 ## = &
 
 K&
 
-| (7 |  |  |  |
+| (7
+ |  |  |  |
 |--------|------|------|------|
 | superadmin | admin123 | X | ; |
 | zhangsan | user123 | X | ; |
@@ -106,7 +109,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 # API Mn
 API_HOST=0.0.0.0
-API_PORT=8000
+API_PORT=9000
 DEBUG=True
 
 # CORS Mn
@@ -146,9 +149,11 @@ src/mocker/
 ```python
 {
     "id": "string",              # UUID
-    "firstName": "string",       # W
+    "firstName": "string",       # 
+W
     "lastName": "string",        # 
-    "username": "string",        # (7/	
+    "username": "string",        # (7
+/	
     "email": "string",           # /	
     "phoneNumber": "string",     # K:
     "status": "active|inactive|invited|suspended",
@@ -175,7 +180,8 @@ src/mocker/
 }
 ```
 
-## = 
+## =
+ 
 
 ### u
 
@@ -229,7 +235,7 @@ poetry run python -m mocker.run
 ( uvicorn
 
 ```bash
-poetry run uvicorn mocker.run:app --reload --host 0.0.0.0 --port 8000
+poetry run uvicorn mocker.run:app --reload --host 0.0.0.0 --port 9000
 ```
 
 ## = 
@@ -249,7 +255,7 @@ Mn
 // vite.config.ts Mn
 proxy: {
   '/api': {
-    target: 'http://localhost:8000',
+    target: 'http://localhost:9000',
     changeOrigin: true
   }
 }
@@ -258,5 +264,5 @@ proxy: {
 
 
 ```env
-VITE_API_BASE_URL=http://localhost:8000
+VITE_API_BASE_URL=http://localhost:9000
 ```

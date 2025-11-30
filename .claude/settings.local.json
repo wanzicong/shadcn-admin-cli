@@ -12,7 +12,7 @@
       "Bash(poetry run python -m mocker.run)",
       "Bash(python src/mocker/run.py:*)",
       "Bash(pip:*)",
-      "Bash(curl -s http://localhost:8000/)",
+      "Bash(curl -s http://localhost:9000/)",
       "Bash(curl:*)",
       "Bash(poetry install:*)",
       "Bash(netstat:*)",

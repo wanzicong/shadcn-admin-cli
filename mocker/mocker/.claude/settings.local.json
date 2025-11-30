@@ -7,7 +7,7 @@
       "Bash(where taskkill)",
       "Bash(cmd /c:*)",
       "Bash(powershell:*)",
-      "Bash(cmd.exe /c \"netstat -ano | findstr :8000\")",
+      "Bash(cmd.exe /c \"netstat -ano | findstr :9000\")",
       "Bash(wmic:*)"
     ],
     "deny": [],

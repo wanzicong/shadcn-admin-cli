@@ -21,7 +21,7 @@ def create_sample_users(db: Session):
             "lastName": "管理员",
             "username": "superadmin",
             "email": "superadmin@example.com",
-            "phoneNumber": "13800000001",
+            "phoneNumber": "13900000001",
             "hashedPassword": get_password_hash("admin123"),
             "status": UserStatus.ACTIVE,
             "role": UserRole.SUPERADMIN
@@ -32,7 +32,7 @@ def create_sample_users(db: Session):
             "lastName": "三",
             "username": "zhangsan",
             "email": "zhangsan@example.com",
-            "phoneNumber": "13800000002",
+            "phoneNumber": "13900000002",
             "hashedPassword": get_password_hash("user123"),
             "status": UserStatus.ACTIVE,
             "role": UserRole.ADMIN
@@ -43,7 +43,7 @@ def create_sample_users(db: Session):
             "lastName": "四",
             "username": "lisi",
             "email": "lisi@example.com",
-            "phoneNumber": "13800000003",
+            "phoneNumber": "13900000003",
             "hashedPassword": get_password_hash("user123"),
             "status": UserStatus.ACTIVE,
             "role": UserRole.MANAGER
@@ -54,7 +54,7 @@ def create_sample_users(db: Session):
             "lastName": "五",
             "username": "wangwu",
             "email": "wangwu@example.com",
-            "phoneNumber": "13800000004",
+            "phoneNumber": "13900000004",
             "hashedPassword": get_password_hash("user123"),
             "status": UserStatus.INACTIVE,
             "role": UserRole.CASHIER
@@ -65,7 +65,7 @@ def create_sample_users(db: Session):
             "lastName": "六",
             "username": "zhaoliu",
             "email": "zhaoliu@example.com",
-            "phoneNumber": "13800000005",
+            "phoneNumber": "13900000005",
             "hashedPassword": get_password_hash("user123"),
             "status": UserStatus.INVITED,
             "role": UserRole.CASHIER
@@ -76,7 +76,7 @@ def create_sample_users(db: Session):
             "lastName": "七",
             "username": "qianqi",
             "email": "qianqi@example.com",
-            "phoneNumber": "13800000006",
+            "phoneNumber": "13900000006",
             "hashedPassword": get_password_hash("user123"),
             "status": UserStatus.SUSPENDED,
             "role": UserRole.CASHIER

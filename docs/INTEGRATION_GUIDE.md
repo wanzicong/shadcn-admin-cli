@@ -20,7 +20,7 @@ poetry run python -m mocker.seed
 poetry run python -m mocker.run
 ```
 
-后端服务将在 `http://localhost:8000` 启动。
+后端服务将在 `http://localhost:9000` 启动。
 
 ### 2. 启动前端服务
 
@@ -37,8 +37,8 @@ pnpm dev
 ### 3. 访问应用
 
 - **前端应用**: http://localhost:3000
-- **后端 API 文档**: http://localhost:8000/docs
-- **API 健康检查**: http://localhost:8000/health
+- **后端 API 文档**: http://localhost:9000/docs
+- **API 健康检查**: http://localhost:9000/health
 
 ## 🔐 默认登录账号
 
@@ -222,7 +222,7 @@ function TasksPage() {
 
 ```env
 # 后端 API 地址
-VITE_API_BASE_URL=http://localhost:8000
+VITE_API_BASE_URL=http://localhost:9000
 
 # API 前缀（可选）
 VITE_API_PREFIX=
@@ -244,7 +244,7 @@ SECRET_KEY=your-super-secret-key-change-in-production-2024
 
 # 服务配置
 API_HOST=0.0.0.0
-API_PORT=8000
+API_PORT=9000
 
 # CORS 允许的前端地址
 ALLOWED_ORIGINS=http://localhost:3000
@@ -340,8 +340,8 @@ queryClient.invalidateQueries({ queryKey: ['users'] })
 ## 📚 API 参考
 
 详细的 API 文档请访问：
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
+- **Swagger UI**: http://localhost:9000/docs
+- **ReDoc**: http://localhost:9000/redoc
 
 ## 🚨 安全提醒
 
