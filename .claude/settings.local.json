@@ -21,7 +21,14 @@
       "Bash(git remote remove:*)",
       "Bash(git remote add:*)",
       "Bash(pnpm format:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(pnpm dev)",
+      "Bash(poetry:*)",
+      "Bash(pnpm check:*)",
+      "Bash(pnpm type-check:*)",
+      "Bash(npm run check)",
+      "Bash(npm run build)",
+      "Bash(pnpm build)"
     ],
     "deny": [],
     "ask": []
