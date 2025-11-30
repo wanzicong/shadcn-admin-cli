@@ -14,7 +14,15 @@
       "Bash(pip:*)",
       "Bash(curl -s http://localhost:8000/)",
       "Bash(curl:*)",
-      "Bash(poetry install:*)"
+      "Bash(poetry install:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill /F /PID 18852:*)",
+      "Bash(taskkill:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(tasklist)",
+      "Bash(ipconfig:*)",
+      "Bash(ipconfig /renew)"
     ],
     "deny": [],
     "ask": []

@@ -34,6 +34,8 @@ import { Route as AuthenticatedOfficialSettingsIndexRouteImport } from './develo
 import { Route as AuthenticatedOfficialHelpCenterIndexRouteImport } from './develop/_authenticated/official/help-center/index'
 import { Route as AuthenticatedOfficialChatsIndexRouteImport } from './develop/_authenticated/official/chats/index'
 import { Route as AuthenticatedOfficialAppsIndexRouteImport } from './develop/_authenticated/official/apps/index'
+import { Route as AuthenticatedOfficialApiUsersIndexRouteImport } from './develop/_authenticated/official-api/users/index'
+import { Route as AuthenticatedOfficialApiTasksIndexRouteImport } from './develop/_authenticated/official-api/tasks/index'
 import { Route as AuthenticatedOfficialSettingsNotificationsRouteImport } from './develop/_authenticated/official/settings/notifications'
 import { Route as AuthenticatedOfficialSettingsDisplayRouteImport } from './develop/_authenticated/official/settings/display'
 import { Route as AuthenticatedOfficialSettingsAppearanceRouteImport } from './develop/_authenticated/official/settings/appearance'
@@ -170,6 +172,18 @@ const AuthenticatedOfficialAppsIndexRoute =
     path: '/official/apps/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedOfficialApiUsersIndexRoute =
+  AuthenticatedOfficialApiUsersIndexRouteImport.update({
+    id: '/official-api/users/',
+    path: '/official-api/users/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOfficialApiTasksIndexRoute =
+  AuthenticatedOfficialApiTasksIndexRouteImport.update({
+    id: '/official-api/tasks/',
+    path: '/official-api/tasks/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOfficialSettingsNotificationsRoute =
   AuthenticatedOfficialSettingsNotificationsRouteImport.update({
     id: '/notifications',
@@ -223,6 +237,8 @@ export interface FileRoutesByFullPath {
   '/official/settings/appearance': typeof AuthenticatedOfficialSettingsAppearanceRoute
   '/official/settings/display': typeof AuthenticatedOfficialSettingsDisplayRoute
   '/official/settings/notifications': typeof AuthenticatedOfficialSettingsNotificationsRoute
+  '/official-api/tasks': typeof AuthenticatedOfficialApiTasksIndexRoute
+  '/official-api/users': typeof AuthenticatedOfficialApiUsersIndexRoute
   '/official/apps': typeof AuthenticatedOfficialAppsIndexRoute
   '/official/chats': typeof AuthenticatedOfficialChatsIndexRoute
   '/official/help-center': typeof AuthenticatedOfficialHelpCenterIndexRoute
@@ -251,6 +267,8 @@ export interface FileRoutesByTo {
   '/official/settings/appearance': typeof AuthenticatedOfficialSettingsAppearanceRoute
   '/official/settings/display': typeof AuthenticatedOfficialSettingsDisplayRoute
   '/official/settings/notifications': typeof AuthenticatedOfficialSettingsNotificationsRoute
+  '/official-api/tasks': typeof AuthenticatedOfficialApiTasksIndexRoute
+  '/official-api/users': typeof AuthenticatedOfficialApiUsersIndexRoute
   '/official/apps': typeof AuthenticatedOfficialAppsIndexRoute
   '/official/chats': typeof AuthenticatedOfficialChatsIndexRoute
   '/official/help-center': typeof AuthenticatedOfficialHelpCenterIndexRoute
@@ -284,6 +302,8 @@ export interface FileRoutesById {
   '/_authenticated/official/settings/appearance': typeof AuthenticatedOfficialSettingsAppearanceRoute
   '/_authenticated/official/settings/display': typeof AuthenticatedOfficialSettingsDisplayRoute
   '/_authenticated/official/settings/notifications': typeof AuthenticatedOfficialSettingsNotificationsRoute
+  '/_authenticated/official-api/tasks/': typeof AuthenticatedOfficialApiTasksIndexRoute
+  '/_authenticated/official-api/users/': typeof AuthenticatedOfficialApiUsersIndexRoute
   '/_authenticated/official/apps/': typeof AuthenticatedOfficialAppsIndexRoute
   '/_authenticated/official/chats/': typeof AuthenticatedOfficialChatsIndexRoute
   '/_authenticated/official/help-center/': typeof AuthenticatedOfficialHelpCenterIndexRoute
@@ -315,6 +335,8 @@ export interface FileRouteTypes {
     | '/official/settings/appearance'
     | '/official/settings/display'
     | '/official/settings/notifications'
+    | '/official-api/tasks'
+    | '/official-api/users'
     | '/official/apps'
     | '/official/chats'
     | '/official/help-center'
@@ -343,6 +365,8 @@ export interface FileRouteTypes {
     | '/official/settings/appearance'
     | '/official/settings/display'
     | '/official/settings/notifications'
+    | '/official-api/tasks'
+    | '/official-api/users'
     | '/official/apps'
     | '/official/chats'
     | '/official/help-center'
@@ -375,6 +399,8 @@ export interface FileRouteTypes {
     | '/_authenticated/official/settings/appearance'
     | '/_authenticated/official/settings/display'
     | '/_authenticated/official/settings/notifications'
+    | '/_authenticated/official-api/tasks/'
+    | '/_authenticated/official-api/users/'
     | '/_authenticated/official/apps/'
     | '/_authenticated/official/chats/'
     | '/_authenticated/official/help-center/'
@@ -575,6 +601,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOfficialAppsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/official-api/users/': {
+      id: '/_authenticated/official-api/users/'
+      path: '/official-api/users'
+      fullPath: '/official-api/users'
+      preLoaderRoute: typeof AuthenticatedOfficialApiUsersIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/official-api/tasks/': {
+      id: '/_authenticated/official-api/tasks/'
+      path: '/official-api/tasks'
+      fullPath: '/official-api/tasks'
+      preLoaderRoute: typeof AuthenticatedOfficialApiTasksIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/official/settings/notifications': {
       id: '/_authenticated/official/settings/notifications'
       path: '/notifications'
@@ -644,6 +684,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedOfficialSettingsRouteRoute: typeof AuthenticatedOfficialSettingsRouteRouteWithChildren
   AuthenticatedOfficialErrorsErrorRoute: typeof AuthenticatedOfficialErrorsErrorRoute
+  AuthenticatedOfficialApiTasksIndexRoute: typeof AuthenticatedOfficialApiTasksIndexRoute
+  AuthenticatedOfficialApiUsersIndexRoute: typeof AuthenticatedOfficialApiUsersIndexRoute
   AuthenticatedOfficialAppsIndexRoute: typeof AuthenticatedOfficialAppsIndexRoute
   AuthenticatedOfficialChatsIndexRoute: typeof AuthenticatedOfficialChatsIndexRoute
   AuthenticatedOfficialHelpCenterIndexRoute: typeof AuthenticatedOfficialHelpCenterIndexRoute
@@ -656,6 +698,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOfficialSettingsRouteRoute:
     AuthenticatedOfficialSettingsRouteRouteWithChildren,
   AuthenticatedOfficialErrorsErrorRoute: AuthenticatedOfficialErrorsErrorRoute,
+  AuthenticatedOfficialApiTasksIndexRoute:
+    AuthenticatedOfficialApiTasksIndexRoute,
+  AuthenticatedOfficialApiUsersIndexRoute:
+    AuthenticatedOfficialApiUsersIndexRoute,
   AuthenticatedOfficialAppsIndexRoute: AuthenticatedOfficialAppsIndexRoute,
   AuthenticatedOfficialChatsIndexRoute: AuthenticatedOfficialChatsIndexRoute,
   AuthenticatedOfficialHelpCenterIndexRoute:

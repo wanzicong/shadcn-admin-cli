@@ -196,7 +196,20 @@ export const menus = [
           ],
      },
      {
-          title: '自定义案例',
-          items: [], // 空数组，可以添加自定义导航项
+          title: '官方案例-API改造',
+          items: [
+               // 用户管理
+               {
+                    title: '用户',
+                    url: '/official-api/users',
+                    icon: Users,
+               },
+               // 任务管理
+               {
+                    title: '任务',
+                    url: '/official-api/tasks',
+                    icon: ListTodo,
+               },
+          ], // 空数组，可以添加自定义导航项
      },
 ]

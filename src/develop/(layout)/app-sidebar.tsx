@@ -12,7 +12,7 @@
  */
 // import { AppTitle } from './app-title'  // 备选：使用普通应用标题而非团队切换器
 import { useLayout } from '@/develop/(context)/layout-provider.tsx'
-import { sidebarData } from '@/develop/(layout)/data/sidebar-data.ts'
+import { sidebarData } from '@/develop/(menu)/sidebar-data.ts'
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from '@/components/ui/sidebar.tsx'
 import { NavGroup } from './nav-group.tsx'
 import { NavUser } from './nav-user.tsx'

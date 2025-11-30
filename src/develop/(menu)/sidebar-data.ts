@@ -3,9 +3,9 @@
  *
  * 提供侧边栏组件所需的完整数据配置
  */
-import { menus } from '@/develop/(layout)/data/navGroups.ts'
+import { menus } from '@/develop/(menu)/navGroups.ts'
 import { AudioWaveform, Command, GalleryVerticalEnd } from 'lucide-react'
-import { type SidebarData } from '../types.ts'
+import { type SidebarData } from '../(layout)/types.ts'
 
 /**
  * 侧边栏数据配置
