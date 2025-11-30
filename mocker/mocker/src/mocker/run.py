@@ -3,21 +3,21 @@ FastAPI 应用启动脚本
 """
 
 import uvicorn
-import os
-import sys
 import pathlib
+import sys
 
 # 添加项目根目录到 Python 路径
-sys.path.insert(0, str(pathlib.Path(__file__).parent.parent.parent))
-
-from src.mocker.main import app
+root_path = str(pathlib.Path(__file__).parent.parent.parent)
+if root_path not in sys.path:
+    sys.path.insert(0, root_path)
 
 # 开发环境配置
 if __name__ == "__main__":
     uvicorn.run(
-        "mocker.run:app",
+        "mocker.main:app",
         host="0.0.0.0",
         port=8000,
         reload=True,  # 开发模式启用热重载
-        log_level="info"
+        log_level="info",
+        reload_dirs=["./src"]
     )
