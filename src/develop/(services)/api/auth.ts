@@ -1,4 +1,4 @@
-import { get, post } from '../request'
+import { post } from '../request'
 import type { LoginRequest, Token, UserProfile } from './types'
 
 /**
@@ -16,7 +16,7 @@ export class AuthService {
       * 获取当前用户信息
       */
      static async getProfile(): Promise<UserProfile> {
-          return get<UserProfile>('/auth/profile')
+          return post<UserProfile>('/auth/profile')
      }
 
      /**
