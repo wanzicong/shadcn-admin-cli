@@ -40,7 +40,10 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def get_password_hash(password: str) -> str:
     """获取密码哈希"""
-    return pwd_context.hash(password)
+    # bcrypt 有72字节的限制，确保密码不超过这个长度
+    # 使用UTF-8编码，截断到72字节
+    password_bytes = password.encode('utf-8')[:72]
+    return pwd_context.hash(password_bytes.decode('utf-8', errors='ignore'))
 
 
 def create_access_token(data: dict, expires_delta: Optional[Any] = None):
@@ -182,14 +185,18 @@ def create_paginated_response(
     success: bool = True
 ) -> dict:
     """创建分页响应格式"""
+    # 计算总页数
+    total_pages = (total + page_size - 1) // page_size if page_size > 0 else 0
+
     return {
         "code": code,
         "message": message,
         "success": success,
-        "data": items,
+        "list": items,  # 改为 list 字段以匹配前端期望
         "total": total,
         "page": page,
-        "pageSize": page_size
+        "pageSize": page_size,
+        "totalPages": total_pages  # 添加总页数字段
     }
 
 

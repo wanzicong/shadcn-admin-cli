@@ -3,13 +3,13 @@
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { showSubmittedData } from '@/develop/(lib)/show-submitted-data.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog.tsx'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx'
 import { Input } from '@/components/ui/input.tsx'
 import { PasswordInput } from '@/components/password-input.tsx'
 import { SelectDropdown } from '@/components/select-dropdown.tsx'
+import { useCreateUser, useUpdateUser } from '@/develop/(services)/hooks/useUsersApi.ts'
 import { roles } from '../../data/data.ts'
 import { type User } from '../../data/schema.ts'
 
@@ -40,10 +40,10 @@ const formSchema = z
      .refine(
           ({ isEdit, password }) => {
                if (isEdit && !password) return true
-               return password.length >= 8
+               return password.length >= 6 && password.length <= 50
           },
           {
-               message: 'Password must be at least 8 characters long.',
+               message: 'Password must be between 6 and 50 characters long.',
                path: ['password'],
           }
      )
@@ -87,6 +87,9 @@ type UserActionDialogProps = {
 
 export function UsersActionDialog({ currentRow, open, onOpenChange }: UserActionDialogProps) {
      const isEdit = !!currentRow
+     const createUser = useCreateUser()
+     const updateUser = useUpdateUser()
+
      const form = useForm({
           resolver: zodResolver(formSchema),
           defaultValues: isEdit
@@ -111,8 +114,29 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UserAction
      })
 
      const onSubmit = (values: UserForm) => {
+          const { isEdit, confirmPassword, ...submitData } = values
+
+          if (isEdit && currentRow) {
+               // 编辑模式 - 只传递有值的字段
+               const updateData: any = {}
+               if (submitData.firstName) updateData.firstName = submitData.firstName
+               if (submitData.lastName) updateData.lastName = submitData.lastName
+               if (submitData.username) updateData.username = submitData.username
+               if (submitData.email) updateData.email = submitData.email
+               if (submitData.phoneNumber) updateData.phoneNumber = submitData.phoneNumber
+               if (submitData.role) updateData.role = submitData.role
+               if (submitData.password) updateData.password = submitData.password
+
+               updateUser.mutate({
+                    userId: currentRow.id,
+                    data: updateData
+               })
+          } else {
+               // 创建模式
+               createUser.mutate(submitData as any)
+          }
+
           form.reset()
-          showSubmittedData(values)
           onOpenChange(false)
      }
 
@@ -257,8 +281,12 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UserAction
                          </Form>
                     </div>
                     <DialogFooter>
-                         <Button type='submit' form='user-form'>
-                              Save changes
+                         <Button
+                              type='submit'
+                              form='user-form'
+                              disabled={createUser.isPending || updateUser.isPending}
+                         >
+                              {createUser.isPending || updateUser.isPending ? 'Saving...' : 'Save changes'}
                          </Button>
                     </DialogFooter>
                </DialogContent>

@@ -50,9 +50,11 @@ class BaseResponse(BaseModel):
 
 # 分页响应模型
 class PaginatedResponse(BaseResponse):
+    list: List  # 改为 list 字段以匹配前端期望
     total: int
     page: int
     pageSize: int
+    totalPages: int  # 添加总页数字段
 
 
 # 用户相关模型
@@ -89,7 +91,7 @@ class UserResponse(UserBase):
 
 
 class UserListResponse(PaginatedResponse):
-    data: List[UserResponse]
+    list: List[UserResponse]  # 改为 list 字段
 
 
 # 认证相关模型
@@ -154,7 +156,7 @@ class TaskResponse(TaskBase):
 
 
 class TaskListResponse(PaginatedResponse):
-    data: List[TaskResponse]
+    list: List[TaskResponse]  # 改为 list 字段
 
 
 # 批量操作模型

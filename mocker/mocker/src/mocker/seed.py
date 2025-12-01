@@ -88,7 +88,7 @@ def create_sample_users(db: Session):
         db.add(db_user)
 
     db.commit()
-    print(f"✅ 创建了 {len(users_data)} 个示例用户")
+    print(f"创建了 {len(users_data)} 个示例用户")
 
 
 def create_sample_tasks(db: Session, user_ids: list):
@@ -192,16 +192,16 @@ def create_sample_tasks(db: Session, user_ids: list):
         db.add(db_task)
 
     db.commit()
-    print(f"✅ 创建了 {len(tasks_data)} 个示例任务")
+    print(f"创建了 {len(tasks_data)} 个示例任务")
 
 
 def init_database():
     """初始化数据库"""
-    print("🚀 开始初始化数据库...")
+    print("开始初始化数据库...")
 
     # 创建所有表
     Base.metadata.create_all(bind=engine)
-    print("✅ 数据库表创建成功")
+    print("数据库表创建成功")
 
     db = SessionLocal()
 
@@ -209,7 +209,7 @@ def init_database():
         # 检查是否已有数据
         existing_users = db.query(User).count()
         if existing_users > 0:
-            print("⚠️ 数据库中已有数据，跳过初始化")
+            print("数据库中已有数据，跳过初始化")
             return
 
         # 创建示例用户
@@ -222,15 +222,15 @@ def init_database():
         # 创建示例任务
         create_sample_tasks(db, user_ids)
 
-        print("🎉 数据库初始化完成！")
-        print("\n📋 默认登录账号：")
+        print("数据库初始化完成！")
+        print("\n默认登录账号：")
         print("超级管理员: superadmin / admin123")
         print("管理员: zhangsan / user123")
         print("经理: lisi / user123")
         print("收银员: wangwu / user123")
 
     except Exception as e:
-        print(f"❌ 数据库初始化失败: {e}")
+        print(f"数据库初始化失败: {e}")
         db.rollback()
     finally:
         db.close()

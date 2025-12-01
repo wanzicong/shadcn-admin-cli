@@ -3,8 +3,16 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 
-# 数据库配置
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./mocker.db")
+# 获取当前脚本的绝对路径
+current_dir = os.path.dirname(os.path.abspath(__file__))
+# mocker/src/mocker -> mocker
+mocker_dir = os.path.dirname(current_dir)
+# mocker -> mocker (项目根目录)
+project_dir = mocker_dir
+db_path = os.path.join(project_dir, "mocker.db")
+
+# 数据库配置 - 使用绝对路径
+DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{db_path}")
 
 # 创建数据库引擎
 engine = create_engine(
