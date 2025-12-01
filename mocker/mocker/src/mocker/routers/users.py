@@ -317,7 +317,7 @@ async def suspend_user(
 
 @router.post("/stats", response_model=UserStats)
 async def get_user_stats(
-    request: dict,
+    request: dict = None,  # 允许空请求
     db: Session = Depends(get_db)
 ):
     """获取用户统计信息"""
