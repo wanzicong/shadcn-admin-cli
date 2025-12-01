@@ -29,7 +29,7 @@ export default defineConfig({
           cors: true,
           proxy: {
                '/api': {
-                    target: 'http://localhost:9000',
+                    target: process.env.VITE_API_BASE_URL,
                     changeOrigin: true,
                     secure: false,
                     rewrite: (path) => path.replace(/^\/api/, '/api'),
