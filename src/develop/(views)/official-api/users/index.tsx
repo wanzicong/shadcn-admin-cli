@@ -36,7 +36,6 @@ export function Users() {
                          <UsersPrimaryButtons />
                     </div>
                     <UsersTable
-                         data={[]}
                          search={search}
                          navigate={navigate}
                     />

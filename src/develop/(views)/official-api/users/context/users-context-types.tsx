@@ -1,5 +1,5 @@
 import { type User } from '../data/schema.ts'
-import type { UserQueryParams, UserStats } from '@/develop/(services)/api/types'
+import type { UserQueryParams, UserCreate, UserUpdate, BulkDeleteRequest, UserInviteRequest, UserStats } from '@/develop/(services)/api/types'
 
 // 用户对话框类型定义
 export type UsersDialogType = 'invite' | 'add' | 'edit' | 'delete'
@@ -36,11 +36,11 @@ export type UsersContextType = {
      onSort: (sortBy: string, sortOrder: 'asc' | 'desc') => void
 
      // 操作方法
-     createUser: (data: any) => void
-     updateUser: ({ userId, data }: { userId: string; data: any }) => void
+     createUser: (data: UserCreate) => void
+     updateUser: ({ userId, data }: { userId: string; data: UserUpdate }) => void
      deleteUser: (userId: string) => void
-     bulkDeleteUsers: (data: any) => void
-     inviteUser: (data: any) => void
+     bulkDeleteUsers: (data: BulkDeleteRequest) => void
+     inviteUser: (data: UserInviteRequest) => void
      activateUser: (userId: string) => void
      suspendUser: (userId: string) => void
 

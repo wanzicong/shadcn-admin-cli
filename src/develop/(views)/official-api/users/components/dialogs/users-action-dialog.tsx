@@ -87,7 +87,7 @@ type UserActionDialogProps = {
 
 export function UsersActionDialog({ currentRow, open, onOpenChange }: UserActionDialogProps) {
      const isEdit = !!currentRow
-     const form = useForm<UserForm>({
+     const form = useForm({
           resolver: zodResolver(formSchema),
           defaultValues: isEdit
                ? {
@@ -95,6 +95,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UserAction
                       password: '',
                       confirmPassword: '',
                       isEdit,
+                      phoneNumber: currentRow?.phoneNumber || '',
                  }
                : {
                       firstName: '',

@@ -26,11 +26,11 @@ const userSchema = z.object({
      lastName: z.string(), // 用户姓氏
      username: z.string(), // 用户名（用于登录）
      email: z.string(), // 用户邮箱地址
-     phoneNumber: z.string(), // 用户手机号码
+     phoneNumber: z.string().nullable(), // 用户手机号码（可为空）
      status: userStatusSchema, // 用户状态（必须符合上面定义的四种状态）
      role: userRoleSchema, // 用户角色（必须符合上面定义的四种角色）
-     createdAt: z.coerce.date(), // 创建时间（自动转换为Date对象）
-     updatedAt: z.coerce.date(), // 更新时间（自动转换为Date对象）
+     createdAt: z.string(), // 创建时间（字符串格式）
+     updatedAt: z.string(), // 更新时间（字符串格式）
 })
 
 // 导出用户类型供组件使用

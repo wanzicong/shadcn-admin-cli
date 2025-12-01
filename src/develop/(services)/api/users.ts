@@ -20,7 +20,7 @@ export class UsersService {
       * 获取用户列表
       */
      static async getUsers(params?: UserQueryParams): Promise<PaginatedResponse<User>> {
-          return post<PaginatedResponse<User>>('/users/', params)
+          return post<PaginatedResponse<User>>('/users', params)
      }
 
      /**

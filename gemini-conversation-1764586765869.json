@@ -1,0 +1,57 @@
+[
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "This is the Qwen Code. We are setting up the context for our chat.\nToday's date is 2025年12月1日星期一 (formatted according to the user's locale).\nMy operating system is: win32\nI'm currently working in the directory: D:\\WorkSpaceCoding\\node\\shadcn-admin-cli\\shadcn-admin\nHere is the folder structure of the current working directories:\n\nShowing up to 20 items (files + folders). Folders or files indicated with ... contain more items not shown, were ignored, or the display limit (20 items) was reached.\n\nD:\\WorkSpaceCoding\\node\\shadcn-admin-cli\\shadcn-admin\\\n├───.gitignore\n├───.prettierignore\n├───.prettierrc\n├───components.json\n├───cz.yaml\n├───eslint.config.js\n├───index.html\n├───knip.config.ts\n├───LICENSE\n├───netlify.toml\n├───package.json\n├───pnpm-lock.yaml\n├───README.md\n├───tsconfig.app.json\n├───tsconfig.json\n├───tsconfig.node.json\n├───tsr.config.json\n├───vite.config.ts\n├───.git\\...\n├───.github\\\n└───..."
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "Got it. Thanks for the context!"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      {
+        "text": "chat list"
+      }
+    ]
+  },
+  {
+    "role": "model",
+    "parts": [
+      {
+        "text": "\nI'll help you get a list of chat-related files or components in your project. Let me search for chat-related files.\n"
+      },
+      {
+        "functionCall": {
+          "id": "call_a829283d2d534e5d978dcb55",
+          "name": "glob",
+          "args": {
+            "pattern": "**/*chat*"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "parts": [
+      {
+        "functionResponse": {
+          "id": "call_a829283d2d534e5d978dcb55",
+          "name": "glob",
+          "response": {
+            "error": "[Operation Cancelled] Reason: User cancelled tool execution."
+          }
+        }
+      }
+    ]
+  }
+]

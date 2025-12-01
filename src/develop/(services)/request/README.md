@@ -19,7 +19,7 @@
 
 ```env
 # API 配置
-VITE_API_BASE_URL=http://localhost:8080
+VITE_API_BASE_URL=http://localhost:9000
 VITE_API_TIMEOUT=30000
 VITE_API_PREFIX=
 VITE_APP_TITLE=Shadcn Admin 脚手架
@@ -210,7 +210,7 @@ interface RequestError extends AxiosError<ResponseData> {
 server: {
   proxy: {
     '/api': {
-      target: process.env.VITE_API_BASE_URL || 'http://localhost:8080',
+      target: process.env.VITE_API_BASE_URL || 'http://localhost:9000',
       changeOrigin: true,
       secure: false,
       rewrite: (path) => path.replace(/^\/api/, ''),

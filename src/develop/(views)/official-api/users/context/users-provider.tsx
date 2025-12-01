@@ -15,8 +15,8 @@ import {
      useActivateUser,
      useSuspendUser,
      useUserStats,
-     type UserQueryParams,
 } from '@/develop/(services)/hooks/useUsersApi'
+import type { UserQueryParams } from '@/develop/(services)/api/types'
 
 // 用户管理状态提供者组件 - 集成 API 数据和操作
 export function UsersProvider({ children }: { children: React.ReactNode }) {
@@ -27,9 +27,9 @@ export function UsersProvider({ children }: { children: React.ReactNode }) {
      // 查询参数状态
      const [queryParams, setQueryParams] = useState<UserQueryParams>({
           page: 1,
-          pageSize: 10,
-          sortBy: 'created_at',
-          sortOrder: 'desc',
+          page_size: 10,
+          sort_by: 'created_at',
+          sort_order: 'desc',
      })
 
      // API 数据和操作
@@ -47,7 +47,7 @@ export function UsersProvider({ children }: { children: React.ReactNode }) {
 
      // 处理查询参数变化
      const handleQueryParamsChange = (newParams: Partial<UserQueryParams>) => {
-          setQueryParams(prev => ({ ...prev, ...newParams }))
+          setQueryParams((prev: UserQueryParams) => ({ ...prev, ...newParams }))
      }
 
      // 处理页面变化
@@ -63,8 +63,8 @@ export function UsersProvider({ children }: { children: React.ReactNode }) {
      // 处理排序
      const handleSort = (sortBy: string, sortOrder: 'asc' | 'desc') => {
           handleQueryParamsChange({
-               sortBy: sortBy as UserQueryParams['sortBy'],
-               sortOrder,
+               sort_by: sortBy as UserQueryParams['sort_by'],
+               sort_order: sortOrder,
                page: 1
           })
      }

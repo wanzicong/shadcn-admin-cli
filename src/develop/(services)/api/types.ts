@@ -13,9 +13,11 @@ export interface BaseResponse<T = unknown> {
 
 // 分页响应类型
 export interface PaginatedResponse<T> extends BaseResponse<T[]> {
+     list: T[]
      total: number
      page: number
      pageSize: number
+     totalPages: number
 }
 
 // 用户相关枚举
