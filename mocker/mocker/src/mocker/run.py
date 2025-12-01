@@ -16,7 +16,7 @@ if __name__ == "__main__":
     uvicorn.run(
         "mocker.main:app",
         host="0.0.0.0",
-        port=9000,
+        port=8000,
         reload=True,  # 开发模式启用热重载
         log_level="info",
         reload_dirs=["./src"]

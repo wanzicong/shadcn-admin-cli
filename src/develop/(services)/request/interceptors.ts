@@ -9,19 +9,13 @@ import type { RequestConfig, RequestError, ResponseData } from './types'
  */
 export function requestInterceptor(config: InternalAxiosRequestConfig): InternalAxiosRequestConfig {
      const requestConfig = config as InternalAxiosRequestConfig & RequestConfig
-     const { needToken = true } = requestConfig
+     const { needToken = false } = requestConfig  // 默认不需要 token
 
-     // 添加 token
+     // 移除 token 认证，用于测试环境
      if (needToken) {
           const token = useAuthStore.getState().auth.accessToken
           if (token) {
                config.headers.Authorization = `Bearer ${token}`
-          } else {
-               // 临时解决方案：如果没有 token，添加一个 mock token 用于测试
-               config.headers.Authorization = `Bearer mock-token-for-development`
-               /* eslint-disable-next-line no-console */
-          /* eslint-disable-next-line no-console */
-          console.warn('⚠️ No auth token found, using mock token for development')
           }
      }
 
@@ -128,13 +122,10 @@ export function responseErrorInterceptor(error: AxiosError<ResponseData>): Promi
 
           switch (status) {
                case HTTP_STATUS.UNAUTHORIZED:
-                    // 未授权，清除 token 并跳转登录
-                    useAuthStore.getState().auth.reset()
+                    // 测试环境不处理认证错误
                     if (requestConfig.showError !== false) {
-                         toast.error('登录已过期，请重新登录')
+                         toast.error('请求失败')
                     }
-                    // 可以在这里添加路由跳转到登录页
-                    // router.navigate({ to: '/sign-in' })
                     break
                case HTTP_STATUS.FORBIDDEN:
                     if (requestConfig.showError !== false) {

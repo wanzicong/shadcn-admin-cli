@@ -21,7 +21,6 @@ from ..schemas import (
     TaskPriority
 )
 from ..utils import (
-    get_current_user,
     generate_task_id,
     paginate_query,
     build_order_by,
@@ -35,8 +34,7 @@ router = APIRouter()
 @router.post("/", response_model=TaskListResponse)
 async def get_tasks(
     request: dict,  # 使用对象接收所有参数
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     # 从对象中提取参数
     page = request.get("page", 1)
@@ -96,8 +94,7 @@ async def get_tasks(
 @router.post("/detail", response_model=TaskResponse)
 async def get_task(
     request: dict,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     task_id = request.get("task_id")
     """获取单个任务详情"""
@@ -114,8 +111,7 @@ async def get_task(
 @router.post("/create", response_model=TaskResponse)
 async def create_task(
     request: dict,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """创建新任务"""
     task_data_dict = request.get("task_data", {})
@@ -145,8 +141,7 @@ async def create_task(
 @router.post("/update", response_model=TaskResponse)
 async def update_task(
     request: dict,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """更新任务信息"""
     task_id = request.get("task_id")
@@ -181,8 +176,7 @@ async def update_task(
 @router.post("/delete")
 async def delete_task(
     request: dict,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """删除单个任务"""
     task_id = request.get("task_id")
@@ -202,8 +196,7 @@ async def delete_task(
 @router.post("/bulk-delete", response_model=BulkOperationResponse)
 async def bulk_delete_tasks(
     request: dict,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """批量删除任务"""
     deleted_count = 0
@@ -237,8 +230,7 @@ async def bulk_delete_tasks(
 @router.post("/status")
 async def update_task_status(
     request: dict,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     task_id = request.get("task_id")
     status = request.get("status")
@@ -259,8 +251,7 @@ async def update_task_status(
 @router.post("/assign")
 async def assign_task(
     request: dict,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     task_id = request.get("task_id")
     assignee_id = request.get("assignee_id")
@@ -289,8 +280,7 @@ async def assign_task(
 @router.post("/import", response_model=TaskImportResponse)
 async def import_tasks(
     request: TaskImportRequest,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """批量导入任务"""
     imported_count = 0
@@ -331,8 +321,7 @@ async def import_tasks(
 @router.post("/export")
 async def export_tasks(
     request: dict,  # 使用对象接收所有参数
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     # 从对象中提取参数
     status = request.get("status")
@@ -378,8 +367,7 @@ async def export_tasks(
 @router.post("/stats", response_model=TaskStats)
 async def get_task_stats(
     request: dict,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """获取任务统计信息"""
     # 基础统计
@@ -419,8 +407,7 @@ async def get_task_stats(
 @router.post("/dashboard")
 async def get_dashboard_data(
     request: dict,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """获取仪表板数据"""
     # 最近任务
