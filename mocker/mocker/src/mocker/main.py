@@ -27,16 +27,17 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS 配置
+# CORS 配置 - 允许所有来源用于测试
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:3000", "http://127.0.0.1:5173"],  # 前端开发服务器地址
+    allow_origins=["*"],  # 允许所有来源用于测试
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# 注册路由（移除认证路由，用于测试）
+# 注册路由
+app.include_router(auth.router, prefix="/api/auth", tags=["认证"])
 app.include_router(users.router, prefix="/api/users", tags=["用户管理"])
 app.include_router(tasks.router, prefix="/api/tasks", tags=["任务管理"])
 
