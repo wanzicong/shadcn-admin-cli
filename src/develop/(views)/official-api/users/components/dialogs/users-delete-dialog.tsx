@@ -1,13 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { showSubmittedData } from '@/develop/(lib)/show-submitted-data.tsx'
 import { AlertTriangle } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert.tsx'
 import { Input } from '@/components/ui/input.tsx'
 import { Label } from '@/components/ui/label.tsx'
 import { ConfirmDialog } from '@/components/confirm-dialog.tsx'
 import { type User } from '../../data/schema.ts'
+import { useUsers } from '../../context/use-users.tsx'
 
 /**
  * 用户删除对话框组件的属性类型定义
@@ -26,6 +26,9 @@ type UserDeleteDialogProps = {
 export function UsersDeleteDialog({ open, onOpenChange, currentRow }: UserDeleteDialogProps) {
      // 状态：存储用户输入的确认用户名
      const [value, setValue] = useState('')
+     
+     // 从 Context 获取删除方法
+     const { deleteUser, isDeleting } = useUsers()
 
      /**
       * 处理删除确认操作
@@ -35,10 +38,13 @@ export function UsersDeleteDialog({ open, onOpenChange, currentRow }: UserDelete
           // 安全检查：确保输入的用户名与目标用户名完全一致
           if (value.trim() !== currentRow.username) return
 
+          // 调用 API 删除用户
+          deleteUser(currentRow.id)
+          
           // 关闭对话框
           onOpenChange(false)
-          // 显示已删除数据的提交信息（调试用）
-          showSubmittedData(currentRow, 'The following user has been deleted:')
+          // 清空输入
+          setValue('')
      }
 
      return (
@@ -46,7 +52,7 @@ export function UsersDeleteDialog({ open, onOpenChange, currentRow }: UserDelete
                open={open}
                onOpenChange={onOpenChange}
                handleConfirm={handleDelete}
-               disabled={value.trim() !== currentRow.username} // 只有输入正确的用户名才能确认
+               disabled={value.trim() !== currentRow.username || isDeleting} // 只有输入正确的用户名才能确认，且不在删除中
                title={
                     <span className='text-destructive'>
                          <AlertTriangle className='stroke-destructive me-1 inline-block' size={18} /> Delete User

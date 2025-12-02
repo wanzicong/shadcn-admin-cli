@@ -11,10 +11,13 @@ import {
      getSortedRowModel,
      useReactTable, // Main hook for creating table instance
 } from '@tanstack/react-table'
-import { DataTablePagination, DataTableToolbar } from '@/develop/(components)/data-table'
+import { DataTablePagination, DataTableFacetedFilter, DataTableViewOptions } from '@/develop/(components)/data-table'
 import { type NavigateFn, useTableUrlState } from '@/develop/(hooks)/use-table-url-state.ts'
 import { cn } from '@/develop/(lib)/utils.ts'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
+import { Input } from '@/components/ui/input.tsx'
+import { Button } from '@/components/ui/button.tsx'
+import { Search, X } from 'lucide-react'
 import { roles } from '../data/data.ts'
 import { DataTableBulkActions } from './actions/data-table-bulk-actions.tsx'
 import { usersColumns as columns } from './users-columns.tsx'
@@ -49,6 +52,7 @@ export function UsersTable({ search, navigate }: DataTableProps) {
      const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({}) // 列可见性状态
      const [sorting, setSorting] = useState<SortingState>([
           {
+               // queryParams.sort_by 已经是驼峰命名（createdAt），直接使用
                id: queryParams.sort_by || 'createdAt',
                desc: queryParams.sort_order === 'desc',
           },
@@ -58,6 +62,13 @@ export function UsersTable({ search, navigate }: DataTableProps) {
      // 取消注释可使用本地状态替代 URL 同步状态
      // const [columnFilters, onColumnFiltersChange] = useState<ColumnFiltersState>([])
      // const [pagination, onPaginationChange] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 })
+
+     // ============= 搜索输入框本地状态 =============
+     // 搜索输入框的值（本地状态，不立即触发 API）
+     const [searchInput, setSearchInput] = useState<string>(() => {
+          // 从 URL 参数初始化搜索输入框的值
+          return typeof search.username === 'string' ? search.username : ''
+     })
 
      // ============= URL 同步状态 =============
      // 这些状态自动与 URL 搜索参数同步，支持可分享的链接
@@ -79,6 +90,47 @@ export function UsersTable({ search, navigate }: DataTableProps) {
                { columnId: 'role', searchKey: 'role', type: 'array' }, // 角色多选筛选
           ],
      })
+
+     // ============= 搜索处理 =============
+     // 当 URL 中的 username 参数变化时，同步更新搜索输入框
+     useEffect(() => {
+          const urlUsername = typeof search.username === 'string' ? search.username : ''
+          if (urlUsername !== searchInput) {
+               setSearchInput(urlUsername)
+          }
+     }, [search.username])
+
+     // 处理搜索按钮点击
+     const handleSearch = () => {
+          // 更新 URL 参数，触发 API 查询
+          navigate({
+               search: (prev) => ({
+                    ...(prev as Record<string, unknown>),
+                    username: searchInput.trim() || undefined,
+                    page: undefined, // 搜索时重置页码
+               }),
+          })
+     }
+
+     // 处理清除搜索
+     const handleClearSearch = () => {
+          setSearchInput('')
+          navigate({
+               search: (prev) => ({
+                    ...(prev as Record<string, unknown>),
+                    username: undefined,
+                    page: undefined,
+               }),
+          })
+     }
+
+     // 处理回车键搜索
+     const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+          if (e.key === 'Enter') {
+               handleSearch()
+          }
+     }
+
 
      // ============= 排序处理 =============
      const handleSortingChange = (updater: SortingState | ((prev: SortingState) => SortingState)) => {
@@ -180,29 +232,86 @@ export function UsersTable({ search, navigate }: DataTableProps) {
                     'flex flex-1 flex-col gap-4'
                )}
           >
-               {/* 表格工具栏 - 全局搜索、列筛选、可见性切换 */}
-               <DataTableToolbar
-                    table={table}
-                    searchPlaceholder='筛选用户...'
-                    searchKey='username' // 全局搜索的列
-                    filters={[
-                         {
-                              columnId: 'status', // 状态列筛选
-                              title: '状态',
-                              options: [
-                                   { label: '活跃', value: 'active' },
-                                   { label: '非活跃', value: 'inactive' },
-                                   { label: '已邀请', value: 'invited' },
-                                   { label: '已暂停', value: 'suspended' },
-                              ],
-                         },
-                         {
-                              columnId: 'role', // 角色列筛选
-                              title: '角色',
-                              options: roles.map((role) => ({ ...role })), // 使用 data.ts 中的角色
-                         },
-                    ]}
-               />
+               {/* 表格工具栏 - 自定义搜索框、列筛选、可见性切换 */}
+               <div className='flex items-center justify-between'>
+                    {/* 左侧工具栏区域：搜索框、过滤器和重置按钮 */}
+                    <div className='flex flex-1 flex-col-reverse items-start gap-y-2 sm:flex-row sm:items-center sm:space-x-2'>
+                         {/* 自定义搜索输入框：点击搜索按钮或按回车键才触发 API 查询 */}
+                         <div className='flex items-center gap-2'>
+                              <div className='relative'>
+                                   <Input
+                                        placeholder='筛选用户...'
+                                        value={searchInput}
+                                        onChange={(e) => setSearchInput(e.target.value)}
+                                        onKeyDown={handleSearchKeyDown}
+                                        className='h-8 w-[150px] lg:w-[250px] pr-8'
+                                   />
+                                   {searchInput && (
+                                        <Button
+                                             variant='ghost'
+                                             size='sm'
+                                             className='absolute right-0 top-0 h-8 w-8 p-0 hover:bg-transparent'
+                                             onClick={handleClearSearch}
+                                        >
+                                             <X className='h-4 w-4' />
+                                        </Button>
+                                   )}
+                              </div>
+                              <Button
+                                   variant='outline'
+                                   size='sm'
+                                   onClick={handleSearch}
+                                   className='h-8'
+                              >
+                                   <Search className='h-4 w-4 mr-2' />
+                                   搜索
+                              </Button>
+                         </div>
+
+                         {/* 多选过滤器组：只显示过滤器，不显示搜索框 */}
+                         <div className='flex gap-x-2'>
+                              {[
+                                   {
+                                        columnId: 'status',
+                                        title: '状态',
+                                        options: [
+                                             { label: '活跃', value: 'active' },
+                                             { label: '非活跃', value: 'inactive' },
+                                             { label: '已邀请', value: 'invited' },
+                                             { label: '已暂停', value: 'suspended' },
+                                        ],
+                                   },
+                                   {
+                                        columnId: 'role',
+                                        title: '角色',
+                                        options: roles.map((role) => ({ ...role })),
+                                   },
+                              ].map((filter) => {
+                                   const column = table.getColumn(filter.columnId)
+                                   if (!column) return null
+                                   return <DataTableFacetedFilter key={filter.columnId} column={column} title={filter.title} options={filter.options} />
+                              })}
+                         </div>
+
+                         {/* 重置按钮：当有任何过滤条件时显示 */}
+                         {(table.getState().columnFilters.length > 0 || searchInput) && (
+                              <Button
+                                   variant='ghost'
+                                   onClick={() => {
+                                        table.resetColumnFilters()
+                                        handleClearSearch()
+                                   }}
+                                   className='h-8 px-2 lg:px-3'
+                              >
+                                   重置
+                                   <X className='ms-2 h-4 w-4' />
+                              </Button>
+                         )}
+                    </div>
+
+                    {/* 右侧工具栏区域：列显示选项控制 */}
+                    <DataTableViewOptions table={table} />
+               </div>
 
                {/* 数据表格 */}
                <div className='overflow-hidden rounded-md border'>

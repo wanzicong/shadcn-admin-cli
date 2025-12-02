@@ -1,13 +1,12 @@
 import { useState } from 'react'
 import { type Table } from '@tanstack/react-table'
 import { DataTableBulkActions as BulkActionsToolbar } from '@/develop/(components)/data-table'
-import { sleep } from '@/develop/(lib)/utils.ts'
 import { Trash2, UserX, UserCheck, Mail } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button.tsx'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip.tsx'
 import { type User } from '../../data/schema.ts'
 import { UsersMultiDeleteDialog } from '../dialogs/users-multi-delete-dialog.tsx'
+import { useUsers } from '../../context/use-users.tsx'
 
 type DataTableBulkActionsProps<TData> = {
      table: Table<TData>
@@ -19,39 +18,37 @@ export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps
      const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
      // 获取当前选中的所有行数据
      const selectedRows = table.getFilteredSelectedRowModel().rows
+     
+     // 从 Context 获取操作方法
+     const { activateUser, suspendUser, inviteUser, isUpdating } = useUsers()
 
      // 批量修改用户状态处理函数
      const handleBulkStatusChange = (status: 'active' | 'inactive') => {
           const selectedUsers = selectedRows.map((row) => row.original as User)
-
-          toast.promise(sleep(2000), {
-               loading: `${status === 'active' ? 'Activating' : 'Deactivating'} users...`,
-               success: () => {
-                    table.resetRowSelection()
-                    const action = status === 'active' ? 'Activated' : 'Deactivated'
-                    const plural = selectedUsers.length > 1 ? 's' : ''
-                    return `${action} ${selectedUsers.length} user${plural}`
-               },
-               error: `Error ${status === 'active' ? 'activating' : 'deactivating'} users`,
+          
+          // 批量调用 API
+          selectedUsers.forEach((user) => {
+               if (status === 'active') {
+                    activateUser(user.id)
+               } else {
+                    suspendUser(user.id)
+               }
           })
-
+          
+          // 重置选择
           table.resetRowSelection()
      }
 
      // 批量邀请用户处理函数
      const handleBulkInvite = () => {
           const selectedUsers = selectedRows.map((row) => row.original as User)
-
-          toast.promise(sleep(2000), {
-               loading: 'Inviting users...',
-               success: () => {
-                    table.resetRowSelection()
-                    const plural = selectedUsers.length > 1 ? 's' : ''
-                    return `Invited ${selectedUsers.length} user${plural}`
-               },
-               error: 'Error inviting users',
+          
+          // 批量调用 API 邀请用户
+          selectedUsers.forEach((user) => {
+               inviteUser({ email: user.email, role: user.role })
           })
-
+          
+          // 重置选择
           table.resetRowSelection()
      }
 
@@ -66,6 +63,7 @@ export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps
                                    variant='outline'
                                    size='icon'
                                    onClick={handleBulkInvite}
+                                   disabled={isUpdating}
                                    className='size-8'
                                    aria-label='Invite selected users'
                                    title='Invite selected users'
@@ -86,6 +84,7 @@ export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps
                                    variant='outline'
                                    size='icon'
                                    onClick={() => handleBulkStatusChange('active')}
+                                   disabled={isUpdating}
                                    className='size-8'
                                    aria-label='Activate selected users'
                                    title='Activate selected users'
@@ -106,6 +105,7 @@ export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps
                                    variant='outline'
                                    size='icon'
                                    onClick={() => handleBulkStatusChange('inactive')}
+                                   disabled={isUpdating}
                                    className='size-8'
                                    aria-label='Deactivate selected users'
                                    title='Deactivate selected users'

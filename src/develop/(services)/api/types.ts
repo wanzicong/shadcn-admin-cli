@@ -12,12 +12,15 @@ export interface BaseResponse<T = unknown> {
 }
 
 // 分页响应类型
-export interface PaginatedResponse<T> extends BaseResponse<T[]> {
+export interface PaginatedResponse<T> {
      list: T[]
      total: number
      page: number
      pageSize: number
      totalPages: number
+     code?: number
+     message?: string
+     success?: boolean
 }
 
 // 用户相关枚举
@@ -100,18 +103,24 @@ export interface BulkDeleteRequest {
      ids: string[]
 }
 
-export interface BulkOperationResponse extends BaseResponse {
+export interface BulkOperationResponse {
      deleted_count: number
      failed_count: number
-     failed_ids: string[]
+     failed_ids?: string[]
+     code?: number
+     message?: string
+     success?: boolean
 }
 
-export interface UserStats extends BaseResponse {
+export interface UserStats {
      total_users: number
      active_users: number
      inactive_users: number
      invited_users: number
      suspended_users: number
+     code?: number
+     message?: string
+     success?: boolean
 }
 
 // 任务相关类型
@@ -186,8 +195,8 @@ export interface SearchParams extends PaginationParams {
 }
 
 export interface UserQueryParams extends SearchParams {
-     status?: UserStatus
-     role?: UserRole
+     status?: UserStatus | UserStatus[] // 支持单个值或数组
+     role?: UserRole | UserRole[] // 支持单个值或数组
      sort_by?: string
      sort_order?: 'asc' | 'desc'
 }

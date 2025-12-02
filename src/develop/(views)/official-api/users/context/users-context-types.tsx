@@ -49,6 +49,7 @@ export type UsersContextType = {
      isUpdating: boolean
      isDeleting: boolean
      isBulkDeleting: boolean
+     isInviting: boolean
 
      // 刷新方法
      refetch: () => void

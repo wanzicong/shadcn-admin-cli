@@ -2,13 +2,13 @@
 
 import { useState } from 'react'
 import { type Table } from '@tanstack/react-table'
-import { sleep } from '@/develop/(lib)/utils.ts'
 import { AlertTriangle } from 'lucide-react'
-import { toast } from 'sonner'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert.tsx'
 import { Input } from '@/components/ui/input.tsx'
 import { Label } from '@/components/ui/label.tsx'
 import { ConfirmDialog } from '@/components/confirm-dialog.tsx'
+import { useUsers } from '../../context/use-users.tsx'
+import { type User } from '../../data/schema.ts'
 
 type UserMultiDeleteDialogProps<TData> = {
      open: boolean
@@ -20,25 +20,30 @@ const CONFIRM_WORD = 'DELETE'
 
 export function UsersMultiDeleteDialog<TData>({ open, onOpenChange, table }: UserMultiDeleteDialogProps<TData>) {
      const [value, setValue] = useState('')
+     
+     // 从 Context 获取批量删除方法
+     const { bulkDeleteUsers, isBulkDeleting } = useUsers()
 
      const selectedRows = table.getFilteredSelectedRowModel().rows
 
      const handleDelete = () => {
           if (value.trim() !== CONFIRM_WORD) {
-               toast.error(`Please type "${CONFIRM_WORD}" to confirm.`)
                return
           }
 
-          onOpenChange(false)
+          // 获取选中的用户 ID
+          const selectedUsers = selectedRows.map((row) => row.original as User)
+          const userIds = selectedUsers.map((user) => user.id)
 
-          toast.promise(sleep(2000), {
-               loading: 'Deleting users...',
-               success: () => {
-                    table.resetRowSelection()
-                    return `Deleted ${selectedRows.length} ${selectedRows.length > 1 ? 'users' : 'user'}`
-               },
-               error: 'Error',
-          })
+          // 调用 API 批量删除
+          bulkDeleteUsers({ ids: userIds })
+
+          // 关闭对话框
+          onOpenChange(false)
+          // 清空输入
+          setValue('')
+          // 重置选择
+          table.resetRowSelection()
      }
 
      return (
@@ -46,7 +51,7 @@ export function UsersMultiDeleteDialog<TData>({ open, onOpenChange, table }: Use
                open={open}
                onOpenChange={onOpenChange}
                handleConfirm={handleDelete}
-               disabled={value.trim() !== CONFIRM_WORD}
+               disabled={value.trim() !== CONFIRM_WORD || isBulkDeleting}
                title={
                     <span className='text-destructive'>
                          <AlertTriangle className='stroke-destructive me-1 inline-block' size={18} /> Delete {selectedRows.length}{' '}

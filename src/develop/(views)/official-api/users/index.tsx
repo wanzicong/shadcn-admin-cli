@@ -17,7 +17,7 @@ export function Users() {
      const navigate = route.useNavigate()
 
      return (
-          <UsersProvider>
+          <UsersProvider initialQueryParams={search}>
                <Header fixed>
                     <Search />
                     <div className='ms-auto flex items-center space-x-4'>

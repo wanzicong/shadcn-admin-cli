@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { showSubmittedData } from '@/develop/(lib)/show-submitted-data.tsx'
 import { MailPlus, Send } from 'lucide-react'
 import { Button } from '@/components/ui/button.tsx'
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog.tsx'
@@ -10,6 +9,7 @@ import { Input } from '@/components/ui/input.tsx'
 import { Textarea } from '@/components/ui/textarea.tsx'
 import { SelectDropdown } from '@/components/select-dropdown.tsx'
 import { roles } from '../../data/data.ts'
+import { useUsers } from '../../context/use-users.tsx'
 
 const formSchema = z.object({
      email: z.email({
@@ -27,14 +27,24 @@ type UserInviteDialogProps = {
 }
 
 export function UsersInviteDialog({ open, onOpenChange }: UserInviteDialogProps) {
+     // 从 Context 获取邀请方法和加载状态
+     const { inviteUser, isInviting } = useUsers()
+     
      const form = useForm<UserInviteForm>({
           resolver: zodResolver(formSchema),
           defaultValues: { email: '', role: '', desc: '' },
      })
 
      const onSubmit = (values: UserInviteForm) => {
+          // 调用 API 邀请用户（只传递 email 和 role，desc 字段用于前端显示，不发送到后端）
+          inviteUser({
+               email: values.email,
+               role: values.role as any, // 类型转换，因为 role 是字符串
+          })
+          
+          // 重置表单
           form.reset()
-          showSubmittedData(values)
+          // 关闭对话框
           onOpenChange(false)
      }
 
@@ -112,8 +122,8 @@ export function UsersInviteDialog({ open, onOpenChange }: UserInviteDialogProps)
                          <DialogClose asChild>
                               <Button variant='outline'>Cancel</Button>
                          </DialogClose>
-                         <Button type='submit' form='user-invite-form'>
-                              Invite <Send />
+                         <Button type='submit' form='user-invite-form' disabled={isInviting}>
+                              {isInviting ? 'Inviting...' : 'Invite'} <Send />
                          </Button>
                     </DialogFooter>
                </DialogContent>

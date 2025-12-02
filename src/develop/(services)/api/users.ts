@@ -20,7 +20,42 @@ export class UsersService {
       * 获取用户列表
       */
      static async getUsers(params?: UserQueryParams): Promise<PaginatedResponse<User>> {
-          return post<PaginatedResponse<User>>('/users', params)
+          // 过滤掉 undefined 值，只发送有效参数，并确保类型正确
+          const cleanParams: Record<string, unknown> = {}
+          if (params) {
+               // 确保 page 和 page_size 是数字
+               if (params.page !== undefined) {
+                    cleanParams.page = typeof params.page === 'number' ? params.page : Number.parseInt(String(params.page), 10) || 1
+               }
+               if (params.page_size !== undefined) {
+                    cleanParams.page_size = typeof params.page_size === 'number' ? params.page_size : Number.parseInt(String(params.page_size), 10) || 10
+               }
+               // 搜索参数
+               if (params.search !== undefined && params.search !== '') {
+                    cleanParams.search = String(params.search).trim()
+               }
+               // 状态和角色（确保是字符串）
+               if (params.status !== undefined) {
+                    cleanParams.status = String(params.status)
+               }
+               if (params.role !== undefined) {
+                    cleanParams.role = String(params.role)
+               }
+               // 排序参数
+               if (params.sort_by !== undefined) {
+                    cleanParams.sort_by = String(params.sort_by)
+               }
+               if (params.sort_order !== undefined) {
+                    cleanParams.sort_order = String(params.sort_order)
+               }
+          }
+          
+          // 开发环境打印请求参数
+          if (import.meta.env.DEV) {
+               console.log('📤 API Request - getUsers:', cleanParams)
+          }
+          
+          return post<PaginatedResponse<User>>('/users', cleanParams)
      }
 
      /**
