@@ -63,6 +63,7 @@ export interface UserUpdate {
      username?: string
      email?: string
      phoneNumber?: string
+     password?: string
      status?: UserStatus
      role?: UserRole
 }

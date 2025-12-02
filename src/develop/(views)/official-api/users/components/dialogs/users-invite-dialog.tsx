@@ -8,6 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input.tsx'
 import { Textarea } from '@/components/ui/textarea.tsx'
 import { SelectDropdown } from '@/components/select-dropdown.tsx'
+import type { UserRole } from '@/develop/(services)/api/types'
 import { roles } from '../../data/data.ts'
 import { useUsers } from '../../context/use-users.tsx'
 
@@ -39,7 +40,7 @@ export function UsersInviteDialog({ open, onOpenChange }: UserInviteDialogProps)
           // 调用 API 邀请用户（只传递 email 和 role，desc 字段用于前端显示，不发送到后端）
           inviteUser({
                email: values.email,
-               role: values.role as any, // 类型转换，因为 role 是字符串
+               role: values.role as UserRole, // 类型转换，因为 role 是字符串
           })
           
           // 重置表单

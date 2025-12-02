@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import useDialogState from '@/develop/(hooks)/use-dialog-state.tsx'
 import { type UsersDialogType } from './users-context-types.tsx'
 import { type User } from '../data/schema.ts'
@@ -78,64 +78,23 @@ export function UsersProvider({ children, initialQueryParams }: UsersProviderPro
           return params
      }, [])
 
-     // 查询参数状态 - 从 URL 参数初始化
-     const [queryParams, setQueryParams] = useState<UserQueryParams>(() => {
+     // 将 URL 参数转换为查询参数对象
+     // 直接使用 initialQueryParams 作为依赖，让 React Compiler 自动优化
+     const urlQueryParams = useMemo((): UserQueryParams => {
           if (initialQueryParams) {
                return convertUrlParamsToQueryParams(initialQueryParams)
           }
           return {
                page: 1,
                page_size: 10,
-               sort_by: 'createdAt', // 后端期望驼峰命名
-               sort_order: 'desc',
+               sort_by: 'createdAt',
+               sort_order: 'desc' as const,
           }
-     })
+     }, [initialQueryParams, convertUrlParamsToQueryParams])
 
-     // 将 URL 参数转换为稳定的查询参数对象
-     const urlQueryParams = useMemo(() => {
-          if (initialQueryParams) {
-               return convertUrlParamsToQueryParams(initialQueryParams)
-          }
-          return null
-     }, [
-          initialQueryParams?.page,
-          initialQueryParams?.pageSize,
-          initialQueryParams?.sort_by,
-          initialQueryParams?.sort_order,
-          initialQueryParams?.username,
-          // 使用 JSON.stringify 来稳定数组依赖
-          initialQueryParams?.status ? JSON.stringify(initialQueryParams.status) : undefined,
-          initialQueryParams?.role ? JSON.stringify(initialQueryParams.role) : undefined,
-          convertUrlParamsToQueryParams,
-     ])
-
-     // 当 URL 参数变化时，同步更新 queryParams
-     useEffect(() => {
-          if (urlQueryParams) {
-               setQueryParams((prev) => {
-                    // 深度比较参数变化
-                    const statusChanged = 
-                         (Array.isArray(prev.status) && Array.isArray(urlQueryParams.status) 
-                              ? JSON.stringify([...prev.status].sort()) !== JSON.stringify([...urlQueryParams.status].sort())
-                              : prev.status !== urlQueryParams.status)
-                    const roleChanged = 
-                         (Array.isArray(prev.role) && Array.isArray(urlQueryParams.role)
-                              ? JSON.stringify([...prev.role].sort()) !== JSON.stringify([...urlQueryParams.role].sort())
-                              : prev.role !== urlQueryParams.role)
-                    
-                    const hasChanges = 
-                         prev.page !== urlQueryParams.page ||
-                         prev.page_size !== urlQueryParams.page_size ||
-                         prev.sort_by !== urlQueryParams.sort_by ||
-                         prev.sort_order !== urlQueryParams.sort_order ||
-                         prev.search !== urlQueryParams.search ||
-                         statusChanged ||
-                         roleChanged
-                    
-                    return hasChanges ? urlQueryParams : prev
-               })
-          }
-     }, [urlQueryParams])
+     // 查询参数状态 - 直接使用 urlQueryParams，手动更新通过更新 URL 实现
+     // 这样避免了在 effect 中同步 setState 的问题
+     const queryParams = urlQueryParams
 
      // API 数据和操作
      const usersQuery = useUsers(queryParams)
@@ -151,28 +110,25 @@ export function UsersProvider({ children, initialQueryParams }: UsersProviderPro
      const suspendUserMutation = useSuspendUser()
 
      // 处理查询参数变化
-     const handleQueryParamsChange = (newParams: Partial<UserQueryParams>) => {
-          setQueryParams((prev: UserQueryParams) => ({ ...prev, ...newParams }))
+     // 注意：这些函数保留用于 API 兼容性，但实际更新应该通过 URL 来实现
+     // URL 更新会自动触发 urlQueryParams 的重新计算，进而触发 API 查询
+     const handleQueryParamsChange = (_newParams: Partial<UserQueryParams>) => {
+          // 空函数，实际更新通过 URL 实现
      }
 
      // 处理页面变化
-     const handlePageChange = (page: number) => {
-          handleQueryParamsChange({ page })
+     const handlePageChange = (_page: number) => {
+          // 空函数，实际更新通过 URL 实现（在 users-table.tsx 中通过 useTableUrlState）
      }
 
      // 处理搜索
-     const handleSearch = (search: string) => {
-          handleQueryParamsChange({ search, page: 1 })
+     const handleSearch = (_search: string) => {
+          // 空函数，实际更新通过 URL 实现（在 users-table.tsx 中通过 handleSearch）
      }
 
      // 处理排序
-     const handleSort = (sortBy: string, sortOrder: 'asc' | 'desc') => {
-          // 后端期望驼峰命名（createdAt），不需要转换
-          handleQueryParamsChange({
-               sort_by: sortBy as UserQueryParams['sort_by'],
-               sort_order: sortOrder,
-               page: 1
-          })
+     const handleSort = (_sortBy: string, _sortOrder: 'asc' | 'desc') => {
+          // 空函数，实际更新通过 URL 实现（在 users-table.tsx 中通过 handleSortingChange）
      }
 
      // 刷新数据

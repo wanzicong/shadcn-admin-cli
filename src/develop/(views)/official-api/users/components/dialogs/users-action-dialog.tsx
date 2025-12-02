@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input.tsx'
 import { PasswordInput } from '@/components/password-input.tsx'
 import { SelectDropdown } from '@/components/select-dropdown.tsx'
 import { useCreateUser, useUpdateUser } from '@/develop/(services)/hooks/useUsersApi.ts'
+import type { UserCreate, UserUpdate } from '@/develop/(services)/api/types'
 import { roles } from '../../data/data.ts'
 import { type User } from '../../data/schema.ts'
 
@@ -118,14 +119,16 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UserAction
 
           if (isEdit && currentRow) {
                // 编辑模式 - 只传递有值的字段
-               const updateData: any = {}
+               const updateData: Partial<UserUpdate> = {}
                if (submitData.firstName) updateData.firstName = submitData.firstName
                if (submitData.lastName) updateData.lastName = submitData.lastName
                if (submitData.username) updateData.username = submitData.username
                if (submitData.email) updateData.email = submitData.email
                if (submitData.phoneNumber) updateData.phoneNumber = submitData.phoneNumber
-               if (submitData.role) updateData.role = submitData.role
-               if (submitData.password) updateData.password = submitData.password
+               if (submitData.role) updateData.role = submitData.role as UserUpdate['role']
+               if (submitData.password && submitData.password.trim()) {
+                    updateData.password = submitData.password
+               }
 
                updateUser.mutate({
                     userId: currentRow.id,
@@ -133,7 +136,16 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UserAction
                })
           } else {
                // 创建模式
-               createUser.mutate(submitData as any)
+               const createData: UserCreate = {
+                    firstName: submitData.firstName,
+                    lastName: submitData.lastName,
+                    username: submitData.username,
+                    email: submitData.email,
+                    phoneNumber: submitData.phoneNumber,
+                    role: submitData.role as UserCreate['role'],
+                    password: submitData.password,
+               }
+               createUser.mutate(createData)
           }
 
           form.reset()

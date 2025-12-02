@@ -29,9 +29,7 @@ export function requestInterceptor(config: InternalAxiosRequestConfig): Internal
 
      // 开发环境打印请求信息
      if (apiConfig.isDev) {
-          /* eslint-disable-next-line no-console */
-          /* eslint-disable-next-line no-console */
-          /* eslint-disable-next-line no-console */
+          // eslint-disable-next-line no-console
           console.log('🚀 Request:', {
                url: config.url,
                method: config.method,
@@ -64,10 +62,6 @@ export function responseInterceptor<T = unknown>(response: AxiosResponse<Respons
      // 开发环境打印响应信息
      if (apiConfig.isDev) {
           // eslint-disable-next-line no-console
-          /* eslint-disable-next-line no-console */
-          /* eslint-disable-next-line no-console */
-          /* eslint-disable-next-line no-console */
-          /* eslint-disable-next-line no-console */
           console.log('✅ Response:', {
                url: config.url,
                data,
@@ -110,9 +104,8 @@ export function responseErrorInterceptor(error: AxiosError<ResponseData>): Promi
      const requestConfig = error.config as AxiosRequestConfig & RequestConfig
 
      if (apiConfig.isDev) {
-          /* eslint-disable-next-line no-console */
-          /* eslint-disable-next-line no-console */
-          console.error('❌ Response Error:', error)
+          // eslint-disable-next-line no-console
+          console.error('❌ Response Error:', error.response?.data || error.message)
      }
 
      // 处理 HTTP 错误

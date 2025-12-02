@@ -98,7 +98,7 @@ export function UsersTable({ search, navigate }: DataTableProps) {
           if (urlUsername !== searchInput) {
                setSearchInput(urlUsername)
           }
-     }, [search.username])
+     }, [search.username, searchInput])
 
      // 处理搜索按钮点击
      const handleSearch = () => {
