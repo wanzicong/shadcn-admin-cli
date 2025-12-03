@@ -189,7 +189,8 @@ function TableDemo({ data, total, totalPages, searchParam, searchChange }: Table
 
 
      // ============= 表格实例创建 =============
-     const table = useReactTable({
+     // eslint-disable-next-line react-hooks/incompatible-library
+     const table = useReactTable<User>({
           data, // 表格数据
           columns, // 列定义
           state: {
@@ -206,6 +207,8 @@ function TableDemo({ data, total, totalPages, searchParam, searchChange }: Table
           getSortedRowModel: getSortedRowModel(), // 启用排序
           getFilteredRowModel: getFilteredRowModel(), // 启用筛选
           manualPagination: true, // 手动分页（服务端分页）
+          manualSorting:true,
+          manualFiltering:true,
           pageCount: totalPages, // 总页数
           rowCount: total, // 总行数
      })
