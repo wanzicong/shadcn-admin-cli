@@ -1,5 +1,5 @@
 import { cn } from '@/develop/(lib)/utils.ts'
-import { Logo } from '@/assets/logo.tsx'
+import { Logo } from '@/static/assets/logo.tsx'
 import dashboardDark from './assets/dashboard-dark.png'
 import dashboardLight from './assets/dashboard-light.png'
 import { UserAuthForm } from './components/user-auth-form.tsx'

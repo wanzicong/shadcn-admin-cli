@@ -14,7 +14,7 @@ import {
      IconGitlab,
      IconDiscord,
      IconWhatsapp,
-} from '@/assets/brand-icons'
+} from '@/static/assets/brand-icons'
 
 export const apps = [
      {

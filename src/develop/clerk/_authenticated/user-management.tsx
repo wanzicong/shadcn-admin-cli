@@ -9,7 +9,7 @@ import { UsersProvider } from '@/develop/(views)/official/users/context/users-pr
 import { users } from '@/develop/(views)/official/users/data/users'
 import { SignedIn, useAuth, UserButton } from '@clerk/clerk-react'
 import { ExternalLink, Loader2 } from 'lucide-react'
-import { ClerkLogo } from '@/assets/clerk-logo'
+import { ClerkLogo } from '@/static/assets/clerk-logo'
 import { Button } from '@/components/ui/button'
 import { LearnMore } from '@/components/learn-more'
 import { Search } from '@/components/search'

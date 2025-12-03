@@ -19,7 +19,7 @@ import {
      UserX,
      Wrench,
 } from 'lucide-react'
-import { ClerkLogo } from '@/assets/clerk-logo.tsx'
+import { ClerkLogo } from '@/static/assets/clerk-logo.tsx'
 
 /**
  * 导航菜单数据配置文件
