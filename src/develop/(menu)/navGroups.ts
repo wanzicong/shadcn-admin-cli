@@ -1,3 +1,4 @@
+import { ClerkLogo } from '@/static/assets/clerk-logo.tsx'
 import {
      Bell,
      Bug,
@@ -19,7 +20,6 @@ import {
      UserX,
      Wrench,
 } from 'lucide-react'
-import { ClerkLogo } from '@/static/assets/clerk-logo.tsx'
 
 /**
  * 导航菜单数据配置文件
@@ -211,5 +211,25 @@ export const menus = [
                     icon: ListTodo,
                },
           ], // 空数组，可以添加自定义导航项
+     },
+     {
+          title: '手写案例',
+          items: [
+               {
+                    title: '案例Table1',
+                    url: '/demos',
+                    icon: Users,
+               },
+               {
+                    title: '案例Table1',
+                    url: '/demos/demo1',
+                    icon: Users,
+               },
+               {
+                    title: '案例Table1',
+                    url: '/demos/demo2',
+                    icon: Users,
+               },
+          ],
      },
 ]

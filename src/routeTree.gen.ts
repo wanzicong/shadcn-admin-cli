@@ -24,6 +24,7 @@ import { Route as authOtpRouteImport } from './develop/(auth)/otp'
 import { Route as authForgotPasswordRouteImport } from './develop/(auth)/forgot-password'
 import { Route as ClerkAuthenticatedRouteRouteImport } from './develop/clerk/_authenticated/route'
 import { Route as ClerkauthRouteRouteImport } from './develop/clerk/(auth)/route'
+import { Route as AuthenticatedDemosIndexRouteImport } from './develop/_authenticated/demos/index'
 import { Route as ClerkAuthenticatedUserManagementRouteImport } from './develop/clerk/_authenticated/user-management'
 import { Route as ClerkauthSignUpRouteImport } from './develop/clerk/(auth)/sign-up'
 import { Route as ClerkauthSignInRouteImport } from './develop/clerk/(auth)/sign-in'
@@ -36,6 +37,7 @@ import { Route as AuthenticatedOfficialChatsIndexRouteImport } from './develop/_
 import { Route as AuthenticatedOfficialAppsIndexRouteImport } from './develop/_authenticated/official/apps/index'
 import { Route as AuthenticatedOfficialApiUsersIndexRouteImport } from './develop/_authenticated/official-api/users/index'
 import { Route as AuthenticatedOfficialApiTasksIndexRouteImport } from './develop/_authenticated/official-api/tasks/index'
+import { Route as AuthenticatedDemosDemo2IndexRouteImport } from './develop/_authenticated/demos/demo2/index'
 import { Route as AuthenticatedDemosDemo1IndexRouteImport } from './develop/_authenticated/demos/demo1/index'
 import { Route as AuthenticatedOfficialSettingsNotificationsRouteImport } from './develop/_authenticated/official/settings/notifications'
 import { Route as AuthenticatedOfficialSettingsDisplayRouteImport } from './develop/_authenticated/official/settings/display'
@@ -115,6 +117,11 @@ const ClerkauthRouteRoute = ClerkauthRouteRouteImport.update({
   id: '/(auth)',
   getParentRoute: () => ClerkRouteRoute,
 } as any)
+const AuthenticatedDemosIndexRoute = AuthenticatedDemosIndexRouteImport.update({
+  id: '/demos/',
+  path: '/demos/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ClerkAuthenticatedUserManagementRoute =
   ClerkAuthenticatedUserManagementRouteImport.update({
     id: '/user-management',
@@ -185,6 +192,12 @@ const AuthenticatedOfficialApiTasksIndexRoute =
     path: '/official-api/tasks/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDemosDemo2IndexRoute =
+  AuthenticatedDemosDemo2IndexRouteImport.update({
+    id: '/demos/demo2/',
+    path: '/demos/demo2/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDemosDemo1IndexRoute =
   AuthenticatedDemosDemo1IndexRouteImport.update({
     id: '/demos/demo1/',
@@ -239,12 +252,14 @@ export interface FileRoutesByFullPath {
   '/clerk/sign-in': typeof ClerkauthSignInRoute
   '/clerk/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/user-management': typeof ClerkAuthenticatedUserManagementRoute
+  '/demos': typeof AuthenticatedDemosIndexRoute
   '/official/errors/$error': typeof AuthenticatedOfficialErrorsErrorRoute
   '/official/settings/account': typeof AuthenticatedOfficialSettingsAccountRoute
   '/official/settings/appearance': typeof AuthenticatedOfficialSettingsAppearanceRoute
   '/official/settings/display': typeof AuthenticatedOfficialSettingsDisplayRoute
   '/official/settings/notifications': typeof AuthenticatedOfficialSettingsNotificationsRoute
   '/demos/demo1': typeof AuthenticatedDemosDemo1IndexRoute
+  '/demos/demo2': typeof AuthenticatedDemosDemo2IndexRoute
   '/official-api/tasks': typeof AuthenticatedOfficialApiTasksIndexRoute
   '/official-api/users': typeof AuthenticatedOfficialApiUsersIndexRoute
   '/official/apps': typeof AuthenticatedOfficialAppsIndexRoute
@@ -270,12 +285,14 @@ export interface FileRoutesByTo {
   '/clerk/sign-in': typeof ClerkauthSignInRoute
   '/clerk/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/user-management': typeof ClerkAuthenticatedUserManagementRoute
+  '/demos': typeof AuthenticatedDemosIndexRoute
   '/official/errors/$error': typeof AuthenticatedOfficialErrorsErrorRoute
   '/official/settings/account': typeof AuthenticatedOfficialSettingsAccountRoute
   '/official/settings/appearance': typeof AuthenticatedOfficialSettingsAppearanceRoute
   '/official/settings/display': typeof AuthenticatedOfficialSettingsDisplayRoute
   '/official/settings/notifications': typeof AuthenticatedOfficialSettingsNotificationsRoute
   '/demos/demo1': typeof AuthenticatedDemosDemo1IndexRoute
+  '/demos/demo2': typeof AuthenticatedDemosDemo2IndexRoute
   '/official-api/tasks': typeof AuthenticatedOfficialApiTasksIndexRoute
   '/official-api/users': typeof AuthenticatedOfficialApiUsersIndexRoute
   '/official/apps': typeof AuthenticatedOfficialAppsIndexRoute
@@ -306,12 +323,14 @@ export interface FileRoutesById {
   '/clerk/(auth)/sign-in': typeof ClerkauthSignInRoute
   '/clerk/(auth)/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/_authenticated/user-management': typeof ClerkAuthenticatedUserManagementRoute
+  '/_authenticated/demos/': typeof AuthenticatedDemosIndexRoute
   '/_authenticated/official/errors/$error': typeof AuthenticatedOfficialErrorsErrorRoute
   '/_authenticated/official/settings/account': typeof AuthenticatedOfficialSettingsAccountRoute
   '/_authenticated/official/settings/appearance': typeof AuthenticatedOfficialSettingsAppearanceRoute
   '/_authenticated/official/settings/display': typeof AuthenticatedOfficialSettingsDisplayRoute
   '/_authenticated/official/settings/notifications': typeof AuthenticatedOfficialSettingsNotificationsRoute
   '/_authenticated/demos/demo1/': typeof AuthenticatedDemosDemo1IndexRoute
+  '/_authenticated/demos/demo2/': typeof AuthenticatedDemosDemo2IndexRoute
   '/_authenticated/official-api/tasks/': typeof AuthenticatedOfficialApiTasksIndexRoute
   '/_authenticated/official-api/users/': typeof AuthenticatedOfficialApiUsersIndexRoute
   '/_authenticated/official/apps/': typeof AuthenticatedOfficialAppsIndexRoute
@@ -340,12 +359,14 @@ export interface FileRouteTypes {
     | '/clerk/sign-in'
     | '/clerk/sign-up'
     | '/clerk/user-management'
+    | '/demos'
     | '/official/errors/$error'
     | '/official/settings/account'
     | '/official/settings/appearance'
     | '/official/settings/display'
     | '/official/settings/notifications'
     | '/demos/demo1'
+    | '/demos/demo2'
     | '/official-api/tasks'
     | '/official-api/users'
     | '/official/apps'
@@ -371,12 +392,14 @@ export interface FileRouteTypes {
     | '/clerk/sign-in'
     | '/clerk/sign-up'
     | '/clerk/user-management'
+    | '/demos'
     | '/official/errors/$error'
     | '/official/settings/account'
     | '/official/settings/appearance'
     | '/official/settings/display'
     | '/official/settings/notifications'
     | '/demos/demo1'
+    | '/demos/demo2'
     | '/official-api/tasks'
     | '/official-api/users'
     | '/official/apps'
@@ -406,12 +429,14 @@ export interface FileRouteTypes {
     | '/clerk/(auth)/sign-in'
     | '/clerk/(auth)/sign-up'
     | '/clerk/_authenticated/user-management'
+    | '/_authenticated/demos/'
     | '/_authenticated/official/errors/$error'
     | '/_authenticated/official/settings/account'
     | '/_authenticated/official/settings/appearance'
     | '/_authenticated/official/settings/display'
     | '/_authenticated/official/settings/notifications'
     | '/_authenticated/demos/demo1/'
+    | '/_authenticated/demos/demo2/'
     | '/_authenticated/official-api/tasks/'
     | '/_authenticated/official-api/users/'
     | '/_authenticated/official/apps/'
@@ -544,6 +569,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClerkauthRouteRouteImport
       parentRoute: typeof ClerkRouteRoute
     }
+    '/_authenticated/demos/': {
+      id: '/_authenticated/demos/'
+      path: '/demos'
+      fullPath: '/demos'
+      preLoaderRoute: typeof AuthenticatedDemosIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/clerk/_authenticated/user-management': {
       id: '/clerk/_authenticated/user-management'
       path: '/user-management'
@@ -628,6 +660,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOfficialApiTasksIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/demos/demo2/': {
+      id: '/_authenticated/demos/demo2/'
+      path: '/demos/demo2'
+      fullPath: '/demos/demo2'
+      preLoaderRoute: typeof AuthenticatedDemosDemo2IndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/demos/demo1/': {
       id: '/_authenticated/demos/demo1/'
       path: '/demos/demo1'
@@ -703,8 +742,10 @@ const AuthenticatedOfficialSettingsRouteRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedOfficialSettingsRouteRoute: typeof AuthenticatedOfficialSettingsRouteRouteWithChildren
+  AuthenticatedDemosIndexRoute: typeof AuthenticatedDemosIndexRoute
   AuthenticatedOfficialErrorsErrorRoute: typeof AuthenticatedOfficialErrorsErrorRoute
   AuthenticatedDemosDemo1IndexRoute: typeof AuthenticatedDemosDemo1IndexRoute
+  AuthenticatedDemosDemo2IndexRoute: typeof AuthenticatedDemosDemo2IndexRoute
   AuthenticatedOfficialApiTasksIndexRoute: typeof AuthenticatedOfficialApiTasksIndexRoute
   AuthenticatedOfficialApiUsersIndexRoute: typeof AuthenticatedOfficialApiUsersIndexRoute
   AuthenticatedOfficialAppsIndexRoute: typeof AuthenticatedOfficialAppsIndexRoute
@@ -718,8 +759,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedOfficialSettingsRouteRoute:
     AuthenticatedOfficialSettingsRouteRouteWithChildren,
+  AuthenticatedDemosIndexRoute: AuthenticatedDemosIndexRoute,
   AuthenticatedOfficialErrorsErrorRoute: AuthenticatedOfficialErrorsErrorRoute,
   AuthenticatedDemosDemo1IndexRoute: AuthenticatedDemosDemo1IndexRoute,
+  AuthenticatedDemosDemo2IndexRoute: AuthenticatedDemosDemo2IndexRoute,
   AuthenticatedOfficialApiTasksIndexRoute:
     AuthenticatedOfficialApiTasksIndexRoute,
   AuthenticatedOfficialApiUsersIndexRoute:
