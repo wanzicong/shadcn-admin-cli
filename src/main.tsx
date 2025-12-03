@@ -12,7 +12,7 @@ import { toast } from 'sonner'
 // Generated Routes
 import { routeTree } from './routeTree.gen'
 // Styles
-import './styles/index.css'
+import '@/static/styles/index.css'
 
 const queryClient = new QueryClient({
      defaultOptions: {
