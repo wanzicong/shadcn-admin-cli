@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, getRouteApi } from '@tanstack/react-router'
 import { Main } from '@/develop/(layout)/main.tsx'
 import { usersApi } from '@/develop/(services)/api'
+import type { User, UserQueryParams } from '@/develop/(services)/api/types'
 
 export const Route = createFileRoute('/_authenticated/demos/')({
      component: RouteComponent,
@@ -16,7 +17,7 @@ function RouteComponent() {
      // 查询数据
      const { data, isLoading, isError } = useQuery({
           queryKey: ['demos', search],
-          queryFn: () => usersApi.getUsers(search),
+          queryFn: () => usersApi.getUsers(search as UserQueryParams),
      })
 
      if (isLoading) {
@@ -50,26 +51,20 @@ function RouteComponent() {
 
      return (
           <Main>
-               <TableDemo
-                    data={userData}
-                    total={total}
-                    totalPages={totalPages}
-                    searchParam={search}
-                    searchChange={searchChange}
-               />
+               <TableDemo data={userData} total={total} totalPages={totalPages} searchParam={search} searchChange={searchChange} />
           </Main>
      )
 }
 
 type TableProps = {
-     data:never,
-     total:number,
-     totalPages:number,
-     searchParam:never,
-     searchChange:never
+     data: User[]
+     total: number
+     totalPages: number
+     searchParam: Record<string, unknown>
+     searchChange: () => Promise<void>
 }
 
-function TableDemo({data,total,totalPages,searchParam,searchChange}:TableProps) {
+function TableDemo({ data, total, totalPages, searchParam, searchChange }: TableProps) {
      return (
           <div>
                <div>searchInfo :{JSON.stringify(searchParam)}</div>
@@ -77,9 +72,10 @@ function TableDemo({data,total,totalPages,searchParam,searchChange}:TableProps) 
                <div>DATA: {JSON.stringify(data)}</div>
                <div>TOTAL: {total}</div>
                <div>TOTAL PAGES: {totalPages}</div>
-               <div> <button onClick={searchChange}> 设置参数 </button></div>
+               <div>
+                    {' '}
+                    <button onClick={searchChange}> 设置参数 </button>
+               </div>
           </div>
      )
 }
-
-
