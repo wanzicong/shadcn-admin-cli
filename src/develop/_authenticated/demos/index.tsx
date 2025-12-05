@@ -38,7 +38,6 @@ export const Route = createFileRoute('/_authenticated/demos/')({
      component: RouteComponent,
 })
 
-
 const route = getRouteApi('/_authenticated/demos/')
 
 /**
@@ -57,7 +56,8 @@ function RouteComponent() {
           await navigate({
                search: {
                     page: 1,
-                    page_size: 1,
+                    page_size: 10,
+                    search: '',
                },
           })
      }
@@ -86,12 +86,11 @@ function RouteComponent() {
 
      return (
           <Main>
-               <TablePage
-                    data={userData}
-                    total={total}
-                    totalPages={totalPages}
-                    searchParam={searchParam}
-                    searchChange={searchChange}
+               <TablePage data={userData}
+                          total={total}
+                          totalPages={totalPages}
+                          searchParam={searchParam}
+                          searchChange={searchChange}
                />
           </Main>
      )
