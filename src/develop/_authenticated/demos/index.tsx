@@ -96,6 +96,7 @@ function TableDemo({ data, total, totalPages, searchParam, searchChange }: Table
           pageSize: (searchParam.page_size as number) || 10,
      })
 
+     //  ============= 表格列字段定义 =============
      const columns: ColumnDef<User>[] = [
           // 用户名列
           {
@@ -198,10 +199,8 @@ function TableDemo({ data, total, totalPages, searchParam, searchChange }: Table
                pagination, // 分页状态
                rowSelection, // 行选择状态
           },
-          enableRowSelection: true, // 启用行选择
-          onSortingChange: setSorting, // 排序变化处理
-          onPaginationChange: setPagination, // 分页变化处理
-          onRowSelectionChange: setRowSelection, // 行选择变化处理
+          pageCount: totalPages, // 总页数
+          rowCount: total, // 总行数
           getCoreRowModel: getCoreRowModel(), // 核心表格功能
           getPaginationRowModel: getPaginationRowModel(), // 启用分页
           getSortedRowModel: getSortedRowModel(), // 启用排序
@@ -209,8 +208,10 @@ function TableDemo({ data, total, totalPages, searchParam, searchChange }: Table
           manualPagination: true, // 手动分页（服务端分页）
           manualSorting:true,
           manualFiltering:true,
-          pageCount: totalPages, // 总页数
-          rowCount: total, // 总行数
+          enableRowSelection: true, // 启用行选择
+          onSortingChange: setSorting, // 排序变化处理
+          onPaginationChange: setPagination, // 分页变化处理
+          onRowSelectionChange: setRowSelection, // 行选择变化处理
      })
 
      return (
