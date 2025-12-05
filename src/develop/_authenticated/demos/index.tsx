@@ -18,6 +18,7 @@ import {
 } from '@tanstack/react-table'
 import { Main } from '@/develop/(layout)/main.tsx'
 import { cn } from '@/develop/(lib)/utils.ts'
+import { decodeQueryParams, encodeQueryParams } from '@/develop/(lib)/url-utils.ts'
 import { usersApi } from '@/develop/(services)/api'
 import type { User, UserQueryParams } from '@/develop/(services)/api/types'
 import { Badge } from '@/components/ui/badge.tsx'
@@ -37,6 +38,22 @@ type TablePageProps = {
  */
 export const Route = createFileRoute('/_authenticated/demos/')({
      component: RouteComponent,
+     validateSearch: (search: Record<string, unknown>): UserQueryParams => {
+          // 解码URL参数
+          const decoded = decodeQueryParams(search)
+
+          return {
+               page: typeof decoded.page === 'string' ? parseInt(decoded.page, 10) :
+                      typeof decoded.page === 'number' ? decoded.page : undefined,
+               page_size: typeof decoded.page_size === 'string' ? parseInt(decoded.page_size, 10) :
+                          typeof decoded.page_size === 'number' ? decoded.page_size : undefined,
+               search: typeof decoded.search === 'string' ? decoded.search : undefined,
+               status: decoded.status as UserQueryParams['status'],
+               role: decoded.role as UserQueryParams['role'],
+               sort_by: typeof decoded.sort_by === 'string' ? decoded.sort_by : undefined,
+               sort_order: decoded.sort_order === 'asc' || decoded.sort_order === 'desc' ? decoded.sort_order : undefined,
+          }
+     },
 })
 
 const route = getRouteApi('/_authenticated/demos/')
@@ -50,17 +67,15 @@ const route = getRouteApi('/_authenticated/demos/')
 function RouteComponent() {
      // 页面导航信息
      const navigate = route.useNavigate()
-     // 查询参数
+     // 查询参数 - 路由配置已经处理了解码
      const searchParam = route.useSearch()
-     // 处理参数变化
+
+     // 处理参数变化 - 编码URL参数
      const searchChange = async (searchParam: UserQueryParams) => {
+          // 编码查询参数以处理中文等特殊字符
+          const encodedParams = encodeQueryParams(searchParam as Record<string, unknown>)
           await navigate({
-               search: {
-                    ...searchParam,
-                    // page: 1,
-                    // page_size: 10,
-                    // search: 'qianqi@example.com',
-               },
+               search: encodedParams,
           })
      }
 
@@ -254,6 +269,18 @@ function TablePage({ data, total, totalPages, searchParam, searchChange }: Table
                          className='rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700'
                     >
                          查询按钮2
+                    </button>
+                    <button
+                         onClick={async () => {
+                              await searchChange({
+                                   page: 1,
+                                   page_size: 10,
+                                   search: '管理员',
+                              })
+                         }}
+                         className='rounded-md bg-green-600 px-4 py-2 text-white transition-colors hover:bg-green-700'
+                    >
+                         测试中文搜索
                     </button>
                </div>
 
