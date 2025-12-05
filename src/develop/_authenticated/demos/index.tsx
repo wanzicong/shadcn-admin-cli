@@ -14,7 +14,7 @@ import {
      type PaginationState,
      type RowSelectionState,
      type TableOptions,
-     Table as TanstackTable,
+     type Table as TanstackTable,
 } from '@tanstack/react-table'
 import { Main } from '@/develop/(layout)/main.tsx'
 import { cn } from '@/develop/(lib)/utils.ts'
@@ -23,20 +23,49 @@ import type { User, UserQueryParams } from '@/develop/(services)/api/types'
 import { Badge } from '@/components/ui/badge.tsx'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
 
+type TablePageProps = {
+     data: User[]
+     total: number
+     totalPages: number
+     searchParam: Record<string, unknown>
+     searchChange: () => Promise<void>
+}
+
+/**
+ *  路由信息
+ */
 export const Route = createFileRoute('/_authenticated/demos/')({
      component: RouteComponent,
 })
 
+
+const route = getRouteApi('/_authenticated/demos/')
+
+/**
+ * 主页面
+ * 1. 数据加载
+ * 2. 组件信息
+ * @constructor
+ */
 function RouteComponent() {
-     const route = getRouteApi('/_authenticated/demos/')
+     // 页面导航信息
      const navigate = route.useNavigate()
-     // 获取查询参数
-     // const params = route.useParams()
-     const search = route.useSearch()
+     // 查询参数
+     const searchParam = route.useSearch()
+     // 处理参数变化
+     const searchChange = async () => {
+          await navigate({
+               search: {
+                    page: 1,
+                    page_size: 1,
+               },
+          })
+     }
+
      // 查询数据
      const { data, isLoading, isError } = useQuery({
-          queryKey: ['demos', search],
-          queryFn: () => usersApi.getUsers(search as UserQueryParams),
+          queryKey: ['demos', searchParam],
+          queryFn: () => usersApi.getUsers(searchParam as UserQueryParams),
      })
 
      if (isLoading) {
@@ -51,39 +80,33 @@ function RouteComponent() {
           return <div>no data</div>
      }
 
-     const searchChange = async () => {
-          await navigate({
-               search: {
-                    page: 1,
-                    page_size: 1,
-               },
-               params: {
-                    sort: 1,
-                    page: 2,
-               },
-          })
-     }
-
      const userData = data.list
      const total = data.total
      const totalPages = data.totalPages
 
      return (
           <Main>
-               <TableDemo data={userData} total={total} totalPages={totalPages} searchParam={search} searchChange={searchChange} />
+               <TablePage
+                    data={userData}
+                    total={total}
+                    totalPages={totalPages}
+                    searchParam={searchParam}
+                    searchChange={searchChange}
+               />
           </Main>
      )
 }
 
-type TableProps = {
-     data: User[]
-     total: number
-     totalPages: number
-     searchParam: Record<string, unknown>
-     searchChange: () => Promise<void>
-}
-
-function TableDemo({ data, total, totalPages, searchParam, searchChange }: TableProps) {
+/**
+ * Table 数据处理逻辑
+ * @param data
+ * @param total
+ * @param totalPages
+ * @param searchParam
+ * @param searchChange
+ * @constructor
+ */
+function TablePage({ data, total, totalPages, searchParam, searchChange }: TablePageProps) {
      // ============= 本地状态管理 =============
      const [sorting, setSorting] = useState<SortingState>([])
      const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
@@ -209,41 +232,6 @@ function TableDemo({ data, total, totalPages, searchParam, searchChange }: Table
      // eslint-disable-next-line react-hooks/incompatible-library
      const table: TanstackTable<User> = useReactTable<User>(tableOptions)
 
-     const CommonDataTable = ({ table }: { table: TanstackTable<User> }) => {
-          return (
-               <Table>
-                    <TableHeader>
-                         {table.getHeaderGroups().map((headerGroup) => (
-                              <TableRow key={headerGroup.id}>
-                                   {headerGroup.headers.map((header) => (
-                                        <TableHead key={header.id}>
-                                             {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                                        </TableHead>
-                                   ))}
-                              </TableRow>
-                         ))}
-                    </TableHeader>
-                    <TableBody>
-                         {table.getRowModel().rows?.length ? (
-                              table.getRowModel().rows.map((row) => (
-                                   <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-                                        {row.getVisibleCells().map((cell) => (
-                                             <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                                        ))}
-                                   </TableRow>
-                              ))
-                         ) : (
-                              <TableRow>
-                                   <TableCell colSpan={columns.length} className='h-24 text-center'>
-                                        暂无数据
-                                   </TableCell>
-                              </TableRow>
-                         )}
-                    </TableBody>
-               </Table>
-          )
-     }
-
      return (
           <div className='space-y-4'>
                <div className='flex items-center justify-between'>
@@ -276,8 +264,48 @@ function TableDemo({ data, total, totalPages, searchParam, searchChange }: Table
                </div>
 
                <div className='rounded-lg border'>
-                    <CommonDataTable table={table} />
+                    <CommonTableData table={table} />
                </div>
           </div>
+     )
+}
+
+/**
+ * 公共页面组件
+ * @param table
+ * @constructor
+ */
+function CommonTableData({ table }: { table: TanstackTable<User> }) {
+     return (
+          <Table>
+               <TableHeader>
+                    {table.getHeaderGroups().map((headerGroup) => (
+                         <TableRow key={headerGroup.id}>
+                              {headerGroup.headers.map((header) => (
+                                   <TableHead key={header.id}>
+                                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                                   </TableHead>
+                              ))}
+                         </TableRow>
+                    ))}
+               </TableHeader>
+               <TableBody>
+                    {table.getRowModel().rows?.length ? (
+                         table.getRowModel().rows.map((row) => (
+                              <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                                   {row.getVisibleCells().map((cell) => (
+                                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                                   ))}
+                              </TableRow>
+                         ))
+                    ) : (
+                         <TableRow>
+                              <TableCell colSpan={table.getAllColumns().length} className='h-24 text-center'>
+                                   暂无数据
+                              </TableCell>
+                         </TableRow>
+                    )}
+               </TableBody>
+          </Table>
      )
 }
