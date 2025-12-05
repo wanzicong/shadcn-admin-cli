@@ -27,8 +27,9 @@ type TablePageProps = {
      data: User[]
      total: number
      totalPages: number
-     searchParam: Record<string, unknown>
-     searchChange: () => Promise<void>
+     // searchParam: Record<string, unknown>
+     searchParam: UserQueryParams
+     searchChange: (searchParam: UserQueryParams) => Promise<void>
 }
 
 /**
@@ -52,12 +53,13 @@ function RouteComponent() {
      // 查询参数
      const searchParam = route.useSearch()
      // 处理参数变化
-     const searchChange = async () => {
+     const searchChange = async (searchParam: UserQueryParams) => {
           await navigate({
                search: {
-                    page: 1,
-                    page_size: 10,
-                    search: '',
+                    ...searchParam,
+                    // page: 1,
+                    // page_size: 10,
+                    // search: 'qianqi@example.com',
                },
           })
      }
@@ -86,12 +88,7 @@ function RouteComponent() {
 
      return (
           <Main>
-               <TablePage data={userData}
-                          total={total}
-                          totalPages={totalPages}
-                          searchParam={searchParam}
-                          searchChange={searchChange}
-               />
+               <TablePage data={userData} total={total} totalPages={totalPages} searchParam={searchParam} searchChange={searchChange} />
           </Main>
      )
 }
@@ -238,8 +235,25 @@ function TablePage({ data, total, totalPages, searchParam, searchChange }: Table
                          <h3 className='text-lg font-semibold'>用户管理演示</h3>
                          <p className='text-muted-foreground text-sm'>搜索信息: {JSON.stringify(searchParam)}</p>
                     </div>
-                    <button onClick={searchChange} className='rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700'>
-                         设置参数
+                    <button
+                         onClick={async () => {
+                              await searchChange({ page: 1, page_size: 10 })
+                         }}
+                         className='rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700'
+                    >
+                         查询按钮
+                    </button>
+                    <button
+                         onClick={async () => {
+                              await searchChange({
+                                   page: 1,
+                                   page_size: 10,
+                                   search: 'superadmin@example.com',
+                              })
+                         }}
+                         className='rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700'
+                    >
+                         查询按钮2
                     </button>
                </div>
 
