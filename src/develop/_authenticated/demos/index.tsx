@@ -18,7 +18,7 @@ import {
      type Table as TanstackTable,
 } from '@tanstack/react-table'
 import { Main } from '@/develop/(layout)/main.tsx'
-import { cn, getPageNumbers } from '@/develop/(lib)/utils.ts'
+import { cn } from '@/develop/(lib)/utils.ts'
 import { usersApi } from '@/develop/(services)/api'
 import type { User, UserQueryParams } from '@/develop/(services)/api/types'
 import { Badge } from '@/components/ui/badge.tsx'
@@ -223,6 +223,49 @@ function TablePage({ data, total, totalPages, searchParam, searchChange }: Table
                </div>
           </div>
      )
+}
+
+function getPageNumbers(currentPage: number, totalPages: number) {
+     const maxVisiblePages = 5 // Maximum number of page buttons to show
+     const rangeWithDots: (string | number)[] = []
+
+     // 如果总页数为0，返回空数组
+     if (totalPages === 0) {
+          return rangeWithDots
+     }
+
+     if (totalPages <= maxVisiblePages) {
+          // 如果总页数是5或更少，显示所有页面
+          for (let i = 0; i < totalPages; i++) {
+               rangeWithDots.push(i)
+          }
+     } else {
+          // 始终显示第一页 (0)
+          rangeWithDots.push(0)
+
+          if (currentPage <= 2) {
+               // 靠近开头: [0] [1] [2] [3] ... [totalPages-1]
+               for (let i = 1; i <= 3; i++) {
+                    rangeWithDots.push(i)
+               }
+               rangeWithDots.push('...', totalPages - 1)
+          } else if (currentPage >= totalPages - 3) {
+               // 靠近结尾: [0] ... [totalPages-4] [totalPages-3] [totalPages-2] [totalPages-1]
+               rangeWithDots.push('...')
+               for (let i = totalPages - 4; i < totalPages; i++) {
+                    rangeWithDots.push(i)
+               }
+          } else {
+               // 在中间: [0] ... [currentPage-1] [currentPage] [currentPage+1] ... [totalPages-1]
+               rangeWithDots.push('...')
+               for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+                    rangeWithDots.push(i)
+               }
+               rangeWithDots.push('...', totalPages - 1)
+          }
+     }
+
+     return rangeWithDots
 }
 
 /**
