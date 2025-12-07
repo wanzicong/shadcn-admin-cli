@@ -267,6 +267,11 @@ function TablePage({ data, total, totalPages, searchParam, searchChange }: Table
                          <div className='font-medium'>页面大小</div>
                          <div className='text-2xl font-bold'>{(searchParam.page_size as number) || 10}</div>
                     </div>
+                    <div className='bg-muted rounded-lg p-3'>
+                         <div className='font-medium'>排序信息</div>
+                         <div className='font-medium'>{sorting[0]?.desc}</div>
+                         <div className='font-medium'>{sorting[0]?.id}</div>
+                    </div>
                </div>
 
                <div className='rounded-lg border'>
@@ -439,7 +444,7 @@ function CommonTablePagination({ table }: { table: TanstackTable<User> }) {
 /**
  * 表格数据 table 表头
  */
-function useCommonTableCols(): ColumnDef<User>[] {
+export function useCommonTableCols(): ColumnDef<User>[] {
      return [
           // 用户名列
           {
