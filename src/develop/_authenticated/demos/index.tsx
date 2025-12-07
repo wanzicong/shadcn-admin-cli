@@ -12,21 +12,6 @@ import { Button } from '@/components/ui/button.tsx'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 type TablePageProps = {
      data: User[]
      total: number
