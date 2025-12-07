@@ -128,6 +128,7 @@ async def create_user(
 ):
     """创建新用户"""
     user_data_dict = request.get("user_data", {})
+    print(user_data_dict)
 
     # 检查用户名是否已存在
     if user_data_dict.get("username") and db.query(User).filter(User.username == user_data_dict["username"]).first():

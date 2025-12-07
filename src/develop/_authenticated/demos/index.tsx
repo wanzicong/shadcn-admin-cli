@@ -68,9 +68,9 @@ function RouteComponent() {
           return <div>no data</div>
      }
 
-     const userData = data.list
-     const total = data.total
-     const totalPages = data.totalPages
+     const userData = data.list // 实际展示数据 (后端)
+     const total = data.total // 一共数据量 (后端)
+     const totalPages = data.totalPages // 数据分页 (后端)
 
      return (
           <Main>
@@ -214,16 +214,6 @@ function TablePage({ data, total, totalPages, searchParam, searchChange }: Table
  * @param table
  * @constructor
  */
-// function CommonTablePagination({table}:{table:TanstackTable<User>}) {
-//   return (
-//       <div>
-//         {table.getPageCount()}
-//         分页条件
-//       </div>
-//   )
-// }
-
-
 function CommonTablePagination({table}:{table:TanstackTable<User>}) {
      // 当前页码（从 1 开始，table 内部使用从 0 开始的索引）
      const currentPage = table.getState().pagination.pageIndex + 1
