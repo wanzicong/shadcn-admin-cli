@@ -106,7 +106,12 @@ function RouteComponent() {
 
      return (
           <Main>
-               <TablePage data={userData} total={total} totalPages={totalPages} searchParam={searchParam} searchChange={searchChange} />
+               <TablePage data={userData}
+                          total={total}
+                          totalPages={totalPages}
+                          searchParam={searchParam}
+                          searchChange={searchChange}
+               />
           </Main>
      )
 }
