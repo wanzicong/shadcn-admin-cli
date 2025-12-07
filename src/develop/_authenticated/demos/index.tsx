@@ -17,8 +17,8 @@ import {
      type Table as TanstackTable,
 } from '@tanstack/react-table'
 import { Main } from '@/develop/(layout)/main.tsx'
-import { cn } from '@/develop/(lib)/utils.ts'
 import { decodeQueryParams, encodeQueryParams } from '@/develop/(lib)/url-utils.ts'
+import { cn } from '@/develop/(lib)/utils.ts'
 import { usersApi } from '@/develop/(services)/api'
 import type { User, UserQueryParams } from '@/develop/(services)/api/types'
 import { Badge } from '@/components/ui/badge.tsx'
@@ -43,10 +43,13 @@ export const Route = createFileRoute('/_authenticated/demos/')({
           const decoded = decodeQueryParams(search)
 
           return {
-               page: typeof decoded.page === 'string' ? parseInt(decoded.page, 10) :
-                      typeof decoded.page === 'number' ? decoded.page : undefined,
-               page_size: typeof decoded.page_size === 'string' ? parseInt(decoded.page_size, 10) :
-                          typeof decoded.page_size === 'number' ? decoded.page_size : undefined,
+               page: typeof decoded.page === 'string' ? parseInt(decoded.page, 10) : typeof decoded.page === 'number' ? decoded.page : undefined,
+               page_size:
+                    typeof decoded.page_size === 'string'
+                         ? parseInt(decoded.page_size, 10)
+                         : typeof decoded.page_size === 'number'
+                           ? decoded.page_size
+                           : undefined,
                search: typeof decoded.search === 'string' ? decoded.search : undefined,
                status: decoded.status as UserQueryParams['status'],
                role: decoded.role as UserQueryParams['role'],
@@ -119,97 +122,16 @@ function RouteComponent() {
  */
 function TablePage({ data, total, totalPages, searchParam, searchChange }: TablePageProps) {
      // ============= 本地状态管理 =============
-     const [sorting, setSorting] = useState<SortingState>([])
-     const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
-     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-     const [pagination, setPagination] = useState<PaginationState>({
+       const [pagination, setPagination] = useState<PaginationState>({
           pageIndex: (searchParam.page as number) ? (searchParam.page as number) - 1 : 0,
           pageSize: (searchParam.page_size as number) || 10,
      })
+     const [sorting, setSorting] = useState<SortingState>([])
+     const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
+     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
      //  ============= 表格列字段定义 =============
-     const columns: ColumnDef<User>[] = [
-          // 用户名列
-          {
-               accessorKey: 'username',
-               header: '用户名',
-               cell: ({ row }) => <div className='font-medium'>{row.getValue('username')}</div>,
-          },
-          // 全名列
-          {
-               accessorKey: 'firstName',
-               header: '姓名',
-               cell: ({ row }) => {
-                    const firstName = row.getValue('firstName') as string
-                    const lastName = row.original.lastName
-                    return (
-                         <div>
-                              {firstName} {lastName}
-                         </div>
-                    )
-               },
-          },
-          // 邮箱列
-          {
-               accessorKey: 'email',
-               header: '邮箱',
-               cell: ({ row }) => <div className='text-muted-foreground text-sm'>{row.getValue('email')}</div>,
-          },
-          // 电话号码列
-          {
-               accessorKey: 'phoneNumber',
-               header: '电话',
-               cell: ({ row }) => {
-                    const phone = row.getValue('phoneNumber') as string
-                    return <div className='text-sm'>{phone || '-'}</div>
-               },
-          },
-          // 状态列
-          {
-               accessorKey: 'status',
-               header: '状态',
-               cell: ({ row }) => {
-                    const status = row.getValue('status') as string
-                    const statusConfig = {
-                         active: { label: '活跃', variant: 'default' as const },
-                         inactive: { label: '非活跃', variant: 'secondary' as const },
-                         invited: { label: '已邀请', variant: 'outline' as const },
-                         suspended: { label: '已暂停', variant: 'destructive' as const },
-                    }
-                    const config = statusConfig[status as keyof typeof statusConfig] || { label: status, variant: 'outline' as const }
-                    return (
-                         <Badge variant={config.variant} className='capitalize'>
-                              {config.label}
-                         </Badge>
-                    )
-               },
-          },
-          // 角色列
-          {
-               accessorKey: 'role',
-               header: '角色',
-               cell: ({ row }) => {
-                    const role = row.getValue('role') as string
-                    const roleConfig = {
-                         superadmin: { label: '超级管理员', color: 'text-red-600' },
-                         admin: { label: '管理员', color: 'text-blue-600' },
-                         manager: { label: '经理', color: 'text-green-600' },
-                         cashier: { label: '收银员', color: 'text-orange-600' },
-                    }
-                    const config = roleConfig[role as keyof typeof roleConfig] || { label: role, color: 'text-gray-600' }
-                    return <span className={cn('text-sm font-medium', config.color)}>{config.label}</span>
-               },
-          },
-          // 创建时间列
-          {
-               accessorKey: 'createdAt',
-               header: '创建时间',
-               cell: ({ row }) => {
-                    const date = new Date(row.getValue('createdAt') as string)
-                    return <div className='text-muted-foreground text-sm'>{date.toLocaleDateString('zh-CN')}</div>
-               },
-          },
-     ]
+     const columns: ColumnDef<User>[] = useCommonTableCols()
 
      // ============= 表格实例创建 =============
      // 定义表格配置选项，提供完整的类型安全
@@ -308,6 +230,91 @@ function TablePage({ data, total, totalPages, searchParam, searchChange }: Table
                </div>
           </div>
      )
+}
+
+function useCommonTableCols(): ColumnDef<User>[] {
+     return [
+          // 用户名列
+          {
+               accessorKey: 'username',
+               header: '用户名',
+               cell: ({ row }) => <div className='font-medium'>{row.getValue('username')}</div>,
+          },
+          // 全名列
+          {
+               accessorKey: 'firstName',
+               header: '姓名',
+               cell: ({ row }) => {
+                    const firstName = row.getValue('firstName') as string
+                    const lastName = row.original.lastName
+                    return (
+                         <div>
+                              {firstName} {lastName}
+                         </div>
+                    )
+               },
+          },
+          // 邮箱列
+          {
+               accessorKey: 'email',
+               header: '邮箱',
+               cell: ({ row }) => <div className='text-muted-foreground text-sm'>{row.getValue('email')}</div>,
+          },
+          // 电话号码列
+          {
+               accessorKey: 'phoneNumber',
+               header: '电话',
+               cell: ({ row }) => {
+                    const phone = row.getValue('phoneNumber') as string
+                    return <div className='text-sm'>{phone || '-'}</div>
+               },
+          },
+          // 状态列
+          {
+               accessorKey: 'status',
+               header: '状态',
+               cell: ({ row }) => {
+                    const status = row.getValue('status') as string
+                    const statusConfig = {
+                         active: { label: '活跃', variant: 'default' as const },
+                         inactive: { label: '非活跃', variant: 'secondary' as const },
+                         invited: { label: '已邀请', variant: 'outline' as const },
+                         suspended: { label: '已暂停', variant: 'destructive' as const },
+                    }
+                    const config = statusConfig[status as keyof typeof statusConfig] || { label: status, variant: 'outline' as const }
+                    return (
+                         <Badge variant={config.variant} className='capitalize'>
+                              {config.label}
+                         </Badge>
+                    )
+               },
+          },
+          // 角色列
+          {
+               accessorKey: 'role',
+               header: '角色',
+               cell: ({ row }) => {
+                    const role = row.getValue('role') as string
+                    const roleConfig = {
+                         superadmin: { label: '超级管理员', color: 'text-red-600' },
+                         admin: { label: '管理员', color: 'text-blue-600' },
+                         manager: { label: '经理', color: 'text-green-600' },
+                         cashier: { label: '收银员', color: 'text-orange-600' },
+                    }
+                    const config = roleConfig[role as keyof typeof roleConfig] || { label: role, color: 'text-gray-600' }
+                    return <span className={cn('text-sm font-medium', config.color)}>{config.label}</span>
+               },
+          },
+          // 创建时间列
+          {
+               accessorKey: 'createdAt',
+               header: '创建时间',
+               cell: ({ row }) => {
+                    const date = new Date(row.getValue('createdAt') as string)
+                    return <div className='text-muted-foreground text-sm'>{date.toLocaleDateString('zh-CN')}</div>
+               },
+          },
+     ]
 }
 
 /**
