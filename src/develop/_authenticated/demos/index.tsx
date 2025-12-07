@@ -17,7 +17,6 @@ import {
      type Table as TanstackTable,
 } from '@tanstack/react-table'
 import { Main } from '@/develop/(layout)/main.tsx'
-// import { decodeQueryParams, encodeQueryParams } from '@/develop/(lib)/url-utils.ts'
 import { cn } from '@/develop/(lib)/utils.ts'
 import { usersApi } from '@/develop/(services)/api'
 import type { User, UserQueryParams } from '@/develop/(services)/api/types'
@@ -28,7 +27,6 @@ type TablePageProps = {
      data: User[]
      total: number
      totalPages: number
-     // searchParam: Record<string, unknown>
      searchParam: UserQueryParams
      searchChange: (searchParam: UserQueryParams) => Promise<void>
 }
@@ -38,25 +36,6 @@ type TablePageProps = {
  */
 export const Route = createFileRoute('/_authenticated/demos/')({
      component: RouteComponent,
-     // validateSearch: (search: Record<string, unknown>): UserQueryParams => {
-     //      // 解码URL参数
-     //      const decoded = decodeQueryParams(search)
-     //
-     //      return {
-     //           page: typeof decoded.page === 'string' ? parseInt(decoded.page, 10) : typeof decoded.page === 'number' ? decoded.page : undefined,
-     //           page_size:
-     //                typeof decoded.page_size === 'string'
-     //                     ? parseInt(decoded.page_size, 10)
-     //                     : typeof decoded.page_size === 'number'
-     //                       ? decoded.page_size
-     //                       : undefined,
-     //           search: typeof decoded.search === 'string' ? decoded.search : undefined,
-     //           status: decoded.status as UserQueryParams['status'],
-     //           role: decoded.role as UserQueryParams['role'],
-     //           sort_by: typeof decoded.sort_by === 'string' ? decoded.sort_by : undefined,
-     //           sort_order: decoded.sort_order === 'asc' || decoded.sort_order === 'desc' ? decoded.sort_order : undefined,
-     //      }
-     // },
 })
 
 const route = getRouteApi('/_authenticated/demos/')
