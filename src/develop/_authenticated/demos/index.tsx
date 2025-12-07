@@ -1,27 +1,31 @@
-import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { createFileRoute, getRouteApi } from '@tanstack/react-router'
-import {
-     type ColumnDef,
-     type ColumnFiltersState,
-     flexRender,
-     useReactTable,
-     getCoreRowModel,
-     getPaginationRowModel,
-     getSortedRowModel,
-     getFilteredRowModel,
-     type SortingState,
-     type PaginationState,
-     type RowSelectionState,
-     type TableOptions,
-     type Table as TanstackTable,
-} from '@tanstack/react-table'
-import { Main } from '@/develop/(layout)/main.tsx'
-import { cn } from '@/develop/(lib)/utils.ts'
-import { usersApi } from '@/develop/(services)/api'
-import type { User, UserQueryParams } from '@/develop/(services)/api/types'
-import { Badge } from '@/components/ui/badge.tsx'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
+import { useState } from 'react';
+import { ChevronLeftIcon, ChevronRightIcon, DoubleArrowLeftIcon, DoubleArrowRightIcon } from '@radix-ui/react-icons';
+import { useQuery } from '@tanstack/react-query';
+import { createFileRoute, getRouteApi } from '@tanstack/react-router';
+import { type ColumnDef, type ColumnFiltersState, flexRender, useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, getFilteredRowModel, type SortingState, type PaginationState, type RowSelectionState, type TableOptions, type Table as TanstackTable } from '@tanstack/react-table';
+import { Main } from '@/develop/(layout)/main.tsx';
+import { cn, getPageNumbers } from '@/develop/(lib)/utils.ts';
+import { usersApi } from '@/develop/(services)/api';
+import type { User, UserQueryParams } from '@/develop/(services)/api/types';
+import { Badge } from '@/components/ui/badge.tsx';
+import { Button } from '@/components/ui/button.tsx'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 type TablePageProps = {
      data: User[]
@@ -212,9 +216,138 @@ function TablePage({ data, total, totalPages, searchParam, searchChange }: Table
                <div className='rounded-lg border'>
                     <CommonTableData table={table} />
                </div>
+               <div>
+                 <CommonTablePagination table={table}/>
+               </div>
           </div>
      )
 }
+
+
+/**
+ * 分页组件
+ * @param table
+ * @constructor
+ */
+// function CommonTablePagination({table}:{table:TanstackTable<User>}) {
+//   return (
+//       <div>
+//         {table.getPageCount()}
+//         分页条件
+//       </div>
+//   )
+// }
+
+
+function CommonTablePagination({table}:{table:TanstackTable<User>}) {
+     // 当前页码（从 1 开始，table 内部使用从 0 开始的索引）
+     const currentPage = table.getState().pagination.pageIndex + 1
+     // 总页数
+     const totalPages = table.getPageCount()
+     // 计算要显示的页码数组（包含省略号处理）
+     const pageNumbers = getPageNumbers(currentPage, totalPages)
+
+     return (
+          <div className={cn('flex items-center justify-between overflow-clip px-2', '@max-2xl/content:flex-col-reverse @max-2xl/content:gap-4',)} style={{ overflowClipMargin: 1 }}>
+               {/* 左侧区域：页面信息（移动端）和每页数量选择 */}
+               <div className='flex w-full items-center justify-between'>
+                    {/* 移动端显示的页面信息（小屏幕时显示，大屏幕隐藏） */}
+                    <div className='flex w-[100px] items-center justify-center text-sm font-medium @2xl/content:hidden'>
+                         Page {currentPage} of {totalPages}
+                    </div>
+
+                    {/* 每页数量选择器 */}
+                    <div className='flex items-center gap-2 @max-2xl/content:flex-row-reverse'>
+                         <Select
+                              value={`${table.getState().pagination.pageSize}`}
+                              onValueChange={(value) => {
+                                   // 更新每页显示的数量
+                                   table.setPageSize(Number(value))
+                              }}
+                         >
+                              <SelectTrigger className='h-8 w-[70px]'>
+                                   <SelectValue placeholder={table.getState().pagination.pageSize} />
+                              </SelectTrigger>
+                              <SelectContent side='top'>
+                                   {/* 每页数量选项：10、20、30、40、50 */}
+                                   {[10, 20, 30, 40, 50].map((pageSize) => (
+                                        <SelectItem key={pageSize} value={`${pageSize}`}>
+                                             {pageSize}
+                                        </SelectItem>
+                                   ))}
+                              </SelectContent>
+                         </Select>
+                         {/* 每页数量标签（移动端隐藏） */}
+                         <p className='hidden text-sm font-medium sm:block'>每页数量</p>
+                    </div>
+               </div>
+
+               {/* 右侧区域：页面信息（桌面端）和页码导航 */}
+               <div className='flex items-center sm:space-x-6 lg:space-x-8'>
+                    {/* 桌面端显示的页面信息（中等屏幕时显示） */}
+                    <div className='flex w-[100px] items-center justify-center text-sm font-medium @max-3xl/content:hidden'>
+                         第 {currentPage} 页 / 共 {totalPages}
+                    </div>
+
+                    {/* 页码导航按钮组 */}
+                    <div className='flex items-center space-x-2'>
+                         {/* 首页按钮：跳转到第一页（移动端隐藏） */}
+                         <Button
+                              variant='outline'
+                              className='size-8 p-0 @max-md/content:hidden'
+                              onClick={() => table.setPageIndex(0)}
+                              disabled={!table.getCanPreviousPage()}
+                         >
+                              <span className='sr-only'>跳转到第一页</span>
+                              <DoubleArrowLeftIcon className='h-4 w-4' />
+                         </Button>
+
+                         {/* 上一页按钮：跳转到上一页 */}
+                         <Button variant='outline' className='size-8 p-0' onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+                              <span className='sr-only'>跳转到上一页</span>
+                              <ChevronLeftIcon className='h-4 w-4' />
+                         </Button>
+
+                         {/* 页码按钮：显示当前页及前后页，使用省略号处理大量页码 */}
+                         {pageNumbers.map((pageNumber, index) => (
+                              <div key={`${pageNumber}-${index}`} className='flex items-center'>
+                                   {
+                                     pageNumber === '...' ? (
+                                        // 省略号显示
+                                        <span className='text-muted-foreground px-1 text-sm'>...</span>
+                                   ) : (
+                                        // 页码按钮：当前页高亮显示
+                                        <Button
+                                             variant={currentPage === pageNumber ? 'default' : 'outline'}
+                                             className='h-8 min-w-8 px-2'
+                                             onClick={() => table.setPageIndex((pageNumber as number) - 1)}
+                                        >
+                                             <span className='sr-only'>Go to page {pageNumber}</span>
+                                             {pageNumber}
+                                        </Button>
+                                   )}
+                              </div>
+                         ))}
+
+                         {/* 下一页按钮：跳转到下一页 */}
+                         <Button variant='outline' className='size-8 p-0' onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+                              <span className='sr-only'>下一页</span>
+                              <ChevronRightIcon className='h-4 w-4' />
+                         </Button>
+
+                         {/* 末页按钮：跳转到最后一页（移动端隐藏） */}
+                         <Button variant='outline' className='size-8 p-0 @max-md/content:hidden' onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={!table.getCanNextPage()}>
+                              <span className='sr-only'>上一页</span>
+                              <DoubleArrowRightIcon className='h-4 w-4' />
+                         </Button>
+                    </div>
+               </div>
+          </div>
+     )
+}
+
+
+
 
 function useCommonTableCols(): ColumnDef<User>[] {
      return [
