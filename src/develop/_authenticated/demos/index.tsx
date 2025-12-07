@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ArrowDownIcon, ArrowUpIcon, CaretSortIcon, ChevronLeftIcon, ChevronRightIcon, DoubleArrowLeftIcon, DoubleArrowRightIcon } from '@radix-ui/react-icons'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, getRouteApi } from '@tanstack/react-router'
@@ -16,6 +16,7 @@ import {
      type RowSelectionState,
      type TableOptions,
      type Table as TanstackTable,
+     type OnChangeFn,
 } from '@tanstack/react-table'
 import { Main } from '@/develop/(layout)/main.tsx'
 import { cn } from '@/develop/(lib)/utils.ts'
@@ -107,95 +108,149 @@ function TablePage({ data, total, totalPages, searchParam, searchChange }: Table
      // 本地状态管理
      // ==========================
 
-     // 初始化分页数据字段
-     const [pagination, setPagination] = useState<PaginationState>({
-          // 后端分页 1 逻辑修改
-          pageIndex: (searchParam.page as number) ? (searchParam.page as number) - 1 : 0,
-          pageSize: (searchParam.page_size as number) || 10,
-     })
-     // 初始化排序状态，从searchParam中获取
-     const [sorting, setSorting] = useState<SortingState>(() => {
-          if (searchParam.sort_by && searchParam.sort_order) {
+     const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
+     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+
+     // ==========================
+     // 从 URL 参数计算派生状态
+     // ==========================
+
+     const paginationFromUrl: PaginationState = useMemo(() => {
+          const page = (searchParam.page as number) ?? 1
+          const pageSize = (searchParam.page_size as number) ?? 10
+          // console.log('计算 paginationFromUrl:', { page, pageSize, searchParam })
+          return {
+               pageIndex: Math.max(0, page - 1),
+               pageSize,
+          }
+     }, [searchParam.page, searchParam.page_size])
+
+     const sortingFromUrl: SortingState = useMemo(() => {
+          const sort_by = searchParam.sort_by as string
+          const sort_order = searchParam.sort_order as string
+          // console.log('计算 sortingFromUrl:', { sort_by, sort_order })
+
+          if (sort_by && sort_order) {
                return [
                     {
-                         id: searchParam.sort_by as string,
-                         desc: searchParam.sort_order === 'desc',
+                         id: sort_by,
+                         desc: sort_order === 'desc',
                     },
                ]
           }
           return []
-     })
+     }, [searchParam.sort_by, searchParam.sort_order])
+
+     // ==========================
+     // 本地状态（作为中间层）
+     // ==========================
+
+     const [pagination, setPagination] = useState<PaginationState>(paginationFromUrl)
+     const [sorting, setSorting] = useState<SortingState>(sortingFromUrl)
+
+     // ==========================
+     // 关键：同步 URL -> 本地状态
+     // ==========================
 
      useEffect(() => {
-          // 发送请求时重置到正确的页码
-          searchChange({
-               ...searchParam,
-               // sort_order: sorting[0].desc ? 'desc' : 'asc',
-               // sort_by:sorting[0].id,
-               page: pagination.pageIndex + 1,
-               page_size: pagination.pageSize,
-          })
-     }, [pagination])
+          // console.log('URL -> 本地状态: 同步分页', paginationFromUrl)
+          setPagination(paginationFromUrl)
+     }, [paginationFromUrl])
 
-     // 监听排序变化并触发搜索
      useEffect(() => {
-          // 重置到第一页（排序后通常回到第一页）
-          // setPagination(prev => ({ ...prev, pageIndex: 0 }))
+          // console.log('URL -> 本地状态: 同步排序', sortingFromUrl)
+          setSorting(sortingFromUrl)
+     }, [sortingFromUrl])
 
-          // 构建新的搜索参数
-          const newSearchParam = {
-               ...searchParam,
-               page: 1, // 重置到第一页
-               page_size: pagination.pageSize,
-          }
+     // ==========================
+     // 本地状态 -> URL
+     // ==========================
 
-          // 如果存在排序，添加排序参数
-          if (sorting.length > 0) {
-               newSearchParam.sort_by = sorting[0].id
-               newSearchParam.sort_order = sorting[0].desc ? 'desc' : 'asc'
-          } else {
-               // 清除排序参数
-               delete newSearchParam.sort_by
-               delete newSearchParam.sort_order
-          }
+     // 处理分页变化 - 修复类型问题
+     const handlePaginationChange: OnChangeFn<PaginationState> = useCallback(
+          (updater) => {
+               // console.log('本地状态 -> URL: 处理分页变化', updater)
 
-          // 触发搜索
-          searchChange(newSearchParam)
-     }, [sorting])
+               // 计算新的分页状态
+               const newPagination = typeof updater === 'function' ? updater(pagination) : updater
 
-     const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
-     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+               // console.log('新的分页状态:', newPagination)
 
-     //  ============= 表格列字段定义 =============
-     const columns: ColumnDef<User>[] = useCommonTableCols2()
+               const newSearchParam = {
+                    ...searchParam,
+                    page: newPagination.pageIndex + 1,
+                    page_size: newPagination.pageSize,
+               }
+
+               // 保留排序参数
+               if (sorting.length > 0) {
+                    newSearchParam.sort_by = sorting[0].id
+                    newSearchParam.sort_order = sorting[0].desc ? 'desc' : 'asc'
+               }
+
+               // console.log('更新 URL 参数:', newSearchParam)
+               searchChange(newSearchParam)
+          },
+          [searchParam, sorting, pagination, searchChange]
+     )
+
+     // 处理排序变化 - 修复类型问题
+     const handleSortingChange: OnChangeFn<SortingState> = useCallback(
+          (updater) => {
+               // console.log('本地状态 -> URL: 处理排序变化', updater)
+
+               // 计算新的排序状态
+               const newSorting = typeof updater === 'function' ? updater(sorting) : updater
+
+               // console.log('新的排序状态:', newSorting)
+
+               const newSearchParam = {
+                    ...searchParam,
+                    page: 1, // 排序后重置到第一页
+                    page_size: pagination.pageSize,
+               }
+
+               if (newSorting.length > 0) {
+                    newSearchParam.sort_by = newSorting[0].id
+                    newSearchParam.sort_order = newSorting[0].desc ? 'desc' : 'asc'
+               } else {
+                    // 清除排序参数
+                    delete newSearchParam.sort_by
+                    delete newSearchParam.sort_order
+               }
+
+               // console.log('更新 URL 参数:', newSearchParam)
+               searchChange(newSearchParam)
+          },
+          [searchParam, sorting, pagination.pageSize, searchChange]
+     )
 
      // ============= 表格实例创建 =============
-     // 定义表格配置选项，提供完整的类型安全
      const tableOptions: TableOptions<User> = {
-          data, // 表格数据
-          columns, // 列定义
+          data,
+          columns: useCommonTableCols2(),
           state: {
-               sorting, // 排序状态
-               pagination, // 分页状态
-               rowSelection, // 行选择状态
-               columnFilters, // 列过滤状态
+               sorting,
+               pagination,
+               rowSelection,
+               columnFilters,
           },
-          pageCount: totalPages, // 总页数
-          rowCount: total, // 总行数
-          getCoreRowModel: getCoreRowModel(), // 核心表格功能
-          getPaginationRowModel: getPaginationRowModel(), // 启用分页
-          getSortedRowModel: getSortedRowModel(), // 启用排序
-          getFilteredRowModel: getFilteredRowModel(), // 启用筛选
-          manualPagination: true, // 手动分页（服务端分页）
+          pageCount: totalPages,
+          rowCount: total,
+          getCoreRowModel: getCoreRowModel(),
+          getPaginationRowModel: getPaginationRowModel(),
+          getSortedRowModel: getSortedRowModel(),
+          getFilteredRowModel: getFilteredRowModel(),
+          manualPagination: true,
           manualSorting: true,
           manualFiltering: true,
-          enableRowSelection: true, // 启用行选择
-          enableMultiRowSelection: true, // 启用多行选择
-          enableColumnFilters: true, // 启用列过滤
-          onSortingChange: setSorting, // 排序变化处理
-          onPaginationChange: setPagination, // 分页变化处理
-          onRowSelectionChange: setRowSelection, // 行选择变化处理
-          onColumnFiltersChange: setColumnFilters, // 列过滤变化处理
+          enableRowSelection: true,
+          enableMultiRowSelection: true,
+          enableColumnFilters: true,
+          onSortingChange: handleSortingChange, // ✅ 类型正确
+          onPaginationChange: handlePaginationChange, // ✅ 类型正确
+          onRowSelectionChange: setRowSelection,
+          onColumnFiltersChange: setColumnFilters,
      }
 
      // eslint-disable-next-line react-hooks/incompatible-library
