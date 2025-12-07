@@ -1,16 +1,30 @@
-import { useState } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon, DoubleArrowLeftIcon, DoubleArrowRightIcon } from '@radix-ui/react-icons';
-import { useQuery } from '@tanstack/react-query';
-import { createFileRoute, getRouteApi } from '@tanstack/react-router';
-import { type ColumnDef, type ColumnFiltersState, flexRender, useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, getFilteredRowModel, type SortingState, type PaginationState, type RowSelectionState, type TableOptions, type Table as TanstackTable } from '@tanstack/react-table';
-import { Main } from '@/develop/(layout)/main.tsx';
-import { cn, getPageNumbers } from '@/develop/(lib)/utils.ts';
-import { usersApi } from '@/develop/(services)/api';
-import type { User, UserQueryParams } from '@/develop/(services)/api/types';
-import { Badge } from '@/components/ui/badge.tsx';
+import { useEffect, useState } from 'react'
+import { ChevronLeftIcon, ChevronRightIcon, DoubleArrowLeftIcon, DoubleArrowRightIcon } from '@radix-ui/react-icons'
+import { useQuery } from '@tanstack/react-query'
+import { createFileRoute, getRouteApi } from '@tanstack/react-router'
+import {
+     type ColumnDef,
+     type ColumnFiltersState,
+     flexRender,
+     useReactTable,
+     getCoreRowModel,
+     getPaginationRowModel,
+     getSortedRowModel,
+     getFilteredRowModel,
+     type SortingState,
+     type PaginationState,
+     type RowSelectionState,
+     type TableOptions,
+     type Table as TanstackTable,
+} from '@tanstack/react-table'
+import { Main } from '@/develop/(layout)/main.tsx'
+import { cn, getPageNumbers } from '@/develop/(lib)/utils.ts'
+import { usersApi } from '@/develop/(services)/api'
+import type { User, UserQueryParams } from '@/develop/(services)/api/types'
+import { Badge } from '@/components/ui/badge.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
 
 type TablePageProps = {
      data: User[]
@@ -74,12 +88,7 @@ function RouteComponent() {
 
      return (
           <Main>
-               <TablePage data={userData}
-                          total={total}
-                          totalPages={totalPages}
-                          searchParam={searchParam}
-                          searchChange={searchChange}
-               />
+               <TablePage data={userData} total={total} totalPages={totalPages} searchParam={searchParam} searchChange={searchChange} />
           </Main>
      )
 }
@@ -95,8 +104,8 @@ function RouteComponent() {
  */
 function TablePage({ data, total, totalPages, searchParam, searchChange }: TablePageProps) {
      // ============= 本地状态管理 =============
-       const [pagination, setPagination] = useState<PaginationState>({
-          pageIndex: (searchParam.page as number) ? (searchParam.page as number) - 1 : 0,
+     const [pagination, setPagination] = useState<PaginationState>({
+          pageIndex: (searchParam.page as number) ? (searchParam.page as number) : 0,
           pageSize: (searchParam.page_size as number) || 10,
      })
      const [sorting, setSorting] = useState<SortingState>([])
@@ -137,6 +146,14 @@ function TablePage({ data, total, totalPages, searchParam, searchChange }: Table
 
      // eslint-disable-next-line react-hooks/incompatible-library
      const table: TanstackTable<User> = useReactTable<User>(tableOptions)
+
+     useEffect(() => {
+          searchChange({
+               ...searchParam,
+               page: pagination.pageIndex,
+               page_size: pagination.pageSize,
+          })
+     }, [pagination])
 
      return (
           <div className='space-y-4'>
@@ -202,28 +219,30 @@ function TablePage({ data, total, totalPages, searchParam, searchChange }: Table
                     <CommonTableData table={table} />
                </div>
                <div>
-                 <CommonTablePagination table={table}/>
+                    <CommonTablePagination table={table} />
                </div>
           </div>
      )
 }
-
 
 /**
  * 分页组件
  * @param table
  * @constructor
  */
-function CommonTablePagination({table}:{table:TanstackTable<User>}) {
+function CommonTablePagination({ table }: { table: TanstackTable<User> }) {
      // 当前页码（从 1 开始，table 内部使用从 0 开始的索引）
-     const currentPage = table.getState().pagination.pageIndex + 1
+     const currentPage = table.getState().pagination.pageIndex
      // 总页数
      const totalPages = table.getPageCount()
      // 计算要显示的页码数组（包含省略号处理）
      const pageNumbers = getPageNumbers(currentPage, totalPages)
 
      return (
-          <div className={cn('flex items-center justify-between overflow-clip px-2', '@max-2xl/content:flex-col-reverse @max-2xl/content:gap-4',)} style={{ overflowClipMargin: 1 }}>
+          <div
+               className={cn('flex items-center justify-between overflow-clip px-2', '@max-2xl/content:flex-col-reverse @max-2xl/content:gap-4')}
+               style={{ overflowClipMargin: 1 }}
+          >
                {/* 左侧区域：页面信息（移动端）和每页数量选择 */}
                <div className='flex w-full items-center justify-between'>
                     {/* 移动端显示的页面信息（小屏幕时显示，大屏幕隐藏） */}
@@ -286,8 +305,7 @@ function CommonTablePagination({table}:{table:TanstackTable<User>}) {
                          {/* 页码按钮：显示当前页及前后页，使用省略号处理大量页码 */}
                          {pageNumbers.map((pageNumber, index) => (
                               <div key={`${pageNumber}-${index}`} className='flex items-center'>
-                                   {
-                                     pageNumber === '...' ? (
+                                   {pageNumber === '...' ? (
                                         // 省略号显示
                                         <span className='text-muted-foreground px-1 text-sm'>...</span>
                                    ) : (
@@ -295,7 +313,7 @@ function CommonTablePagination({table}:{table:TanstackTable<User>}) {
                                         <Button
                                              variant={currentPage === pageNumber ? 'default' : 'outline'}
                                              className='h-8 min-w-8 px-2'
-                                             onClick={() => table.setPageIndex((pageNumber as number) - 1)}
+                                             onClick={() => table.setPageIndex(pageNumber as number)}
                                         >
                                              <span className='sr-only'>Go to page {pageNumber}</span>
                                              {pageNumber}
@@ -311,7 +329,12 @@ function CommonTablePagination({table}:{table:TanstackTable<User>}) {
                          </Button>
 
                          {/* 末页按钮：跳转到最后一页（移动端隐藏） */}
-                         <Button variant='outline' className='size-8 p-0 @max-md/content:hidden' onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={!table.getCanNextPage()}>
+                         <Button
+                              variant='outline'
+                              className='size-8 p-0 @max-md/content:hidden'
+                              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                              disabled={!table.getCanNextPage()}
+                         >
                               <span className='sr-only'>上一页</span>
                               <DoubleArrowRightIcon className='h-4 w-4' />
                          </Button>
@@ -320,9 +343,6 @@ function CommonTablePagination({table}:{table:TanstackTable<User>}) {
           </div>
      )
 }
-
-
-
 
 function useCommonTableCols(): ColumnDef<User>[] {
      return [
