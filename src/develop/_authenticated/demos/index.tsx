@@ -225,6 +225,11 @@ function TablePage({ data, total, totalPages, searchParam, searchChange }: Table
      )
 }
 
+/**
+ * 获取分页的数量
+ * @param currentPage
+ * @param totalPages
+ */
 function getPageNumbers(currentPage: number, totalPages: number) {
      const maxVisiblePages = 5 // Maximum number of page buttons to show
      const rangeWithDots: (string | number)[] = []
@@ -387,6 +392,9 @@ function CommonTablePagination({ table }: { table: TanstackTable<User> }) {
      )
 }
 
+/**
+ * 表格数据 table 表头
+ */
 function useCommonTableCols(): ColumnDef<User>[] {
      return [
           // 用户名列
