@@ -106,7 +106,7 @@ function TablePage({ data, total, totalPages, searchParam, searchChange }: Table
      // ============= 本地状态管理 =============
      const [pagination, setPagination] = useState<PaginationState>({
           // 后端分页 1 逻辑修改
-          pageIndex: (searchParam.page as number) ? (searchParam.page as number) -1 : 0,
+          pageIndex: (searchParam.page as number) ? (searchParam.page as number) - 1 : 0,
           pageSize: (searchParam.page_size as number) || 10,
      })
      const [sorting, setSorting] = useState<SortingState>([])
@@ -279,22 +279,23 @@ function getPageNumbers(currentPage: number, totalPages: number) {
  * @constructor
  */
 function CommonTablePagination({ table }: { table: TanstackTable<User> }) {
-     // React Table内部使用0-based，但显示时转换为1-based
      const currentPageIndex = table.getState().pagination.pageIndex
-     const currentPage = currentPageIndex + 1 // 转换为1-based用于显示
+     const currentPage = currentPageIndex + 1
      const totalPages = table.getPageCount()
-
-     // 注意：这里currentPage已经是1-based了，所以直接传入
      const pageNumbers = getPageNumbers(currentPage, totalPages)
 
      return (
-          <div className={cn('flex items-center justify-between overflow-clip px-2', '@max-2xl/content:flex-col-reverse @max-2xl/content:gap-4')}>
-               {/* 左侧区域 */}
-               <div className='flex w-full items-center justify-between'>
-                    <div className='flex w-[100px] items-center justify-center text-sm font-medium @2xl/content:hidden'>
-                         Page {currentPage} of {totalPages}
+          <div className='flex flex-col items-center justify-between gap-4 px-2 py-2 sm:flex-row'>
+               {/* 第一行：左侧信息 */}
+               <div className='flex w-full items-center justify-between gap-4 sm:w-auto sm:justify-start'>
+                    {/* 移动端页面信息 */}
+                    <div className='flex items-center text-sm font-medium sm:hidden'>
+                         第 {currentPage} / {totalPages} 页
                     </div>
-                    <div className='flex items-center gap-2 @max-2xl/content:flex-row-reverse'>
+
+                    {/* 每页数量选择器 */}
+                    <div className='flex items-center gap-2'>
+                         <p className='hidden text-sm font-medium sm:block'>每页</p>
                          <Select
                               value={`${table.getState().pagination.pageSize}`}
                               onValueChange={(value) => {
@@ -312,64 +313,68 @@ function CommonTablePagination({ table }: { table: TanstackTable<User> }) {
                                    ))}
                               </SelectContent>
                          </Select>
-                         <p className='hidden text-sm font-medium sm:block'>每页数量</p>
                     </div>
                </div>
 
-               {/* 右侧区域 */}
-               <div className='flex items-center sm:space-x-6 lg:space-x-8'>
-                    <div className='flex w-[100px] items-center justify-center text-sm font-medium @max-3xl/content:hidden'>
-                         第 {currentPage} 页 / 共 {totalPages}
+               {/* 第二行：分页导航 */}
+               <div className='flex w-full flex-col items-center gap-4 sm:w-auto sm:flex-row'>
+                    {/* 桌面端页面信息 */}
+                    <div className='hidden min-w-[120px] items-center text-sm font-medium sm:flex'>
+                         第 {currentPage} 页 / 共 {totalPages} 页
                     </div>
 
-                    <div className='flex items-center space-x-2'>
-                         {/* 首页按钮：注意传递给setPageIndex的参数是0-based */}
+                    {/* 分页按钮组 */}
+                    <div className='flex flex-wrap items-center justify-center gap-1 sm:gap-2'>
+                         {/* 首页按钮 */}
                          <Button
                               variant='outline'
-                              className='size-8 p-0 @max-md/content:hidden'
-                              onClick={() => table.setPageIndex(0)}  // 0代表第一页
+                              className='hidden size-8 p-0 sm:inline-flex'
+                              onClick={() => table.setPageIndex(0)}
                               disabled={!table.getCanPreviousPage()}
                          >
                               <span className='sr-only'>跳转到第一页</span>
                               <DoubleArrowLeftIcon className='h-4 w-4' />
                          </Button>
 
+                         {/* 上一页按钮 */}
                          <Button variant='outline' className='size-8 p-0' onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
-                              <span className='sr-only'>跳转到上一页</span>
+                              <span className='sr-only'>上一页</span>
                               <ChevronLeftIcon className='h-4 w-4' />
                          </Button>
 
-                         {pageNumbers.map((pageNumber, index) => (
-                              <div key={`${pageNumber}-${index}`} className='flex items-center'>
-                                   {pageNumber === '...' ? (
-                                        <span className='text-muted-foreground px-1 text-sm'>...</span>
-                                   ) : (
-                                        // 注意：pageNumber是1-based，需要减1来设置给React Table
-                                        <Button
-                                             variant={currentPage === pageNumber ? 'default' : 'outline'}
-                                             className='h-8 min-w-8 px-2'
-                                             onClick={() => table.setPageIndex((pageNumber as number) - 1)}
-                                        >
-                                             <span className='sr-only'>Go to page {pageNumber}</span>
-                                             {pageNumber}
-                                        </Button>
-                                   )}
-                              </div>
-                         ))}
+                         {/* 页码按钮 */}
+                         <div className='flex flex-wrap items-center justify-center gap-1'>
+                              {pageNumbers.map((pageNumber, index) => (
+                                   <div key={`${pageNumber}-${index}`} className='flex items-center'>
+                                        {pageNumber === '...' ? (
+                                             <span className='text-muted-foreground px-1 text-sm'>...</span>
+                                        ) : (
+                                             <Button
+                                                  variant={currentPage === pageNumber ? 'default' : 'outline'}
+                                                  className='h-8 w-8 min-w-8 p-0'
+                                                  onClick={() => table.setPageIndex((pageNumber as number) - 1)}
+                                             >
+                                                  {pageNumber}
+                                             </Button>
+                                        )}
+                                   </div>
+                              ))}
+                         </div>
 
+                         {/* 下一页按钮 */}
                          <Button variant='outline' className='size-8 p-0' onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
                               <span className='sr-only'>下一页</span>
                               <ChevronRightIcon className='h-4 w-4' />
                          </Button>
 
-                         {/* 末页按钮：注意传递给setPageIndex的参数是0-based */}
+                         {/* 末页按钮 */}
                          <Button
                               variant='outline'
-                              className='size-8 p-0 @max-md/content:hidden'
-                              onClick={() => table.setPageIndex(table.getPageCount() - 1)}  // 最后一页是totalPages-1
+                              className='hidden size-8 p-0 sm:inline-flex'
+                              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
                               disabled={!table.getCanNextPage()}
                          >
-                              <span className='sr-only'>上一页</span>
+                              <span className='sr-only'>末页</span>
                               <DoubleArrowRightIcon className='h-4 w-4' />
                          </Button>
                     </div>
