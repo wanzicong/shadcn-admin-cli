@@ -1,30 +1,16 @@
 import { useEffect, useState } from 'react'
-import { ChevronLeftIcon, ChevronRightIcon, DoubleArrowLeftIcon, DoubleArrowRightIcon } from '@radix-ui/react-icons'
-import { useQuery } from '@tanstack/react-query'
-import { createFileRoute, getRouteApi } from '@tanstack/react-router'
-import {
-     type ColumnDef,
-     type ColumnFiltersState,
-     flexRender,
-     useReactTable,
-     getCoreRowModel,
-     getPaginationRowModel,
-     getSortedRowModel,
-     getFilteredRowModel,
-     type SortingState,
-     type PaginationState,
-     type RowSelectionState,
-     type TableOptions,
-     type Table as TanstackTable,
-} from '@tanstack/react-table'
-import { Main } from '@/develop/(layout)/main.tsx'
-import { cn } from '@/develop/(lib)/utils.ts'
-import { usersApi } from '@/develop/(services)/api'
-import type { User, UserQueryParams } from '@/develop/(services)/api/types'
-import { Badge } from '@/components/ui/badge.tsx'
-import { Button } from '@/components/ui/button.tsx'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
+import { ChevronLeftIcon, ChevronRightIcon, DoubleArrowLeftIcon, DoubleArrowRightIcon } from '@radix-ui/react-icons';
+import { useQuery } from '@tanstack/react-query';
+import { createFileRoute, getRouteApi } from '@tanstack/react-router';
+import { type ColumnDef, type ColumnFiltersState, flexRender, useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, getFilteredRowModel, type SortingState, type PaginationState, type RowSelectionState, type TableOptions, type Table as TanstackTable } from '@tanstack/react-table';
+import { Main } from '@/develop/(layout)/main.tsx';
+import { cn } from '@/develop/(lib)/utils.ts';
+import { usersApi } from '@/develop/(services)/api';
+import type { User, UserQueryParams } from '@/develop/(services)/api/types';
+import { Badge } from '@/components/ui/badge.tsx';
+import { Button } from '@/components/ui/button.tsx';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
 
 type TablePageProps = {
      data: User[]
@@ -103,13 +89,65 @@ function RouteComponent() {
  * @constructor
  */
 function TablePage({ data, total, totalPages, searchParam, searchChange }: TablePageProps) {
-     // ============= 本地状态管理 =============
+     // ==========================
+     // 本地状态管理
+     // ==========================
+
+     // 初始化分页数据字段
      const [pagination, setPagination] = useState<PaginationState>({
           // 后端分页 1 逻辑修改
           pageIndex: (searchParam.page as number) ? (searchParam.page as number) - 1 : 0,
           pageSize: (searchParam.page_size as number) || 10,
      })
-     const [sorting, setSorting] = useState<SortingState>([])
+     // 初始化排序状态，从searchParam中获取
+     const [sorting, setSorting] = useState<SortingState>(() => {
+          if (searchParam.sort_by && searchParam.sort_order) {
+               return [{
+                    id: searchParam.sort_by as string,
+                    desc: searchParam.sort_order === 'desc'
+               }]
+          }
+          return []
+     })
+
+     useEffect(() => {
+          // 发送请求时重置到正确的页码
+          searchChange({
+               ...searchParam,
+               // sort_order: sorting[0].desc ? 'desc' : 'asc',
+               // sort_by:sorting[0].id,
+               page: pagination.pageIndex + 1,
+               page_size: pagination.pageSize,
+          })
+     }, [pagination])
+
+       // 监听排序变化并触发搜索
+     useEffect(() => {
+          // 重置到第一页（排序后通常回到第一页）
+          // setPagination(prev => ({ ...prev, pageIndex: 0 }))
+
+          // 构建新的搜索参数
+          const newSearchParam = {
+               ...searchParam,
+               page: 1, // 重置到第一页
+               page_size: pagination.pageSize,
+          }
+
+          // 如果存在排序，添加排序参数
+          if (sorting.length > 0) {
+               newSearchParam.sort_by = sorting[0].id
+               newSearchParam.sort_order = sorting[0].desc ? 'desc' : 'asc'
+          } else {
+               // 清除排序参数
+               delete newSearchParam.sort_by
+               delete newSearchParam.sort_order
+          }
+
+          // 触发搜索
+          searchChange(newSearchParam)
+     }, [sorting])
+
+
      const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
      const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
@@ -148,13 +186,6 @@ function TablePage({ data, total, totalPages, searchParam, searchChange }: Table
      // eslint-disable-next-line react-hooks/incompatible-library
      const table: TanstackTable<User> = useReactTable<User>(tableOptions)
 
-     useEffect(() => {
-          searchChange({
-               ...searchParam,
-               page: pagination.pageIndex + 1,
-               page_size: pagination.pageSize,
-          })
-     }, [pagination])
 
      return (
           <div className='space-y-4'>
@@ -170,6 +201,14 @@ function TablePage({ data, total, totalPages, searchParam, searchChange }: Table
                          className='rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700'
                     >
                          查询按钮
+                    </button>
+                 <button
+                         onClick={async () => {
+                              await searchChange({})
+                         }}
+                         className='rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700'
+                    >
+                         重置按钮
                     </button>
                     <button
                          onClick={async () => {
