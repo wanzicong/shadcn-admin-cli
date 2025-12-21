@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import type { ColumnFiltersState, OnChangeFn, PaginationState } from '@tanstack/react-table'
+import type { ColumnFiltersState, OnChangeFn, PaginationState, SortingState } from '@tanstack/react-table'
 
 type SearchRecord = Record<string, unknown>
 
@@ -24,7 +24,6 @@ type UseTableUrlStateParams = {
                  columnId: string
                  searchKey: string
                  type?: 'string'
-                 // Optional transformers for custom types
                  serialize?: (value: unknown) => unknown
                  deserialize?: (value: unknown) => unknown
             }
@@ -36,6 +35,19 @@ type UseTableUrlStateParams = {
                  deserialize?: (value: unknown) => unknown
             }
      >
+     sorting?: {
+          enabled?: boolean
+          sortByKey?: string
+          sortOrderKey?: string
+          defaultSortBy?: string
+          defaultSortOrder?: 'asc' | 'desc'
+          // 支持多列排序
+          multiSort?: {
+               enabled?: boolean
+               key?: string
+               separator?: string
+          }
+     }
 }
 
 type UseTableUrlStateReturn = {
@@ -48,23 +60,45 @@ type UseTableUrlStateReturn = {
      // Pagination
      pagination: PaginationState
      onPaginationChange: OnChangeFn<PaginationState>
+     // Sorting
+     sorting: SortingState
+     onSortingChange: OnChangeFn<SortingState>
      // Helpers
      ensurePageInRange: (pageCount: number, opts?: { resetTo?: 'first' | 'last' }) => void
 }
 
 export function useTableUrlState(params: UseTableUrlStateParams): UseTableUrlStateReturn {
-     const { search, navigate, pagination: paginationCfg, globalFilter: globalFilterCfg, columnFilters: columnFiltersCfg = [] } = params
+     const {
+          search,
+          navigate,
+          pagination: paginationCfg,
+          globalFilter: globalFilterCfg,
+          columnFilters: columnFiltersCfg = [],
+          sorting: sortingCfg = {},
+     } = params
 
+     // ============= 分页配置 =============
      const pageKey = paginationCfg?.pageKey ?? ('page' as string)
      const pageSizeKey = paginationCfg?.pageSizeKey ?? ('pageSize' as string)
      const defaultPage = paginationCfg?.defaultPage ?? 1
      const defaultPageSize = paginationCfg?.defaultPageSize ?? 10
 
+     // ============= 全局筛选配置 =============
      const globalFilterKey = globalFilterCfg?.key ?? ('filter' as string)
      const globalFilterEnabled = globalFilterCfg?.enabled ?? true
      const trimGlobal = globalFilterCfg?.trim ?? true
 
-     // Build initial column filters from the current search params
+     // ============= 排序配置 =============
+     const sortingEnabled = sortingCfg.enabled ?? true
+     const sortByKey = sortingCfg.sortByKey ?? ('sort_by' as string)
+     const sortOrderKey = sortingCfg.sortOrderKey ?? ('sort_order' as string)
+     const defaultSortBy = sortingCfg.defaultSortBy
+     const defaultSortOrder = sortingCfg.defaultSortOrder ?? 'asc'
+     const multiSortEnabled = sortingCfg.multiSort?.enabled ?? false
+     const multiSortKey = sortingCfg.multiSort?.key ?? ('sort' as string)
+     const multiSortSeparator = sortingCfg.multiSort?.separator ?? ','
+
+     // ============= 列筛选初始化 =============
      const initialColumnFilters: ColumnFiltersState = useMemo(() => {
           const collected: ColumnFiltersState = []
           for (const cfg of columnFiltersCfg) {
@@ -88,6 +122,7 @@ export function useTableUrlState(params: UseTableUrlStateParams): UseTableUrlSta
 
      const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(initialColumnFilters)
 
+     // ============= 分页初始化 =============
      const pagination: PaginationState = useMemo(() => {
           const rawPage = (search as SearchRecord)[pageKey]
           const rawPageSize = (search as SearchRecord)[pageSizeKey]
@@ -109,6 +144,7 @@ export function useTableUrlState(params: UseTableUrlStateParams): UseTableUrlSta
           })
      }
 
+     // ============= 全局筛选初始化 =============
      const [globalFilter, setGlobalFilter] = useState<string | undefined>(() => {
           if (!globalFilterEnabled) return undefined
           const raw = (search as SearchRecord)[globalFilterKey]
@@ -130,6 +166,7 @@ export function useTableUrlState(params: UseTableUrlStateParams): UseTableUrlSta
             }
           : undefined
 
+     // ============= 列筛选变化处理 =============
      const onColumnFiltersChange: OnChangeFn<ColumnFiltersState> = (updater) => {
           const next = typeof updater === 'function' ? updater(columnFilters) : updater
           setColumnFilters(next)
@@ -157,6 +194,87 @@ export function useTableUrlState(params: UseTableUrlStateParams): UseTableUrlSta
           })
      }
 
+     // ============= 排序初始化 =============
+     const sorting: SortingState = useMemo(() => {
+          if (!sortingEnabled) return []
+
+          if (multiSortEnabled) {
+               // 多列排序模式
+               const rawSort = (search as SearchRecord)[multiSortKey]
+               if (typeof rawSort === 'string' && rawSort.trim() !== '') {
+                    const sortItems = rawSort.split(multiSortSeparator)
+                    return sortItems
+                         .map((item) => {
+                              const match = item.match(/^(-?)(.+)$/)
+                              if (match) {
+                                   const [_, direction, column] = match
+                                   return {
+                                        id: column,
+                                        desc: direction === '-',
+                                   }
+                              }
+                              return null
+                         })
+                         .filter(Boolean) as SortingState
+               }
+               return []
+          } else {
+               // 单列排序模式
+               const rawSortBy = (search as SearchRecord)[sortByKey]
+               const rawSortOrder = (search as SearchRecord)[sortOrderKey]
+
+               const sortBy = typeof rawSortBy === 'string' ? rawSortBy : defaultSortBy
+               const sortOrder = typeof rawSortOrder === 'string' ? (rawSortOrder.toLowerCase() === 'desc' ? 'desc' : 'asc') : defaultSortOrder
+
+               if (!sortBy) return []
+
+               return [
+                    {
+                         id: sortBy,
+                         desc: sortOrder === 'desc',
+                    },
+               ]
+          }
+     }, [search, sortingEnabled, multiSortEnabled, multiSortKey, multiSortSeparator, sortByKey, sortOrderKey, defaultSortBy, defaultSortOrder])
+
+     // ============= 排序变化处理 =============
+     const onSortingChange: OnChangeFn<SortingState> = (updater) => {
+          if (!sortingEnabled) return
+
+          const next = typeof updater === 'function' ? updater(sorting) : updater
+
+          if (multiSortEnabled) {
+               // 多列排序：转换为 "-column1,column2" 格式
+               const sortString = next.map((sort) => `${sort.desc ? '-' : ''}${sort.id}`).join(multiSortSeparator)
+
+               navigate({
+                    search: (prev) => ({
+                         ...(prev as SearchRecord),
+                         [pageKey]: undefined, // 重置页码
+                         [multiSortKey]: sortString || undefined,
+                         // 清理单列排序参数（如果存在）
+                         ...(sortByKey && { [sortByKey]: undefined }),
+                         ...(sortOrderKey && { [sortOrderKey]: undefined }),
+                    }),
+               })
+          } else {
+               // 单列排序
+               const newSort = next.length > 0 ? next[0] : null
+
+               navigate({
+                    search: (prev) => ({
+                         ...(prev as SearchRecord),
+                         [pageKey]: undefined, // 重置页码
+                         [sortByKey]: newSort?.id || undefined,
+                         [sortOrderKey]: newSort ? (newSort.desc ? 'desc' : 'asc') : undefined,
+                         // 清理多列排序参数（如果存在）
+                         ...(multiSortKey && { [multiSortKey]: undefined }),
+                    }),
+               })
+          }
+     }
+
+     // ============= 辅助函数 =============
      const ensurePageInRange = (pageCount: number, opts: { resetTo?: 'first' | 'last' } = { resetTo: 'first' }) => {
           const currentPage = (search as SearchRecord)[pageKey]
           const pageNum = typeof currentPage === 'number' ? currentPage : defaultPage
@@ -171,6 +289,7 @@ export function useTableUrlState(params: UseTableUrlStateParams): UseTableUrlSta
           }
      }
 
+     // ============= 返回值 =============
      return {
           globalFilter: globalFilterEnabled ? (globalFilter ?? '') : undefined,
           onGlobalFilterChange,
@@ -178,6 +297,100 @@ export function useTableUrlState(params: UseTableUrlStateParams): UseTableUrlSta
           onColumnFiltersChange,
           pagination,
           onPaginationChange,
+          sorting,
+          onSortingChange,
           ensurePageInRange,
+     }
+}
+
+// ============= 辅助函数：排序状态转换 =============
+/**
+ * 将排序状态转换为查询参数对象
+ */
+export function sortingToQueryParams(
+     sorting: SortingState,
+     options?: {
+          sortByKey?: string
+          sortOrderKey?: string
+          multiSortKey?: string
+          multiSortSeparator?: string
+          multiSortEnabled?: boolean
+     }
+): Record<string, unknown> {
+     const { sortByKey = 'sort_by', sortOrderKey = 'sort_order', multiSortKey = 'sort', multiSortSeparator = ',', multiSortEnabled = false } = options || {}
+
+     if (!sorting || sorting.length === 0) {
+          return {}
+     }
+
+     if (multiSortEnabled) {
+          // 多列排序
+          const sortString = sorting.map((sort) => `${sort.desc ? '-' : ''}${sort.id}`).join(multiSortSeparator)
+
+          return {
+               [multiSortKey]: sortString,
+          }
+     } else {
+          // 单列排序
+          const firstSort = sorting[0]
+          return {
+               [sortByKey]: firstSort.id,
+               [sortOrderKey]: firstSort.desc ? 'desc' : 'asc',
+          }
+     }
+}
+
+/**
+ * 从查询参数解析排序状态
+ */
+export function queryParamsToSorting(
+     search: SearchRecord,
+     options?: {
+          sortByKey?: string
+          sortOrderKey?: string
+          multiSortKey?: string
+          multiSortSeparator?: string
+          multiSortEnabled?: boolean
+     }
+): SortingState {
+     const { sortByKey = 'sort_by', sortOrderKey = 'sort_order', multiSortKey = 'sort', multiSortSeparator = ',', multiSortEnabled = false } = options || {}
+
+     if (multiSortEnabled) {
+          // 多列排序
+          const rawSort = search[multiSortKey]
+          if (typeof rawSort === 'string' && rawSort.trim() !== '') {
+               const sortItems = rawSort.split(multiSortSeparator)
+               return sortItems
+                    .map((item) => {
+                         const match = item.match(/^(-?)(.+)$/)
+                         if (match) {
+                              const [_, direction, column] = match
+                              return {
+                                   id: column,
+                                   desc: direction === '-',
+                              }
+                         }
+                         return null
+                    })
+                    .filter(Boolean) as SortingState
+          }
+          return []
+     } else {
+          // 单列排序
+          const rawSortBy = search[sortByKey]
+          const rawSortOrder = search[sortOrderKey]
+
+          if (typeof rawSortBy !== 'string' || !rawSortBy.trim()) {
+               return []
+          }
+
+          const sortOrder = typeof rawSortOrder === 'string' ? (rawSortOrder.toLowerCase() === 'desc' ? 'desc' : 'asc') : 'asc'
+
+          return [
+               {
+                    id: rawSortBy.trim(),
+                    desc: sortOrder === 'desc',
+               },
+          ]
      }
 }

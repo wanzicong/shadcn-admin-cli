@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
-     type SortingState,
      type VisibilityState,
      flexRender,
      getCoreRowModel,
@@ -14,7 +13,7 @@ import {
      type TableOptions,
 } from '@tanstack/react-table'
 import { DataTablePagination, DataTableToolbar } from '@/develop/(components)/data-table'
-import { type NavigateFn, useTableUrlState } from '@/develop/(hooks)/use-table-url-state.ts'
+import { type NavigateFn, useTableUrlState } from '@/develop/(hooks)/use-table-url-state-server.ts'
 import { cn } from '@/develop/(lib)/utils.ts'
 import { type UserQueryParams, type UserRole, type UserStatus } from '@/develop/(services)/api'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
@@ -41,10 +40,10 @@ export function UsersTable({ search, navigate }: DataTableProps) {
      // 本地 UI 状态
      const [rowSelection, setRowSelection] = useState({}) // 行选择状态
      const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({}) // 列可见性状态
-     const [sorting, setSorting] = useState<SortingState>([]) // 排序状态
+     // const [sorting, setSorting] = useState<SortingState>([]) // 排序状态
 
      // ============= URL 同步状态 =============
-     const { columnFilters, onColumnFiltersChange, pagination, onPaginationChange, ensurePageInRange } = useTableUrlState({
+     const { columnFilters, onColumnFiltersChange, pagination, onPaginationChange, ensurePageInRange, sorting, onSortingChange } = useTableUrlState({
           search, // 当前 URL 搜索参数
           navigate, // 导航函数
           pagination: {
@@ -59,6 +58,14 @@ export function UsersTable({ search, navigate }: DataTableProps) {
                { columnId: 'status', searchKey: 'status', type: 'array' },
                { columnId: 'role', searchKey: 'role', type: 'array' },
           ],
+          sorting: {
+               // ✅ 新增排序配置
+               enabled: true,
+               sortByKey: 'sort_by', // 对应后端的 sort_by 参数
+               sortOrderKey: 'sort_order', // 对应后端的 sort_order 参数
+               defaultSortBy: 'created_at', // 默认排序字段
+               defaultSortOrder: 'desc', // 默认排序方向
+          },
      })
 
      // ============= 数据查询 Hook =============
@@ -67,6 +74,10 @@ export function UsersTable({ search, navigate }: DataTableProps) {
           ...transformFilters(search),
           page: search.page as number,
           page_size: search.pageSize as number,
+          ...(sorting.length > 0 && {
+               sort_by: sorting[0].id,
+               sort_order: sorting[0].desc ? 'desc' : 'asc',
+          }),
      }
 
      // 转换筛选参数的辅助函数
@@ -142,10 +153,10 @@ export function UsersTable({ search, navigate }: DataTableProps) {
                columnVisibility,
           },
           enableRowSelection: true,
-          onPaginationChange,
+          onPaginationChange: onPaginationChange,
           onColumnFiltersChange,
           onRowSelectionChange: setRowSelection,
-          onSortingChange: setSorting,
+          onSortingChange: onSortingChange,
           onColumnVisibilityChange: setColumnVisibility,
           getPaginationRowModel: getPaginationRowModel(),
           getCoreRowModel: getCoreRowModel(),
