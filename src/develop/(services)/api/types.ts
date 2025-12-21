@@ -200,6 +200,7 @@ export interface UserQueryParams extends SearchParams {
      role?: UserRole | UserRole[] // 支持单个值或数组
      sort_by?: string
      sort_order?: 'asc' | 'desc'
+     username?: string
 }
 
 export interface TaskQueryParams extends SearchParams {

@@ -51,7 +51,7 @@ export function UsersTable({ search, navigate }: DataTableProps) {
                defaultPageSize: 10, // 默认每页大小
           },
           globalFilter: {
-               enabled: false, // 禁用全局搜索
+               enabled: true, // 禁用全局搜索
           },
           columnFilters: [
                { columnId: 'username', searchKey: 'username', type: 'string' },
@@ -71,13 +71,15 @@ export function UsersTable({ search, navigate }: DataTableProps) {
      // ============= 数据查询 Hook =============
      // 必须放在所有其他 Hook 之后，但在条件语句之前
      const userSearchParams: UserQueryParams = {
-          ...transformFilters(search),
           page: search.page as number,
           page_size: search.pageSize as number,
           ...(sorting.length > 0 && {
                sort_by: sorting[0].id,
                sort_order: sorting[0].desc ? 'desc' : 'asc',
           }),
+          username: search.username as string,
+          ...search,
+          ...transformFilters(search),
      }
 
      // 转换筛选参数的辅助函数
