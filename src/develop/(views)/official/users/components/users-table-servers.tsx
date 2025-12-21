@@ -12,7 +12,8 @@ import {
      useReactTable,
      type TableOptions,
 } from '@tanstack/react-table'
-import { DataTablePagination, DataTableToolbar } from '@/develop/(components)/data-table'
+import { DataTableToolbar } from '@/develop/(components)/data-table/toolbar-server'
+import { DataTablePagination } from '@/develop/(components)/data-table'
 import { type NavigateFn, useTableUrlState } from '@/develop/(hooks)/use-table-url-state-server.ts'
 import { cn } from '@/develop/(lib)/utils.ts'
 import { type UserQueryParams, type UserRole, type UserStatus } from '@/develop/(services)/api'
