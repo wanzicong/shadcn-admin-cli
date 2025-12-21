@@ -49,31 +49,31 @@ export function UsersDeleteDialog({ open, onOpenChange, currentRow }: UserDelete
                disabled={value.trim() !== currentRow.username} // 只有输入正确的用户名才能确认
                title={
                     <span className='text-destructive'>
-                         <AlertTriangle className='stroke-destructive me-1 inline-block' size={18} /> Delete User
+                         <AlertTriangle className='stroke-destructive me-1 inline-block' size={18} /> 删除用户
                     </span>
                }
                desc={
                     <div className='space-y-4'>
                          {/* 删除确认信息 */}
                          <p className='mb-2'>
-                              Are you sure you want to delete <span className='font-bold'>{currentRow.username}</span>? This action will permanently remove the
-                              user with the role of <span className='font-bold'>{currentRow.role.toUpperCase()}</span> from the system. This cannot be undone.
+                              您确定要删除 <span className='font-bold'>{currentRow.username}</span> 吗？此操作将永久从系统中移除
+                              角色为 <span className='font-bold'>{currentRow.role.toUpperCase()}</span> 的用户。此操作无法撤销。
                          </p>
 
                          {/* 安全确认输入 */}
                          <Label className='my-2'>
-                              Username:
-                              <Input value={value} onChange={(e) => setValue(e.target.value)} placeholder='Enter username to confirm deletion.' />
+                              用户名：
+                              <Input value={value} onChange={(e) => setValue(e.target.value)} placeholder='请输入用户名以确认删除。' />
                          </Label>
 
                          {/* 危险警告提示 */}
                          <Alert variant='destructive'>
-                              <AlertTitle>Warning!</AlertTitle>
-                              <AlertDescription>Please be careful, this operation cannot be rolled back.</AlertDescription>
+                              <AlertTitle>警告！</AlertTitle>
+                              <AlertDescription>请注意，此操作无法撤销。</AlertDescription>
                          </Alert>
                     </div>
                }
-               confirmText='Delete' // 确认按钮文本
+               confirmText='删除' // 确认按钮文本
                destructive // 使用危险样式（红色主题）
           />
      )

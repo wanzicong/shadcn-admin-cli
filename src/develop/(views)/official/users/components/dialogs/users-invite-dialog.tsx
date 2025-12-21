@@ -13,9 +13,9 @@ import { roles } from '../../data/data.ts'
 
 const formSchema = z.object({
      email: z.email({
-          error: (iss) => (iss.input === '' ? 'Please enter an email to invite.' : undefined),
+          error: (iss) => (iss.input === '' ? '请输入要邀请的邮箱。' : undefined),
      }),
-     role: z.string().min(1, 'Role is required.'),
+     role: z.string().min(1, '角色是必填项。'),
      desc: z.string().optional(),
 })
 
@@ -49,10 +49,10 @@ export function UsersInviteDialog({ open, onOpenChange }: UserInviteDialogProps)
                <DialogContent className='sm:max-w-md'>
                     <DialogHeader className='text-start'>
                          <DialogTitle className='flex items-center gap-2'>
-                              <MailPlus /> Invite User
+                              <MailPlus /> 邀请用户
                          </DialogTitle>
                          <DialogDescription>
-                              Invite new user to join your team by sending them an email invitation. Assign a role to define their access level.
+                              通过发送邮件邀请来邀请新用户加入您的团队。分配角色以定义其访问级别。
                          </DialogDescription>
                     </DialogHeader>
                     <Form {...form}>
@@ -62,9 +62,9 @@ export function UsersInviteDialog({ open, onOpenChange }: UserInviteDialogProps)
                                    name='email'
                                    render={({ field }) => (
                                         <FormItem>
-                                             <FormLabel>Email</FormLabel>
+                                             <FormLabel>邮箱</FormLabel>
                                              <FormControl>
-                                                  <Input type='email' placeholder='eg: john.doe@gmail.com' {...field} />
+                                                  <Input type='email' placeholder='例如：example@email.com' {...field} />
                                              </FormControl>
                                              <FormMessage />
                                         </FormItem>
@@ -75,11 +75,11 @@ export function UsersInviteDialog({ open, onOpenChange }: UserInviteDialogProps)
                                    name='role'
                                    render={({ field }) => (
                                         <FormItem>
-                                             <FormLabel>Role</FormLabel>
+                                             <FormLabel>角色</FormLabel>
                                              <SelectDropdown
                                                   defaultValue={field.value}
                                                   onValueChange={field.onChange}
-                                                  placeholder='Select a role'
+                                                  placeholder='请选择角色'
                                                   items={roles.map(({ label, value }) => ({
                                                        label,
                                                        value,
@@ -94,11 +94,11 @@ export function UsersInviteDialog({ open, onOpenChange }: UserInviteDialogProps)
                                    name='desc'
                                    render={({ field }) => (
                                         <FormItem className=''>
-                                             <FormLabel>Description (optional)</FormLabel>
+                                             <FormLabel>描述（可选）</FormLabel>
                                              <FormControl>
                                                   <Textarea
                                                        className='resize-none'
-                                                       placeholder='Add a personal note to your invitation (optional)'
+                                                       placeholder='为您的邀请添加个人备注（可选）'
                                                        {...field}
                                                   />
                                              </FormControl>
@@ -110,10 +110,10 @@ export function UsersInviteDialog({ open, onOpenChange }: UserInviteDialogProps)
                     </Form>
                     <DialogFooter className='gap-y-2'>
                          <DialogClose asChild>
-                              <Button variant='outline'>Cancel</Button>
+                              <Button variant='outline'>取消</Button>
                          </DialogClose>
                          <Button type='submit' form='user-invite-form'>
-                              Invite <Send />
+                              邀请 <Send />
                          </Button>
                     </DialogFooter>
                </DialogContent>
