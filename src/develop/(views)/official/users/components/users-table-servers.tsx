@@ -13,10 +13,10 @@ import {
      type TableOptions,
 } from '@tanstack/react-table'
 import { DataTablePagination } from '@/develop/(components)/data-table'
-import { DataTableToolbar } from '@/develop/(views)/official/users/search/toolbar-server'
+import { DataTableToolbar } from '@/develop/(views)/official/users/search/search-form.tsx'
 import { cn } from '@/develop/(lib)/utils.ts'
 import { type UserQueryParams, type UserRole, type UserStatus } from '@/develop/(services)/api'
-import { type NavigateFn, useTableUrlState } from '@/develop/(views)/official/users/search/use-table-url-state-server.ts'
+import { type NavigateFn, useTableUrlState } from '@/develop/(views)/official/users/search/use-table-url.ts'
 import { Button } from '@/components/ui/button.tsx'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
 import { roles } from '../data/data.ts'
