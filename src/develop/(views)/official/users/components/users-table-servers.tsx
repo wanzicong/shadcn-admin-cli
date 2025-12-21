@@ -29,6 +29,38 @@ import { usersColumns as columns } from './users-columns.tsx';
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // 组件属性类型定义
 type DataTableProps = {
      search: Record<string, unknown> // URL 搜索参数
@@ -61,6 +93,7 @@ export function UsersTable({ search, navigate }: DataTableProps) {
           },
           columnFilters: [
                { columnId: 'username', searchKey: 'username', type: 'string' },
+               { columnId: 'phoneNumber', searchKey: 'phoneNumber', type: 'string' },
                { columnId: 'status', searchKey: 'status', type: 'array' },
                { columnId: 'role', searchKey: 'role', type: 'array' },
           ],

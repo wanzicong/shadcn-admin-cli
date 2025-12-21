@@ -49,6 +49,9 @@ export class UsersService {
                if (params.username !== undefined) {
                     cleanParams.username = String(params.username)
                }
+               if (params.phoneNumber !== undefined) {
+                    cleanParams.phoneNumber = String(params.phoneNumber)
+               }
           }
 
           // 开发环境打印请求参数

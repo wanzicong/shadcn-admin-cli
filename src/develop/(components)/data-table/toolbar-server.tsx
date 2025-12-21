@@ -1,11 +1,169 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Cross2Icon, MagnifyingGlassIcon } from '@radix-ui/react-icons'
-import { type Table } from '@tanstack/react-table'
+import * as React from 'react'
+import { CheckIcon, Cross2Icon, PlusCircledIcon } from '@radix-ui/react-icons'
+import { type Column, type Table } from '@tanstack/react-table'
+import { cn } from '@/develop/(lib)/utils.ts'
+import { Badge } from '@/components/ui/badge.tsx'
 import { Button } from '@/components/ui/button.tsx'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from '@/components/ui/command.tsx'
 import { Input } from '@/components/ui/input.tsx'
-import { DataTableFacetedFilter } from './faceted-filter-server'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.tsx'
+import { Separator } from '@/components/ui/separator.tsx'
 import { DataTableViewOptions } from './view-options.tsx'
 
+/**
+ * 多选过滤组件的 Props 类型定义
+ * @template TData 表格数据的类型
+ * @template TValue 列值的类型
+ */
+type DataTableFacetedFilterProps<TData, TValue> = {
+     column?: Column<TData, TValue>
+     title?: string
+     options: {
+          label: string
+          value: string
+          icon?: React.ComponentType<{ className?: string }>
+     }[]
+}
+
+/**
+ * 数据表格多选过滤组件
+ *
+ * 提供多选过滤功能，支持从下拉菜单中选择多个值进行过滤，包括：
+ * - 多选过滤
+ * - 选项计数显示（显示每个选项对应的数据数量）
+ * - 已选值徽章显示
+ * - 搜索过滤选项
+ * - 清除过滤功能
+ *
+ * @template TData 表格数据的类型
+ * @template TValue 列值的类型
+ * @param props 组件属性
+ * @param props.column TanStack Table 列对象
+ * @param props.title 过滤器标题
+ * @param props.options 过滤选项数组，每个选项包含标签、值和可选的图标
+ * @returns 多选过滤组件
+ */
+export function DataTableFacetedFilter<TData, TValue>({ column, title, options }: DataTableFacetedFilterProps<TData, TValue>) {
+     // 获取每个选项的唯一值及其对应的数据数量（用于显示计数）
+     const facets = column?.getFacetedUniqueValues()
+     // 获取当前选中的过滤值（转换为 Set 以便快速查找）
+     const selectedValues = new Set(column?.getFilterValue() as string[])
+
+     return (
+          <Popover>
+               {/* 触发按钮：显示过滤器标题和已选值 */}
+               <PopoverTrigger asChild>
+                    <Button variant='outline' size='sm' className='h-8 border-dashed'>
+                         <PlusCircledIcon className='size-4' />
+                         {title}
+                         {/* 如果有选中的值，显示徽章 */}
+                         {selectedValues?.size > 0 && (
+                              <>
+                                   <Separator orientation='vertical' className='mx-2 h-4' />
+                                   {/* 移动端：只显示选中数量 */}
+                                   <Badge variant='secondary' className='rounded-sm px-1 font-normal lg:hidden'>
+                                        {selectedValues.size}
+                                   </Badge>
+                                   {/* 桌面端：显示选中项的标签或数量 */}
+                                   <div className='hidden space-x-1 lg:flex'>
+                                        {selectedValues.size > 2 ? (
+                                             // 选中超过 2 项时，只显示数量
+                                             <Badge variant='secondary' className='rounded-sm px-1 font-normal'>
+                                                  {selectedValues.size} selected
+                                             </Badge>
+                                        ) : (
+                                             // 选中 2 项或更少时，显示每个选中项的标签
+                                             options
+                                                  .filter((option) => selectedValues.has(option.value))
+                                                  .map((option) => (
+                                                       <Badge variant='secondary' key={option.value} className='rounded-sm px-1 font-normal'>
+                                                            {option.label}
+                                                       </Badge>
+                                                  ))
+                                        )}
+                                   </div>
+                              </>
+                         )}
+                    </Button>
+               </PopoverTrigger>
+
+               {/* 弹出内容：包含选项列表和搜索功能 */}
+               <PopoverContent className='w-[200px] p-0' align='start'>
+                    <Command>
+                         {/* 搜索输入框：用于过滤选项 */}
+                         <CommandInput placeholder={title} />
+                         <CommandList>
+                              {/* 无搜索结果时的提示 */}
+                              <CommandEmpty>No results found.</CommandEmpty>
+
+                              {/* 选项组 */}
+                              <CommandGroup>
+                                   {options.map((option) => {
+                                        // 检查当前选项是否被选中
+                                        const isSelected = selectedValues.has(option.value)
+                                        return (
+                                             <CommandItem
+                                                  key={option.value}
+                                                  onSelect={() => {
+                                                       // 切换选中状态：如果已选中则移除，否则添加
+                                                       if (isSelected) {
+                                                            selectedValues.delete(option.value)
+                                                       } else {
+                                                            selectedValues.add(option.value)
+                                                       }
+                                                       // 将 Set 转换为数组并更新列过滤值
+                                                       const filterValues = Array.from(selectedValues)
+                                                       // 如果有选中值则设置过滤，否则清除过滤
+                                                       column?.setFilterValue(filterValues.length ? filterValues : undefined)
+                                                  }}
+                                             >
+                                                  {/* 复选框：显示选中状态 */}
+                                                  <div
+                                                       className={cn(
+                                                            'border-primary flex size-4 items-center justify-center rounded-sm border',
+                                                            isSelected ? 'bg-primary text-primary-foreground' : 'opacity-50 [&_svg]:invisible'
+                                                       )}
+                                                  >
+                                                       <CheckIcon className={cn('text-background h-4 w-4')} />
+                                                  </div>
+                                                  {/* 选项图标（如果提供） */}
+                                                  {option.icon && <option.icon className='text-muted-foreground size-4' />}
+                                                  {/* 选项标签 */}
+                                                  <span>{option.label}</span>
+                                                  {/* 选项计数：显示该选项对应的数据数量 */}
+                                                  {facets?.get(option.value) && (
+                                                       <span className='ms-auto flex h-4 w-4 items-center justify-center font-mono text-xs'>
+                                                            {facets.get(option.value)}
+                                                       </span>
+                                                  )}
+                                             </CommandItem>
+                                        )
+                                   })}
+                              </CommandGroup>
+
+                              {/* 如果有选中的值，显示清除按钮 */}
+                              {selectedValues.size > 0 && (
+                                   <>
+                                        <CommandSeparator />
+                                        <CommandGroup>
+                                             {/* 清除所有过滤 */}
+                                             <CommandItem onSelect={() => column?.setFilterValue(undefined)} className='justify-center text-center'>
+                                                  Clear filters
+                                             </CommandItem>
+                                        </CommandGroup>
+                                   </>
+                              )}
+                         </CommandList>
+                    </Command>
+               </PopoverContent>
+          </Popover>
+     )
+}
+
+/**
+ * 表格工具栏组件的 Props 类型定义
+ * @template TData 表格数据的类型
+ */
 type DataTableToolbarProps<TData> = {
      table: Table<TData>
      searchPlaceholder?: string
@@ -19,221 +177,83 @@ type DataTableToolbarProps<TData> = {
                icon?: React.ComponentType<{ className?: string }>
           }[]
      }[]
-     // 搜索模式
-     searchMode?: 'instant' | 'manual'
-     // 统一筛选触发模式
-     filterMode?: 'instant' | 'manual'
-     // 统一应用筛选回调
-     onApplyFilters?: (filters: Record<string, string | string[]>) => void
 }
 
-export function DataTableToolbar<TData>({
-     table,
-     searchPlaceholder = '请输入搜索内容...',
-     searchKey,
-     filters = [],
-     searchMode = 'manual', // 搜索默认手动
-     filterMode = 'manual', // 筛选默认手动
-     onApplyFilters,
-}: DataTableToolbarProps<TData>) {
-     // 搜索输入状态
-     const [searchInput, setSearchInput] = useState('')
-     // 筛选器状态
-     const [filterStates, setFilterStates] = useState<Record<string, Set<string>>>({})
-     // 加载状态
-     const [isApplying, setIsApplying] = useState(false)
-
-     // 初始化状态
-     useEffect(() => {
-          // 初始化搜索输入
-          if (searchKey) {
-               const currentValue = (table.getColumn(searchKey)?.getFilterValue() as string) ?? ''
-               setSearchInput(currentValue)
-          } else {
-               const currentValue = table.getState().globalFilter ?? ''
-               setSearchInput(currentValue)
-          }
-
-          // 初始化筛选器状态
-          const initialFilterStates: Record<string, Set<string>> = {}
-          filters.forEach((filter) => {
-               const column = table.getColumn(filter.columnId)
-               if (column) {
-                    const currentValues = column.getFilterValue() as string[] | undefined
-                    initialFilterStates[filter.columnId] = new Set(currentValues || [])
-               }
-          })
-          setFilterStates(initialFilterStates)
-     }, [table, searchKey, filters])
-
-     // 应用所有筛选和搜索
-     const applyAllFilters = useCallback(async () => {
-          setIsApplying(true)
-
-          try {
-               // 收集所有筛选条件
-               const allFilters: Record<string, string | string[]> = {}
-
-               // 处理搜索
-               if (searchKey && searchInput.trim()) {
-                    allFilters[searchKey] = searchInput.trim()
-               } else if (!searchKey && searchInput.trim()) {
-                    // 全局搜索的处理
-                    table.setGlobalFilter(searchInput.trim())
-               }
-
-               // 处理筛选器
-               Object.entries(filterStates).forEach(([columnId, values]) => {
-                    if (values.size > 0) {
-                         allFilters[columnId] = Array.from(values)
-                    }
-               })
-
-               // 调用回调（如果有）
-               if (onApplyFilters) {
-                    await onApplyFilters(allFilters)
-               } else {
-                    // 如果没有回调，直接应用到 table
-                    filters.forEach((filter) => {
-                         const column = table.getColumn(filter.columnId)
-                         if (column) {
-                              const values = filterStates[filter.columnId]
-                              column.setFilterValue(values.size > 0 ? Array.from(values) : undefined)
-                         }
-                    })
-
-                    if (searchKey) {
-                         table.getColumn(searchKey)?.setFilterValue(searchInput.trim() || undefined)
-                    }
-
-                    // 重置到第一页
-                    table.resetPageIndex()
-               }
-          } finally {
-               setIsApplying(false)
-          }
-     }, [searchInput, filterStates, searchKey, table, filters, onApplyFilters])
-
-     // 重置所有
-     const resetAll = useCallback(() => {
-          setSearchInput('')
-          const resetFilterStates: Record<string, Set<string>> = {}
-          filters.forEach((filter) => {
-               resetFilterStates[filter.columnId] = new Set()
-          })
-          setFilterStates(resetFilterStates)
-
-          // 重置 table
-          table.resetColumnFilters()
-          table.setGlobalFilter('')
-          table.resetPageIndex()
-     }, [table, filters])
-
-     // 处理搜索输入变化
-     const handleSearchChange = (value: string) => {
-          setSearchInput(value)
-          if (searchMode === 'instant') {
-               applyAllFilters()
-          }
-     }
-
-     // 处理筛选器变化
-     const handleFilterChange = (columnId: string, values: Set<string>) => {
-          setFilterStates((prev) => ({
-               ...prev,
-               [columnId]: values,
-          }))
-
-          if (filterMode === 'instant') {
-               applyAllFilters()
-          }
-     }
-
-     // 检查是否有任何筛选条件
-     const hasActiveFilters = () => {
-          if (searchInput.trim()) return true
-
-          return Object.values(filterStates).some((values) => values && values.size > 0)
-     }
-
-     // 处理键盘事件
-     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-          if (event.key === 'Enter' && searchMode === 'manual') {
-               event.preventDefault()
-               applyAllFilters()
-          }
-     }
+/**
+ * 数据表格工具栏组件
+ *
+ * 提供表格的搜索、过滤和重置功能，包括：
+ * - 全局搜索或列搜索
+ * - 多选过滤（Faceted Filter）
+ * - 重置所有过滤条件
+ * - 列显示选项控制
+ *
+ * @template TData 表格数据的类型
+ * @param props 组件属性
+ * @param props.table TanStack Table 实例
+ * @param props.searchPlaceholder 搜索框占位符文本，默认为 'Filter...'
+ * @param props.searchKey 指定列的搜索键，如果提供则进行列搜索，否则进行全局搜索
+ * @param props.filters 过滤配置数组，每个配置包含列ID、标题和选项列表
+ * @returns 工具栏组件
+ */
+export function DataTableToolbar<TData>({ table, searchPlaceholder = 'Filter...', searchKey, filters = [] }: DataTableToolbarProps<TData>) {
+     // 检查是否有任何过滤条件被应用（列过滤或全局过滤）
+     const isFiltered = table.getState().columnFilters.length > 0 || table.getState().globalFilter
 
      return (
           <div className='flex items-center justify-between'>
+               {/* 左侧工具栏区域：搜索框、过滤器和重置按钮 */}
                <div className='flex flex-1 flex-col-reverse items-start gap-y-2 sm:flex-row sm:items-center sm:space-x-2'>
-                    {/* 搜索区域 */}
-                    <div className='flex items-center gap-2'>
-                         <div className='relative'>
-                              <Input
-                                   placeholder={searchPlaceholder}
-                                   value={searchInput}
-                                   onChange={(e) => handleSearchChange(e.target.value)}
-                                   onKeyDown={handleKeyDown}
-                                   className='h-8 w-[150px] pr-10 pl-8 lg:w-[250px]'
-                                   disabled={isApplying}
-                              />
+                    {/* 搜索输入框：根据 searchKey 决定是列搜索还是全局搜索 */}
+                    {searchKey ? (
+                         // 列搜索模式：搜索指定列的值
+                         <Input
+                              placeholder={searchPlaceholder}
+                              value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ''}
+                              onChange={(event) => table.getColumn(searchKey)?.setFilterValue(event.target.value)}
+                              className='h-8 w-[150px] lg:w-[250px]'
+                         />
+                    ) : (
+                         // 全局搜索模式：搜索所有列的值
+                         <Input
+                              placeholder={searchPlaceholder}
+                              value={table.getState().globalFilter ?? ''}
+                              onChange={(event) => table.setGlobalFilter(event.target.value)}
+                              className='h-8 w-[150px] lg:w-[250px]'
+                         />
+                    )}
 
-                              <MagnifyingGlassIcon className='text-muted-foreground absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2' />
-
-                              {searchMode === 'manual' && (
-                                   <Button
-                                        size='sm'
-                                        variant='secondary'
-                                        className='absolute top-1/2 right-1 h-6 w-6 -translate-y-1/2 p-0'
-                                        onClick={applyAllFilters}
-                                        disabled={isApplying || !searchInput.trim()}
-                                   >
-                                        {isApplying ? (
-                                             <div className='h-3 w-3 animate-spin rounded-full border border-t-transparent' />
-                                        ) : (
-                                             <MagnifyingGlassIcon className='h-3 w-3' />
-                                        )}
-                                   </Button>
-                              )}
-                         </div>
-                    </div>
-
-                    {/* 筛选器 */}
+                    {/* 多选过滤器组：渲染每个配置的过滤器 */}
                     <div className='flex gap-x-2'>
                          {filters.map((filter) => {
+                              // 获取对应的列对象
                               const column = table.getColumn(filter.columnId)
+                              // 如果列不存在，跳过渲染
                               if (!column) return null
-
-                              return (
-                                   <DataTableFacetedFilter
-                                        key={filter.columnId}
-                                        column={column}
-                                        title={filter.title}
-                                        options={filter.options}
-                                        manualTrigger={filterMode === 'manual'}
-                                        onApplyFilter={(values) => handleFilterChange(filter.columnId, values)}
-                                   />
-                              )
+                              // 渲染多选过滤器组件
+                              return <DataTableFacetedFilter key={filter.columnId} column={column} title={filter.title} options={filter.options} />
                          })}
                     </div>
 
-                    {/* 统一应用按钮（手动模式） */}
-                    {(searchMode === 'manual' || filterMode === 'manual') && hasActiveFilters() && (
-                         <Button size='sm' onClick={applyAllFilters} disabled={isApplying} className='h-8'>
-                              {isApplying ? '应用中...' : '应用筛选'}
-                         </Button>
-                    )}
-
-                    {/* 重置按钮 */}
-                    {hasActiveFilters() && (
-                         <Button variant='ghost' size='sm' onClick={resetAll} className='h-8 px-2 lg:px-3' disabled={isApplying}>
+                    {/* 重置按钮：当有任何过滤条件时显示，点击后清除所有过滤 */}
+                    {isFiltered && (
+                         <Button
+                              variant='ghost'
+                              onClick={() => {
+                                   // 重置所有列过滤
+                                   table.resetColumnFilters()
+                                   // 重置全局过滤
+                                   table.setGlobalFilter('')
+                              }}
+                              className='h-8 px-2 lg:px-3'
+                         >
                               重置
                               <Cross2Icon className='ms-2 h-4 w-4' />
                          </Button>
                     )}
                </div>
 
+               {/* 右侧工具栏区域：列显示选项控制 */}
                <DataTableViewOptions table={table} />
           </div>
      )

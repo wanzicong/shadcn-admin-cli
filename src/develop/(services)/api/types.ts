@@ -201,6 +201,7 @@ export interface UserQueryParams extends SearchParams {
      sort_by?: string
      sort_order?: 'asc' | 'desc'
      username?: string
+     phoneNumber?: string
 }
 
 export interface TaskQueryParams extends SearchParams {
