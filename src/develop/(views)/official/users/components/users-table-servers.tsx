@@ -1,28 +1,33 @@
-import { useEffect, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import {
-     type VisibilityState,
-     flexRender,
-     getCoreRowModel,
-     getFacetedRowModel,
-     getFacetedUniqueValues,
-     getFilteredRowModel,
-     getPaginationRowModel,
-     getSortedRowModel,
-     useReactTable,
-     type TableOptions,
-} from '@tanstack/react-table'
-import { DataTableToolbar } from '@/develop/(components)/data-table/toolbar-server'
-import { DataTablePagination } from '@/develop/(components)/data-table'
-import { type NavigateFn, useTableUrlState } from '@/develop/(hooks)/use-table-url-state-server.ts'
-import { cn } from '@/develop/(lib)/utils.ts'
-import { type UserQueryParams, type UserRole, type UserStatus } from '@/develop/(services)/api'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
-import { roles } from '../data/data.ts'
-import { type User } from '../data/schema.ts'
-import { usersApi } from '../services/user-services.ts'
-import { DataTableBulkActions } from './actions/data-table-bulk-actions.tsx'
-import { usersColumns as columns } from './users-columns.tsx'
+import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { type VisibilityState, flexRender, getCoreRowModel, getFacetedRowModel, getFacetedUniqueValues, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable, type TableOptions } from '@tanstack/react-table';
+import { DataTablePagination } from '@/develop/(components)/data-table';
+import { DataTableToolbar } from '@/develop/(components)/data-table/toolbar-server';
+import { type NavigateFn, useTableUrlState } from '@/develop/(hooks)/use-table-url-state-server.ts';
+import { cn } from '@/develop/(lib)/utils.ts';
+import { type UserQueryParams, type UserRole, type UserStatus } from '@/develop/(services)/api';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
+import { roles } from '../data/data.ts';
+import { type User } from '../data/schema.ts';
+import { usersApi } from '../services/user-services.ts';
+import { DataTableBulkActions } from './actions/data-table-bulk-actions.tsx';
+import { usersColumns as columns } from './users-columns.tsx';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // 组件属性类型定义
 type DataTableProps = {
@@ -52,7 +57,7 @@ export function UsersTable({ search, navigate }: DataTableProps) {
                defaultPageSize: 10, // 默认每页大小
           },
           globalFilter: {
-               enabled: true, // 禁用全局搜索
+               enabled: false, // 禁用全局搜索
           },
           columnFilters: [
                { columnId: 'username', searchKey: 'username', type: 'string' },
@@ -82,6 +87,13 @@ export function UsersTable({ search, navigate }: DataTableProps) {
           ...search,
           ...transformFilters(search),
      }
+
+     // alert(userSearchParams.username)
+     const { data, isLoading, isError } = useQuery({
+          queryKey: ['demos', userSearchParams],
+          queryFn: () => usersApi.getUsers(userSearchParams),
+     })
+
 
      // 转换筛选参数的辅助函数
      function transformFilters(searchParams: Record<string, unknown>): Partial<UserQueryParams> {
@@ -131,12 +143,6 @@ export function UsersTable({ search, navigate }: DataTableProps) {
           // 其他类型转换为字符串
           return String(param)
      }
-
-     const { data, isLoading, isError } = useQuery({
-          queryKey: ['demos', userSearchParams],
-          queryFn: () => usersApi.getUsers(userSearchParams),
-     })
-
      // ============= 数据转换 =============
      // 这些不是 Hook，可以在条件语句之前
      const userData: User[] = data?.list || [] // 添加默认值，防止 undefined

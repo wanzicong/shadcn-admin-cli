@@ -40,6 +40,8 @@ async def get_users(
     page = request.get("page", 1)
     page_size = request.get("page_size", 10)
     search = request.get("search")
+    username = request.get("username")
+    phoneNumber = request.get("phoneNumber")
     status = request.get("status")
     role = request.get("role")
     sort_by = request.get("sort_by", "createdAt")
@@ -87,6 +89,14 @@ async def get_users(
     # 角色筛选
     if role and isinstance(role, str):
         query = query.filter(User.role == role)
+
+    # 角色筛选
+    if username and isinstance(username, str):
+        query = query.filter(User.username == username)
+
+    # 角色筛选
+    if phoneNumber and isinstance(phoneNumber, str):
+        query = query.filter(User.phoneNumber == phoneNumber)
 
     # 排序
     order_by = build_order_by(User, sort_by, sort_order)

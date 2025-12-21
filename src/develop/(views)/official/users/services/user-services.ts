@@ -46,6 +46,9 @@ export class UsersService {
                if (params.sort_order !== undefined) {
                     cleanParams.sort_order = String(params.sort_order)
                }
+               if (params.username !== undefined) {
+                    cleanParams.username = String(params.username)
+               }
           }
 
           // 开发环境打印请求参数
