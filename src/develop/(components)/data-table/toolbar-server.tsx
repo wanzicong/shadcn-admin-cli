@@ -161,13 +161,32 @@ export function DataTableFacetedFilter<TData, TValue>({ column, title, options }
 }
 
 /**
+ * 搜索字段配置类型定义
+ */
+type SearchField = {
+     /** 搜索字段对应的列 ID */
+     columnId: string
+     /** 输入框占位符文本 */
+     placeholder?: string
+     /** 显示标签（可选） */
+     label?: string
+}
+
+/**
  * 表格工具栏组件的 Props 类型定义
  * @template TData 表格数据的类型
  */
 type DataTableToolbarProps<TData> = {
      table: Table<TData>
-     searchPlaceholder?: string
+     /** 全局搜索占位符（当使用全局搜索时） */
+     globalSearchPlaceholder?: string
+     /** 单个搜索字段（向后兼容旧用法） */
      searchKey?: string
+     /** 单个搜索字段占位符（向后兼容旧用法） */
+     searchPlaceholder?: string
+     /** 多个搜索字段配置 */
+     searchFields?: SearchField[]
+     /** 多选过滤配置 */
      filters?: {
           columnId: string
           title: string
@@ -183,7 +202,7 @@ type DataTableToolbarProps<TData> = {
  * 数据表格工具栏组件
  *
  * 提供表格的搜索、过滤和重置功能，包括：
- * - 全局搜索或列搜索
+ * - 多列搜索或全局搜索
  * - 多选过滤（Faceted Filter）
  * - 重置所有过滤条件
  * - 列显示选项控制
@@ -191,70 +210,106 @@ type DataTableToolbarProps<TData> = {
  * @template TData 表格数据的类型
  * @param props 组件属性
  * @param props.table TanStack Table 实例
- * @param props.searchPlaceholder 搜索框占位符文本，默认为 'Filter...'
- * @param props.searchKey 指定列的搜索键，如果提供则进行列搜索，否则进行全局搜索
- * @param props.filters 过滤配置数组，每个配置包含列ID、标题和选项列表
+ * @param props.globalSearchPlaceholder 全局搜索框占位符文本，默认为 'Search...'
+ * @param props.searchKey 单个搜索字段的列ID（向后兼容）
+ * @param props.searchPlaceholder 单个搜索字段占位符（向后兼容）
+ * @param props.searchFields 多个搜索字段配置数组
+ * @param props.filters 多选过滤配置数组
  * @returns 工具栏组件
  */
-export function DataTableToolbar<TData>({ table, searchPlaceholder = 'Filter...', searchKey, filters = [] }: DataTableToolbarProps<TData>) {
+export function DataTableToolbar<TData>({
+     table,
+     globalSearchPlaceholder = 'Search...',
+     searchKey,
+     searchPlaceholder = 'Filter...',
+     searchFields = [],
+     filters = [],
+}: DataTableToolbarProps<TData>) {
      // 检查是否有任何过滤条件被应用（列过滤或全局过滤）
      const isFiltered = table.getState().columnFilters.length > 0 || table.getState().globalFilter
 
+     // 处理向后兼容：将单个 searchKey 转换为 searchFields 格式
+     const effectiveSearchFields = React.useMemo(() => {
+          if (searchKey) {
+               return [
+                    {
+                         columnId: searchKey,
+                         placeholder: searchPlaceholder,
+                         label: undefined,
+                    },
+               ]
+          }
+          return searchFields
+     }, [searchKey, searchPlaceholder, searchFields])
+
      return (
-          <div className='flex items-center justify-between'>
-               {/* 左侧工具栏区域：搜索框、过滤器和重置按钮 */}
-               <div className='flex flex-1 flex-col-reverse items-start gap-y-2 sm:flex-row sm:items-center sm:space-x-2'>
-                    {/* 搜索输入框：根据 searchKey 决定是列搜索还是全局搜索 */}
-                    {searchKey ? (
-                         // 列搜索模式：搜索指定列的值
-                         <Input
-                              placeholder={searchPlaceholder}
-                              value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ''}
-                              onChange={(event) => table.getColumn(searchKey)?.setFilterValue(event.target.value)}
-                              className='h-8 w-[150px] lg:w-[250px]'
-                         />
-                    ) : (
-                         // 全局搜索模式：搜索所有列的值
-                         <Input
-                              placeholder={searchPlaceholder}
-                              value={table.getState().globalFilter ?? ''}
-                              onChange={(event) => table.setGlobalFilter(event.target.value)}
-                              className='h-8 w-[150px] lg:w-[250px]'
-                         />
-                    )}
-
-                    {/* 多选过滤器组：渲染每个配置的过滤器 */}
-                    <div className='flex gap-x-2'>
-                         {filters.map((filter) => {
-                              // 获取对应的列对象
-                              const column = table.getColumn(filter.columnId)
-                              // 如果列不存在，跳过渲染
+          <div className='flex flex-col gap-4'>
+               {/* 搜索区域：多个搜索框或全局搜索 */}
+               <div className='flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4'>
+                    {/* 多个搜索字段模式 */}
+                    {effectiveSearchFields.length > 0 &&
+                         effectiveSearchFields.map((field) => {
+                              const column = table.getColumn(field.columnId)
                               if (!column) return null
-                              // 渲染多选过滤器组件
-                              return <DataTableFacetedFilter key={filter.columnId} column={column} title={filter.title} options={filter.options} />
-                         })}
-                    </div>
 
-                    {/* 重置按钮：当有任何过滤条件时显示，点击后清除所有过滤 */}
-                    {isFiltered && (
-                         <Button
-                              variant='ghost'
-                              onClick={() => {
-                                   // 重置所有列过滤
-                                   table.resetColumnFilters()
-                                   // 重置全局过滤
-                                   table.setGlobalFilter('')
-                              }}
-                              className='h-8 px-2 lg:px-3'
-                         >
-                              重置
-                              <Cross2Icon className='ms-2 h-4 w-4' />
-                         </Button>
+                              return (
+                                   <div key={field.columnId} className='flex flex-col gap-1'>
+                                        {field.label && <label className='text-muted-foreground text-sm font-medium'>{field.label}</label>}
+                                        <Input
+                                             placeholder={field.placeholder || `Search ${field.columnId}...`}
+                                             value={(column.getFilterValue() as string) ?? ''}
+                                             onChange={(event) => column.setFilterValue(event.target.value)}
+                                             className='h-8 w-full sm:w-[180px] lg:w-[220px]'
+                                        />
+                                   </div>
+                              )
+                         })}
+
+                    {/* 全局搜索模式（当没有指定任何搜索字段时） */}
+                    {effectiveSearchFields.length === 0 && (
+                         <div className='flex-1'>
+                              <Input
+                                   placeholder={globalSearchPlaceholder}
+                                   value={table.getState().globalFilter ?? ''}
+                                   onChange={(event) => table.setGlobalFilter(event.target.value)}
+                                   className='h-8 w-full sm:w-[200px] lg:w-[300px]'
+                              />
+                         </div>
                     )}
                </div>
 
-               {/* 右侧工具栏区域：列显示选项控制 */}
-               <DataTableViewOptions table={table} />
+               {/* 过滤器和操作区域 */}
+               <div className='flex flex-col-reverse items-start justify-between gap-3 sm:flex-row sm:items-center'>
+                    {/* 左侧：过滤器和重置按钮 */}
+                    <div className='flex flex-1 flex-wrap items-center gap-2'>
+                         {/* 多选过滤器组 */}
+                         <div className='flex flex-wrap gap-2'>
+                              {filters.map((filter) => {
+                                   const column = table.getColumn(filter.columnId)
+                                   if (!column) return null
+                                   return <DataTableFacetedFilter key={filter.columnId} column={column} title={filter.title} options={filter.options} />
+                              })}
+                         </div>
+
+                         {/* 重置按钮 */}
+                         {isFiltered && (
+                              <Button
+                                   variant='ghost'
+                                   onClick={() => {
+                                        table.resetColumnFilters()
+                                        table.setGlobalFilter('')
+                                   }}
+                                   className='h-8 px-2 lg:px-3'
+                              >
+                                   重置
+                                   <Cross2Icon className='ms-2 h-4 w-4' />
+                              </Button>
+                         )}
+                    </div>
+
+                    {/* 右侧：列显示选项控制 */}
+                    <DataTableViewOptions table={table} />
+               </div>
           </div>
      )
 }
