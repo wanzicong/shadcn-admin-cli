@@ -18,7 +18,7 @@ export const usersColumns: ColumnDef<User>[] = [
                <Checkbox
                     checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
                     onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                    aria-label='Select all'
+                    aria-label='全选'
                     className='translate-y-[2px]'
                />
           ),
@@ -27,7 +27,7 @@ export const usersColumns: ColumnDef<User>[] = [
                <Checkbox
                     checked={row.getIsSelected()}
                     onCheckedChange={(value) => row.toggleSelected(!!value)}
-                    aria-label='Select row'
+                    aria-label='选择行'
                     className='translate-y-[2px]'
                />
           ),
@@ -40,7 +40,7 @@ export const usersColumns: ColumnDef<User>[] = [
      // 用户名列：显示用户登录名
      {
           accessorKey: 'username',
-          header: ({ column }) => <DataTableColumnHeader column={column} title='用户名字' />,
+          header: ({ column }) => <DataTableColumnHeader column={column} title='用户名' />,
           cell: ({ row }) => <LongText className='max-w-36 ps-3'>{row.getValue('username')}</LongText>,
           meta: {
                className: cn(

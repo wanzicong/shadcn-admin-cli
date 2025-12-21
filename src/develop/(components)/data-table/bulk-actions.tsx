@@ -48,7 +48,7 @@ export function DataTableBulkActions<TData>({ table, entityName, children }: Dat
      useEffect(() => {
           if (selectedCount > 0) {
                // 生成公告消息（处理单复数）
-               const message = `${selectedCount} ${entityName}${selectedCount > 1 ? 's' : ''} selected. Bulk actions toolbar is available.`
+               const message = `已选中 ${selectedCount} 个${entityName}。批量操作工具栏可用。`
 
                // 使用 queueMicrotask 延迟状态更新，避免级联渲染
                queueMicrotask(() => {

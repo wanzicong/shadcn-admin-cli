@@ -64,13 +64,13 @@ export function DataTableColumnHeader<TData, TValue>({ column, title, className 
                          {/* 升序排序选项 */}
                          <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
                               <ArrowUpIcon className='text-muted-foreground/70 size-3.5' />
-                              从大到小
+                              升序
                          </DropdownMenuItem>
 
                          {/* 降序排序选项 */}
                          <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
                               <ArrowDownIcon className='text-muted-foreground/70 size-3.5' />
-                              从小到大
+                              降序
                          </DropdownMenuItem>
 
                          {/* 如果列可以隐藏，显示隐藏选项 */}

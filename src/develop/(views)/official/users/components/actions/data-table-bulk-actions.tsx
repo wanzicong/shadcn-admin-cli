@@ -25,14 +25,13 @@ export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps
           const selectedUsers = selectedRows.map((row) => row.original as User)
 
           toast.promise(sleep(2000), {
-               loading: `${status === 'active' ? 'Activating' : 'Deactivating'} users...`,
+               loading: `${status === 'active' ? '正在激活用户...' : '正在停用用户...'}`,
                success: () => {
                     table.resetRowSelection()
-                    const action = status === 'active' ? 'Activated' : 'Deactivated'
-                    const plural = selectedUsers.length > 1 ? 's' : ''
-                    return `${action} ${selectedUsers.length} user${plural}`
+                    const action = status === 'active' ? '已激活' : '已停用'
+                    return `成功${action} ${selectedUsers.length} 个用户`
                },
-               error: `Error ${status === 'active' ? 'activating' : 'deactivating'} users`,
+               error: `激活/停用用户时出错`,
           })
 
           table.resetRowSelection()
@@ -46,10 +45,9 @@ export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps
                loading: '邀请用户中...',
                success: () => {
                     table.resetRowSelection()
-                    const plural = selectedUsers.length > 1 ? 's' : ''
-                    return `Invited ${selectedUsers.length} user${plural}`
+                    return `成功邀请 ${selectedUsers.length} 个用户`
                },
-               error: 'Error inviting users',
+               error: '邀请用户时出错',
           })
 
           table.resetRowSelection()
@@ -67,7 +65,7 @@ export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps
                                    size='icon'
                                    onClick={handleBulkInvite}
                                    className='size-8'
-                                   aria-label='Invite selected users'
+                                   aria-label='邀请选择用户'
                                    title='邀请选择用户'
                               >
                                    <Mail />
@@ -87,7 +85,7 @@ export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps
                                    size='icon'
                                    onClick={() => handleBulkStatusChange('active')}
                                    className='size-8'
-                                   aria-label='Activate selected users'
+                                   aria-label='激活选择用户'
                                    title='激活选择用户'
                               >
                                    <UserCheck />
@@ -107,7 +105,7 @@ export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps
                                    size='icon'
                                    onClick={() => handleBulkStatusChange('inactive')}
                                    className='size-8'
-                                   aria-label='Deactivate selected users'
+                                   aria-label='停用选择用户'
                                    title='不邀请他们'
                               >
                                    <UserX />
@@ -127,7 +125,7 @@ export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps
                                    size='icon'
                                    onClick={() => setShowDeleteConfirm(true)}
                                    className='size-8'
-                                   aria-label='Delete selected users'
+                                   aria-label='删除选择用户'
                                    title='删除选择用户'
                               >
                                    <Trash2 />

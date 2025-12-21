@@ -71,7 +71,7 @@ export function DataTablePagination<TData>({ table, className }: DataTablePagina
                               </SelectContent>
                          </Select>
                          {/* 每页数量标签（移动端隐藏） */}
-                         <p className='hidden text-sm font-medium sm:block'>Rows per page</p>
+                         <p className='hidden text-sm font-medium sm:block'>每页行数</p>
                     </div>
                </div>
 
