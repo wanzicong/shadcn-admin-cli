@@ -16,11 +16,11 @@ import {
 import { DataTablePagination, DataTableToolbar } from '@/develop/(components)/data-table'
 import { type NavigateFn, useTableUrlState } from '@/develop/(hooks)/use-table-url-state.ts'
 import { cn } from '@/develop/(lib)/utils.ts'
-import { type UserQueryParams } from '@/develop/(services)/api'
+import { type UserQueryParams, type UserRole, type UserStatus } from '@/develop/(services)/api'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
 import { roles } from '../data/data.ts'
 import { type User } from '../data/schema.ts'
-import { usersApi } from '../services/UserService.ts'
+import { usersApi } from '../services/user-services.ts'
 import { DataTableBulkActions } from './actions/data-table-bulk-actions.tsx'
 import { usersColumns as columns } from './users-columns.tsx'
 
@@ -63,9 +63,64 @@ export function UsersTable({ search, navigate }: DataTableProps) {
 
      // ============= 数据查询 Hook =============
      // 必须放在所有其他 Hook 之后，但在条件语句之前
+     const userSearchParams: UserQueryParams = {
+          ...transformFilters(search),
+          page: search.page as number,
+          page_size: search.pageSize as number,
+     }
+
+     // 转换筛选参数的辅助函数
+     function transformFilters(searchParams: Record<string, unknown>): Partial<UserQueryParams> {
+          const result: Partial<UserQueryParams> = {}
+
+          // 状态参数转换
+          if (searchParams.status) {
+               result.status = parseFilterParam(searchParams.status) as UserStatus | UserStatus[]
+          }
+
+          // 角色参数转换
+          if (searchParams.role) {
+               result.role = parseFilterParam(searchParams.role) as UserRole | UserRole[]
+          }
+          return result
+     }
+
+     // 解析筛选参数的通用函数
+     function parseFilterParam(param: unknown): string | string[] {
+          if (Array.isArray(param)) {
+               return param.map(String)
+          }
+
+          if (typeof param === 'string') {
+               // 检查是否是 JSON 数组字符串
+               if (param.startsWith('[') && param.endsWith(']')) {
+                    try {
+                         const parsed = JSON.parse(param)
+                         return Array.isArray(parsed) ? parsed.map(String) : [String(parsed)]
+                    } catch {
+                         return [param]
+                    }
+               }
+
+               // 检查是否是逗号分隔的字符串
+               if (param.includes(',')) {
+                    return param
+                         .split(',')
+                         .map((s) => s.trim())
+                         .filter(Boolean)
+               }
+
+               // 单个字符串值
+               return param
+          }
+
+          // 其他类型转换为字符串
+          return String(param)
+     }
+
      const { data, isLoading, isError } = useQuery({
-          queryKey: ['demos', search],
-          queryFn: () => usersApi.getUsers(search as UserQueryParams),
+          queryKey: ['demos', userSearchParams],
+          queryFn: () => usersApi.getUsers(userSearchParams),
      })
 
      // ============= 数据转换 =============
