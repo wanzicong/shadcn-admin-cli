@@ -43,7 +43,7 @@ export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps
           const selectedUsers = selectedRows.map((row) => row.original as User)
 
           toast.promise(sleep(2000), {
-               loading: 'Inviting users...',
+               loading: '邀请用户中...',
                success: () => {
                     table.resetRowSelection()
                     const plural = selectedUsers.length > 1 ? 's' : ''
@@ -68,14 +68,14 @@ export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps
                                    onClick={handleBulkInvite}
                                    className='size-8'
                                    aria-label='Invite selected users'
-                                   title='Invite selected users'
+                                   title='邀请选择用户'
                               >
                                    <Mail />
-                                   <span className='sr-only'>Invite selected users</span>
+                                   <span className='sr-only'>邀请选择用户</span>
                               </Button>
                          </TooltipTrigger>
                          <TooltipContent>
-                              <p>Invite selected users</p>
+                              <p>邀请选择用户</p>
                          </TooltipContent>
                     </Tooltip>
 
@@ -88,14 +88,14 @@ export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps
                                    onClick={() => handleBulkStatusChange('active')}
                                    className='size-8'
                                    aria-label='Activate selected users'
-                                   title='Activate selected users'
+                                   title='激活选择用户'
                               >
                                    <UserCheck />
-                                   <span className='sr-only'>Activate selected users</span>
+                                   <span className='sr-only'>激活选择用户</span>
                               </Button>
                          </TooltipTrigger>
                          <TooltipContent>
-                              <p>Activate selected users</p>
+                              <p>激活选择用户</p>
                          </TooltipContent>
                     </Tooltip>
 
@@ -108,14 +108,14 @@ export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps
                                    onClick={() => handleBulkStatusChange('inactive')}
                                    className='size-8'
                                    aria-label='Deactivate selected users'
-                                   title='Deactivate selected users'
+                                   title='不邀请他们'
                               >
                                    <UserX />
-                                   <span className='sr-only'>Deactivate selected users</span>
+                                   <span className='sr-only'>不邀请他们</span>
                               </Button>
                          </TooltipTrigger>
                          <TooltipContent>
-                              <p>Deactivate selected users</p>
+                              <p>不邀请他们</p>
                          </TooltipContent>
                     </Tooltip>
 
@@ -128,14 +128,14 @@ export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps
                                    onClick={() => setShowDeleteConfirm(true)}
                                    className='size-8'
                                    aria-label='Delete selected users'
-                                   title='Delete selected users'
+                                   title='删除选择用户'
                               >
                                    <Trash2 />
-                                   <span className='sr-only'>Delete selected users</span>
+                                   <span className='sr-only'>删除选择用户</span>
                               </Button>
                          </TooltipTrigger>
                          <TooltipContent>
-                              <p>Delete selected users</p>
+                              <p>删除选择用户</p>
                          </TooltipContent>
                     </Tooltip>
                </BulkActionsToolbar>

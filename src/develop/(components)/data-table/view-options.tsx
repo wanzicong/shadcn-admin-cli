@@ -33,13 +33,13 @@ export function DataTableViewOptions<TData>({ table }: DataTableViewOptionsProps
                <DropdownMenuTrigger asChild>
                     <Button variant='outline' size='sm' className='ms-auto hidden h-8 lg:flex'>
                          <MixerHorizontalIcon className='size-4' />
-                         View
+                         查看
                     </Button>
                </DropdownMenuTrigger>
 
                {/* 下拉菜单内容 */}
                <DropdownMenuContent align='end' className='w-[150px]'>
-                    <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                    <DropdownMenuLabel>字段列表</DropdownMenuLabel>
                     <DropdownMenuSeparator />
 
                     {/* 遍历所有可隐藏的列，生成复选框选项 */}

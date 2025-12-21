@@ -40,7 +40,7 @@ export const usersColumns: ColumnDef<User>[] = [
      // 用户名列：显示用户登录名
      {
           accessorKey: 'username',
-          header: ({ column }) => <DataTableColumnHeader column={column} title='Username' />,
+          header: ({ column }) => <DataTableColumnHeader column={column} title='用户名字' />,
           cell: ({ row }) => <LongText className='max-w-36 ps-3'>{row.getValue('username')}</LongText>,
           meta: {
                className: cn(
@@ -53,7 +53,7 @@ export const usersColumns: ColumnDef<User>[] = [
      // 全名列：组合显示用户的名字和姓氏
      {
           id: 'fullName',
-          header: ({ column }) => <DataTableColumnHeader column={column} title='Name' />,
+          header: ({ column }) => <DataTableColumnHeader column={column} title='全名' />,
           cell: ({ row }) => {
                const { firstName, lastName } = row.original
                const fullName = `${firstName} ${lastName}`
@@ -64,20 +64,20 @@ export const usersColumns: ColumnDef<User>[] = [
      // 邮箱列：显示用户邮箱地址
      {
           accessorKey: 'email',
-          header: ({ column }) => <DataTableColumnHeader column={column} title='Email' />,
+          header: ({ column }) => <DataTableColumnHeader column={column} title='邮箱' />,
           cell: ({ row }) => <div className='w-fit ps-2 text-nowrap'>{row.getValue('email')}</div>,
      },
      // 电话号码列：显示用户联系方式
      {
           accessorKey: 'phoneNumber',
-          header: ({ column }) => <DataTableColumnHeader column={column} title='Phone Number' />,
+          header: ({ column }) => <DataTableColumnHeader column={column} title='电话号码' />,
           cell: ({ row }) => <div>{row.getValue('phoneNumber')}</div>,
           enableSorting: false,
      },
      // 状态列：显示用户当前状态，使用不同颜色的徽章
      {
           accessorKey: 'status',
-          header: ({ column }) => <DataTableColumnHeader column={column} title='Status' />,
+          header: ({ column }) => <DataTableColumnHeader column={column} title='状态' />,
           cell: ({ row }) => {
                const { status } = row.original
                const badgeColor = callTypes.get(status)
@@ -98,7 +98,7 @@ export const usersColumns: ColumnDef<User>[] = [
      // 角色列：显示用户权限角色，包含图标
      {
           accessorKey: 'role',
-          header: ({ column }) => <DataTableColumnHeader column={column} title='Role' />,
+          header: ({ column }) => <DataTableColumnHeader column={column} title='角色' />,
           cell: ({ row }) => {
                const { role } = row.original
                const userType = roles.find(({ value }) => value === role)

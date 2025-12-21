@@ -11,13 +11,13 @@ export function UsersPrimaryButtons() {
           <div className='flex gap-2'>
                {/* 邀请用户按钮 */}
                <Button variant='outline' className='space-x-1' onClick={() => setOpen('invite')}>
-                    <span>Invite User</span>
+                    <span>邀请用户</span>
                     <MailPlus size={18} />
                </Button>
 
                {/* 添加用户按钮 */}
                <Button className='space-x-1' onClick={() => setOpen('add')}>
-                    <span>Add User</span>
+                    <span>添加用户</span>
                     <UserPlus size={18} />
                </Button>
           </div>

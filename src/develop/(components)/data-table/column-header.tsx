@@ -64,13 +64,13 @@ export function DataTableColumnHeader<TData, TValue>({ column, title, className 
                          {/* 升序排序选项 */}
                          <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
                               <ArrowUpIcon className='text-muted-foreground/70 size-3.5' />
-                              Asc
+                              从大到小
                          </DropdownMenuItem>
 
                          {/* 降序排序选项 */}
                          <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
                               <ArrowDownIcon className='text-muted-foreground/70 size-3.5' />
-                              Desc
+                              从小到大
                          </DropdownMenuItem>
 
                          {/* 如果列可以隐藏，显示隐藏选项 */}
@@ -80,7 +80,7 @@ export function DataTableColumnHeader<TData, TValue>({ column, title, className 
                                    {/* 隐藏列选项 */}
                                    <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
                                         <EyeNoneIcon className='text-muted-foreground/70 size-3.5' />
-                                        Hide
+                                        隐藏
                                    </DropdownMenuItem>
                               </>
                          )}
