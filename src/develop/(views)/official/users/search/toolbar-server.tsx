@@ -23,6 +23,10 @@ type DataTableFacetedFilterProps<TData, TValue> = {
           value: string
           icon?: React.ComponentType<{ className?: string }>
      }[]
+     /** 临时选中的值 */
+     tempValue?: string[]
+     /** 临时值变化回调 */
+     onTempValueChange?: (value: string[]) => void
 }
 
 /**
@@ -43,11 +47,17 @@ type DataTableFacetedFilterProps<TData, TValue> = {
  * @param props.options 过滤选项数组，每个选项包含标签、值和可选的图标
  * @returns 多选过滤组件
  */
-export function DataTableFacetedFilter<TData, TValue>({ column, title, options }: DataTableFacetedFilterProps<TData, TValue>) {
+export function DataTableFacetedFilter<TData, TValue>({ 
+     column, 
+     title, 
+     options, 
+     tempValue = [], 
+     onTempValueChange 
+}: DataTableFacetedFilterProps<TData, TValue>) {
      // 获取每个选项的唯一值及其对应的数据数量（用于显示计数）
      const facets = column?.getFacetedUniqueValues()
-     // 获取当前选中的过滤值（转换为 Set 以便快速查找）
-     const selectedValues = new Set(column?.getFilterValue() as string[])
+     // 获取当前选中的过滤值（优先使用临时值，否则使用列的当前值）
+     const selectedValues = new Set(tempValue.length > 0 ? tempValue : (column?.getFilterValue() as string[] || []))
 
      return (
           <Popover>
@@ -111,10 +121,10 @@ export function DataTableFacetedFilter<TData, TValue>({ column, title, options }
                                                        } else {
                                                             selectedValues.add(option.value)
                                                        }
-                                                       // 将 Set 转换为数组并更新列过滤值
+                                                       // 将 Set 转换为数组并更新临时值
                                                        const filterValues = Array.from(selectedValues)
-                                                       // 如果有选中值则设置过滤，否则清除过滤
-                                                       column?.setFilterValue(filterValues.length ? filterValues : undefined)
+                                                       // 调用临时值变化回调
+                                                       onTempValueChange?.(filterValues)
                                                   }}
                                              >
                                                   {/* 复选框：显示选中状态 */}
@@ -147,7 +157,10 @@ export function DataTableFacetedFilter<TData, TValue>({ column, title, options }
                                         <CommandSeparator />
                                         <CommandGroup>
                                              {/* 清除所有过滤 */}
-                                             <CommandItem onSelect={() => column?.setFilterValue(undefined)} className='justify-center text-center'>
+                                             <CommandItem 
+                                                  onSelect={() => onTempValueChange?.([])} 
+                                                  className='justify-center text-center'
+                                             >
                                                   Clear filters
                                              </CommandItem>
                                         </CommandGroup>
@@ -170,6 +183,14 @@ type SearchField = {
      placeholder?: string
      /** 显示标签（可选） */
      label?: string
+}
+
+/**
+ * 临时搜索状态类型
+ */
+interface TempSearchState {
+     searchFields: Record<string, string>
+     filters: Record<string, string[]>
 }
 
 /**
@@ -196,6 +217,10 @@ type DataTableToolbarProps<TData> = {
                icon?: React.ComponentType<{ className?: string }>
           }[]
      }[]
+     /** 手动搜索回调函数 */
+     onManualSearch?: () => void
+     /** 是否正在加载中 */
+     isLoading?: boolean
 }
 
 /**
@@ -224,6 +249,8 @@ export function DataTableToolbar<TData>({
      searchPlaceholder = 'Filter...',
      searchFields = [],
      filters = [],
+     onManualSearch,
+     isLoading = false,
 }: DataTableToolbarProps<TData>) {
      // 检查是否有任何过滤条件被应用（列过滤或全局过滤）
      const isFiltered = table.getState().columnFilters.length > 0 || table.getState().globalFilter
@@ -242,28 +269,113 @@ export function DataTableToolbar<TData>({
           return searchFields
      }, [searchKey, searchPlaceholder, searchFields])
 
+     // 临时搜索状态管理
+     const [tempSearchState, setTempSearchState] = React.useState<TempSearchState>({
+          searchFields: {},
+          filters: {},
+     })
+
+     // 更新临时搜索字段值
+     const updateTempSearchField = React.useCallback((columnId: string, value: string) => {
+          setTempSearchState(prev => ({
+               ...prev,
+               searchFields: {
+                    ...prev.searchFields,
+                    [columnId]: value,
+               },
+          }))
+     }, [])
+
+     // 更新临时筛选值
+     const updateTempFilter = React.useCallback((columnId: string, value: string[]) => {
+          setTempSearchState(prev => ({
+               ...prev,
+               filters: {
+                    ...prev.filters,
+                    [columnId]: value,
+               },
+          }))
+     }, [])
+
+     // 应用临时搜索条件到表格
+     const applySearchConditions = React.useCallback(() => {
+          // 应用搜索字段
+          Object.entries(tempSearchState.searchFields).forEach(([columnId, value]) => {
+               const column = table.getColumn(columnId)
+               if (column) {
+                    column.setFilterValue(value || undefined)
+               }
+          })
+
+          // 应用筛选字段
+          Object.entries(tempSearchState.filters).forEach(([columnId, values]) => {
+               const column = table.getColumn(columnId)
+               if (column) {
+                    column.setFilterValue(values.length > 0 ? values : undefined)
+               }
+          })
+
+          // 触发手动搜索
+          onManualSearch?.()
+     }, [tempSearchState, table, onManualSearch])
+
+     // 清除临时搜索条件
+     const clearTempSearchConditions = React.useCallback(() => {
+          // 清除临时状态
+          setTempSearchState({
+               searchFields: {},
+               filters: {},
+          })
+
+          // 清除表格中的搜索字段
+          effectiveSearchFields.forEach(field => {
+               const column = table.getColumn(field.columnId)
+               if (column) {
+                    column.setFilterValue(undefined)
+               }
+          })
+
+          // 清除表格中的筛选字段
+          filters.forEach(filter => {
+               const column = table.getColumn(filter.columnId)
+               if (column) {
+                    column.setFilterValue(undefined)
+               }
+          })
+
+          // 触发手动搜索以更新显示
+          onManualSearch?.()
+     }, [effectiveSearchFields, filters, table, onManualSearch])
+
      return (
           <div className='flex flex-col gap-4'>
                {/* 搜索区域：多个搜索框或全局搜索 */}
                <div className='flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4'>
-                    {/* 多个搜索字段模式 */}
-                    {effectiveSearchFields.length > 0 &&
-                         effectiveSearchFields.map((field) => {
-                              const column = table.getColumn(field.columnId)
-                              if (!column) return null
+                     {/* 多个搜索字段模式 */}
+                     {effectiveSearchFields.length > 0 &&
+                          effectiveSearchFields.map((field) => {
+                               const column = table.getColumn(field.columnId)
+                               if (!column) return null
 
-                              return (
-                                   <div key={field.columnId} className='flex flex-col gap-1'>
-                                        {field.label && <label className='text-muted-foreground text-sm font-medium'>{field.label}</label>}
-                                        <Input
-                                             placeholder={field.placeholder || `Search ${field.columnId}...`}
-                                             value={(column.getFilterValue() as string) ?? ''}
-                                             onChange={(event) => column.setFilterValue(event.target.value)}
-                                             className='h-8 w-full sm:w-[180px] lg:w-[220px]'
-                                        />
-                                   </div>
-                              )
-                         })}
+                               return (
+                                    <div key={field.columnId} className='flex flex-col gap-1'>
+                                         {field.label && <label className='text-muted-foreground text-sm font-medium'>{field.label}</label>}
+                                         <Input
+                                              placeholder={field.placeholder || `Search ${field.columnId}...`}
+                                              value={tempSearchState.searchFields[field.columnId] || ''}
+                                              onChange={(event) => updateTempSearchField(field.columnId, event.target.value)}
+                                              className='h-8 w-full sm:w-[180px] lg:w-[220px]'
+                                              onKeyDown={(event) => {
+                                                   if (event.key === 'Enter') {
+                                                        event.preventDefault()
+                                                        // 应用搜索条件并触发搜索
+                                                        applySearchConditions()
+                                                   }
+                                              }}
+                                         />
+                                    </div>
+                               )
+                          })}
 
                     {/* 全局搜索模式（当没有指定任何搜索字段时） */}
                     {effectiveSearchFields.length === 0 && (
@@ -287,28 +399,67 @@ export function DataTableToolbar<TData>({
                               {filters.map((filter) => {
                                    const column = table.getColumn(filter.columnId)
                                    if (!column) return null
-                                   return <DataTableFacetedFilter key={filter.columnId} column={column} title={filter.title} options={filter.options} />
+                                   return (
+                                        <DataTableFacetedFilter 
+                                             key={filter.columnId} 
+                                             column={column} 
+                                             title={filter.title} 
+                                             options={filter.options}
+                                             tempValue={tempSearchState.filters[filter.columnId] || []}
+                                             onTempValueChange={(value) => updateTempFilter(filter.columnId, value)}
+                                        />
+                                   )
                               })}
                          </div>
 
-                         {/* 重置按钮 */}
-                         {isFiltered && (
-                              <Button
-                                   variant='ghost'
-                                   onClick={() => {
-                                        table.resetColumnFilters()
-                                        table.setGlobalFilter('')
-                                   }}
-                                   className='h-8 px-2 lg:px-3'
-                              >
-                                   重置
-                                   <Cross2Icon className='ms-2 h-4 w-4' />
-                              </Button>
-                         )}
+                          {/* 重置按钮 */}
+                          {isFiltered && (
+                               <Button
+                                    variant='ghost'
+                                    onClick={() => {
+                                         table.resetColumnFilters()
+                                         table.setGlobalFilter('')
+                                    }}
+                                    className='h-8 px-2 lg:px-3'
+                               >
+                                    重置
+                                    <Cross2Icon className='ms-2 h-4 w-4' />
+                               </Button>
+                          )}
+                          
+                          {/* 清除搜索按钮 */}
+                          {(Object.keys(tempSearchState.searchFields).length > 0 || Object.keys(tempSearchState.filters).length > 0) && (
+                               <Button
+                                    variant='ghost'
+                                    onClick={clearTempSearchConditions}
+                                    className='h-8 px-2 lg:px-3'
+                                    title='清除所有搜索条件'
+                               >
+                                    清除搜索
+                                    <Cross2Icon className='ms-2 h-4 w-4' />
+                               </Button>
+                          )}
                     </div>
 
-                    {/* 右侧：列显示选项控制 */}
-                    <DataTableViewOptions table={table} />
+                    {/* 右侧：列显示选项控制和统一搜索按钮 */}
+                    <div className='flex items-center gap-2'>
+                         {/* 统一搜索按钮 */}
+                         {onManualSearch && (
+                              <Button
+                                   variant='default'
+                                   size='sm'
+                                   onClick={applySearchConditions}
+                                   disabled={isLoading}
+                                   className='h-8 px-4'
+                              >
+                                   <svg className={cn('h-4 w-4 mr-1', isLoading && 'animate-spin')} fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' />
+                                   </svg>
+                                   搜索
+                              </Button>
+                         )}
+                         <DataTableViewOptions table={table} />
+                    </div>
                </div>
           </div>
      )

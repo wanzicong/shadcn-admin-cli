@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
      type VisibilityState,
@@ -13,7 +13,7 @@ import {
      type TableOptions,
 } from '@tanstack/react-table'
 import { DataTablePagination } from '@/develop/(components)/data-table'
-import { DataTableToolbar } from '@/develop/(components)/data-table/toolbar-server'
+import { DataTableToolbar } from '@/develop/(views)/official/users/search/toolbar-server'
 import { cn } from '@/develop/(lib)/utils.ts'
 import { type UserQueryParams, type UserRole, type UserStatus } from '@/develop/(services)/api'
 import { type NavigateFn, useTableUrlState } from '@/develop/(views)/official/users/search/use-table-url-state-server.ts'
@@ -71,25 +71,36 @@ export function UsersTable({ search, navigate }: DataTableProps) {
           },
      })
 
-     // ============= 数据查询 Hook =============
-     // 必须放在所有其他 Hook 之后，但在条件语句之前
-     const userSearchParams: UserQueryParams = {
-          page: search.page as number,
-          page_size: search.pageSize as number,
-          ...(sorting.length > 0 && {
-               sort_by: sorting[0].id,
-               sort_order: sorting[0].desc ? 'desc' : 'asc',
-          }),
-          username: search.username as string,
-          ...search,
-          ...transformFilters(search),
-     }
+      // ============= 手动搜索处理 =============
+      const handleManualSearch = useCallback(() => {
+          // 手动搜索时重置到第一页并重新触发查询
+          navigate({
+               search: (prev) => ({
+                    ...(prev as Record<string, unknown>),
+                    page: 1, // 重置到第一页
+               }),
+          })
+      }, [navigate])
 
-     // alert(userSearchParams.username)
-     const { data, isLoading, isError } = useQuery({
-          queryKey: ['users', userSearchParams],
-          queryFn: () => usersApi.getUsers(userSearchParams),
-     })
+      // ============= 数据查询 Hook =============
+      // 必须放在所有其他 Hook 之后，但在条件语句之前
+      const userSearchParams: UserQueryParams = {
+           page: search.page as number,
+           page_size: search.pageSize as number,
+           ...(sorting.length > 0 && {
+                sort_by: sorting[0].id,
+                sort_order: sorting[0].desc ? 'desc' : 'asc',
+           }),
+           username: search.username as string,
+           ...search,
+           ...transformFilters(search),
+      }
+
+      // alert(userSearchParams.username)
+      const { data, isLoading, isError } = useQuery({
+           queryKey: ['users', userSearchParams],
+           queryFn: () => usersApi.getUsers(userSearchParams),
+      })
 
      // 转换筛选参数的辅助函数
      function transformFilters(searchParams: Record<string, unknown>): Partial<UserQueryParams> {
@@ -245,75 +256,107 @@ export function UsersTable({ search, navigate }: DataTableProps) {
      return (
           <div className={cn('max-sm:has-[div[role="toolbar"]]:mb-16', 'flex flex-1 flex-col gap-4')}>
                {/* 表格工具栏 */}
-               <DataTableToolbar
-                    table={table}
-                    // searchPlaceholder='筛选用户...'
-                    // searchKey='phoneNumber'
-                    searchFields={[
-                         {
-                              columnId: 'phoneNumber',
-                              placeholder: '电话号码...',
-                              label: '电话号码',
-                         },
-                         {
-                              columnId: 'username',
-                              placeholder: '姓名...',
-                              label: '姓名',
-                         },
-                    ]}
-                    filters={[
-                         {
-                              columnId: 'status',
-                              title: '状态',
-                              options: [
-                                   { label: '活跃', value: 'active' },
-                                   { label: '非活跃', value: 'inactive' },
-                                   { label: '已邀请', value: 'invited' },
-                                   { label: '已暂停', value: 'suspended' },
-                              ],
-                         },
-                         {
-                              columnId: 'role',
-                              title: '角色',
-                              options: roles.map((role) => ({ ...role })),
-                         },
-                    ]}
-               />
+                <DataTableToolbar
+                     table={table}
+                     // searchPlaceholder='筛选用户...'
+                     // searchKey='phoneNumber'
+                     onManualSearch={handleManualSearch}
+                     isLoading={isLoading}
+                     searchFields={[
+                          {
+                               columnId: 'phoneNumber',
+                               placeholder: '电话号码...',
+                               label: '电话号码',
+                          },
+                          {
+                               columnId: 'username',
+                               placeholder: '姓名...',
+                               label: '姓名',
+                          },
+                     ]}
+                     filters={[
+                          {
+                               columnId: 'status',
+                               title: '状态',
+                               options: [
+                                    { label: '活跃', value: 'active' },
+                                    { label: '非活跃', value: 'inactive' },
+                                    { label: '已邀请', value: 'invited' },
+                                    { label: '已暂停', value: 'suspended' },
+                               ],
+                          },
+                          {
+                               columnId: 'role',
+                               title: '角色',
+                               options: roles.map((role) => ({ ...role })),
+                          },
+                     ]}
+                />
 
-               {/* 状态信息栏 */}
-               {!isLoading && !isError && (
-                    <div className='text-muted-foreground bg-muted/30 flex items-center justify-between rounded-md px-2 py-1 text-xs'>
-                         <div className='flex items-center gap-4'>
-                              <span>
-                                   共 {total} 个用户
-                                   {total > 0 && (
-                                        <>
-                                             ，第 {pagination.pageIndex + 1} 页， 每页 {pagination.pageSize} 条
-                                        </>
-                                   )}
-                              </span>
-                              {columnFilters.length > 0 && (
-                                   <span className='flex items-center gap-1'>
-                                        <svg className='h-3 w-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                                             <path
-                                                  strokeLinecap='round'
-                                                  strokeLinejoin='round'
-                                                  strokeWidth={2}
-                                                  d='M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z'
-                                             />
-                                        </svg>
-                                        已应用筛选条件
-                                   </span>
-                              )}
-                         </div>
-                         {isLoading && (
-                              <div className='flex items-center gap-1'>
-                                   <div className='border-primary h-3 w-3 animate-spin rounded-full border-b-2'></div>
-                                   加载中
-                              </div>
-                         )}
-                    </div>
-               )}
+                {/* 状态信息栏 */}
+                {!isLoading && !isError && (
+                     <div className='text-muted-foreground bg-muted/30 flex items-center justify-between rounded-md px-2 py-1 text-xs'>
+                          <div className='flex items-center gap-4'>
+                               <span>
+                                    共 {total} 个用户
+                                    {total > 0 && (
+                                         <>
+                                              ，第 {pagination.pageIndex + 1} 页， 每页 {pagination.pageSize} 条
+                                         </>
+                                    )}
+                               </span>
+                               {/* 显示搜索条件 */}
+                               {(() => {
+                                    const searchConditions = []
+                                    const usernameFilter = table.getColumn('username')?.getFilterValue() as string
+                                    const phoneFilter = table.getColumn('phoneNumber')?.getFilterValue() as string
+                                    
+                                    if (usernameFilter) {
+                                         searchConditions.push(`姓名: ${usernameFilter}`)
+                                    }
+                                    if (phoneFilter) {
+                                         searchConditions.push(`电话: ${phoneFilter}`)
+                                    }
+                                    if (columnFilters.length > 0) {
+                                         searchConditions.push('已筛选')
+                                    }
+                                    
+                                    return searchConditions.length > 0 && (
+                                         <span className='flex items-center gap-1'>
+                                              <svg className='h-3 w-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                                   <path
+                                                        strokeLinecap='round'
+                                                        strokeLinejoin='round'
+                                                        strokeWidth={2}
+                                                        d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'
+                                                   />
+                                              </svg>
+                                              <span>搜索: {searchConditions.join(', ')}</span>
+                                         </span>
+                                    )
+                               })()}
+                               {columnFilters.length > 0 && (
+                                    <span className='flex items-center gap-1'>
+                                         <svg className='h-3 w-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                              <path
+                                                   strokeLinecap='round'
+                                                   strokeLinejoin='round'
+                                                   strokeWidth={2}
+                                                   d='M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z'
+                                              />
+                                         </svg>
+                                         已应用筛选条件
+                                    </span>
+                               )}
+                          </div>
+                          {isLoading && (
+                               <div className='flex items-center gap-1'>
+                                    <div className='border-primary h-3 w-3 animate-spin rounded-full border-b-2'></div>
+                                    加载中
+                               </div>
+                          )}
+                     </div>
+                )}
 
                {/* 数据表格 */}
                <div className='overflow-hidden rounded-md border'>
