@@ -1,6 +1,7 @@
 import * as React from 'react'
-import { CheckIcon, Cross2Icon, PlusCircledIcon } from '@radix-ui/react-icons'
+import { CheckIcon, PlusCircledIcon } from '@radix-ui/react-icons'
 import { type Column, type Table } from '@tanstack/react-table'
+import { DataTableViewOptions } from '@/develop/(components)/data-table/view-options.tsx'
 import { cn } from '@/develop/(lib)/utils.ts'
 import { Badge } from '@/components/ui/badge.tsx'
 import { Button } from '@/components/ui/button.tsx'
@@ -8,7 +9,6 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Input } from '@/components/ui/input.tsx'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.tsx'
 import { Separator } from '@/components/ui/separator.tsx'
-import { DataTableViewOptions } from '@/develop/(components)/data-table/view-options.tsx'
 
 /**
  * 多选过滤组件的 Props 类型定义
@@ -27,66 +27,79 @@ type DataTableFacetedFilterProps<TData, TValue> = {
      tempValue?: string[]
      /** 临时值变化回调 */
      onTempValueChange?: (value: string[]) => void
+     /** 是否有筛选值 */
+     hasFilterValue?: boolean
 }
 
 /**
- * 数据表格多选过滤组件
+ * 数据表格多选过滤组件（纯API版本）
  *
- * 提供多选过滤功能，支持从下拉菜单中选择多个值进行过滤，包括：
- * - 多选过滤
- * - 选项计数显示（显示每个选项对应的数据数量）
- * - 已选值徽章显示
- * - 搜索过滤选项
- * - 清除过滤功能
- *
- * @template TData 表格数据的类型
- * @template TValue 列值的类型
- * @param props 组件属性
- * @param props.column TanStack Table 列对象
- * @param props.title 过滤器标题
- * @param props.options 过滤选项数组，每个选项包含标签、值和可选的图标
- * @returns 多选过滤组件
+ * 提供多选过滤功能，支持从下拉菜单中选择多个值进行过滤
+ * 不依赖table对象，直接通过回调函数处理值变化
  */
-export function DataTableFacetedFilter<TData, TValue>({ 
-     column, 
-     title, 
-     options, 
-     tempValue = [], 
-     onTempValueChange 
+export function DataTableFacetedFilter<TData, TValue>({
+     column,
+     title,
+     options,
+     tempValue = [],
+     onTempValueChange,
+     hasFilterValue = false,
 }: DataTableFacetedFilterProps<TData, TValue>) {
      // 获取每个选项的唯一值及其对应的数据数量（用于显示计数）
      const facets = column?.getFacetedUniqueValues()
      // 获取当前选中的过滤值（优先使用临时值，否则使用列的当前值）
-     const selectedValues = new Set(tempValue.length > 0 ? tempValue : (column?.getFilterValue() as string[] || []))
+     const selectedValues = new Set(tempValue.length > 0 ? tempValue : (column?.getFilterValue() as string[]) || [])
+     // 是否显示有筛选值的指示器
+     const hasActiveFilter = hasFilterValue || selectedValues.size > 0
 
      return (
           <Popover>
                {/* 触发按钮：显示过滤器标题和已选值 */}
                <PopoverTrigger asChild>
-                    <Button variant='outline' size='sm' className='h-8 border-dashed'>
-                         <PlusCircledIcon className='size-4' />
-                         {title}
+                    <Button
+                         variant='outline'
+                         size='sm'
+                         className={cn(
+                              'h-8 min-w-[80px] border-dashed transition-all duration-200',
+                              hasActiveFilter
+                                   ? 'border-orange-300 bg-orange-50 text-orange-700 hover:bg-orange-100 dark:border-orange-600 dark:bg-orange-950/30 dark:text-orange-300'
+                                   : 'hover:border-orange-200 hover:bg-orange-50/50'
+                         )}
+                    >
+                         <div className='flex items-center gap-1'>
+                              {hasActiveFilter ? (
+                                   <div className='flex items-center gap-1'>
+                                        <div className='h-1.5 w-1.5 animate-pulse rounded-full bg-orange-500'></div>
+                                   </div>
+                              ) : (
+                                   <PlusCircledIcon className='size-3' />
+                              )}
+                              <span className='text-xs font-medium'>{title}</span>
+                         </div>
                          {/* 如果有选中的值，显示徽章 */}
                          {selectedValues?.size > 0 && (
                               <>
-                                   <Separator orientation='vertical' className='mx-2 h-4' />
+                                   <Separator orientation='vertical' className='mx-1 h-4' />
                                    {/* 移动端：只显示选中数量 */}
-                                   <Badge variant='secondary' className='rounded-sm px-1 font-normal lg:hidden'>
+                                   <Badge variant='secondary' className='rounded-full px-1.5 py-0.5 text-xs font-medium lg:hidden'>
                                         {selectedValues.size}
                                    </Badge>
                                    {/* 桌面端：显示选中项的标签或数量 */}
                                    <div className='hidden space-x-1 lg:flex'>
                                         {selectedValues.size > 2 ? (
                                              // 选中超过 2 项时，只显示数量
-                                             <Badge variant='secondary' className='rounded-sm px-1 font-normal'>
-                                                  {selectedValues.size} selected
+                                             <Badge variant='secondary' className='rounded-full px-1.5 py-0.5 text-xs font-medium'>
+                                                  {selectedValues.size} 项
                                              </Badge>
                                         ) : (
                                              // 选中 2 项或更少时，显示每个选中项的标签
                                              options
                                                   .filter((option) => selectedValues.has(option.value))
                                                   .map((option) => (
-                                                       <Badge variant='secondary' key={option.value} className='rounded-sm px-1 font-normal'>
+                                                       <Badge
+                                                            key={option.value}
+                                                            className='rounded-full border-orange-200 bg-orange-100 px-1.5 py-0.5 text-xs font-medium text-orange-800'
+                                                       >
                                                             {option.label}
                                                        </Badge>
                                                   ))
@@ -157,10 +170,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                                         <CommandSeparator />
                                         <CommandGroup>
                                              {/* 清除所有过滤 */}
-                                             <CommandItem 
-                                                  onSelect={() => onTempValueChange?.([])} 
-                                                  className='justify-center text-center'
-                                             >
+                                             <CommandItem onSelect={() => onTempValueChange?.([])} className='justify-center text-center'>
                                                   Clear filters
                                              </CommandItem>
                                         </CommandGroup>
@@ -224,13 +234,10 @@ type DataTableToolbarProps<TData> = {
 }
 
 /**
- * 数据表格工具栏组件
+ * 数据表格工具栏组件（单行版本）
  *
- * 提供表格的搜索、过滤和重置功能，包括：
- * - 多列搜索或全局搜索
- * - 多选过滤（Faceted Filter）
- * - 重置所有过滤条件
- * - 列显示选项控制
+ * 提供表格的搜索、过滤和重置功能，所有元素都在同一行显示
+ * 包括：搜索框、筛选器、操作按钮
  *
  * @template TData 表格数据的类型
  * @param props 组件属性
@@ -240,6 +247,8 @@ type DataTableToolbarProps<TData> = {
  * @param props.searchPlaceholder 单个搜索字段占位符（向后兼容）
  * @param props.searchFields 多个搜索字段配置数组
  * @param props.filters 多选过滤配置数组
+ * @param props.onManualSearch 手动搜索回调函数
+ * @param props.isLoading 是否正在加载中
  * @returns 工具栏组件
  */
 export function DataTableToolbar<TData>({
@@ -277,7 +286,7 @@ export function DataTableToolbar<TData>({
 
      // 更新临时搜索字段值
      const updateTempSearchField = React.useCallback((columnId: string, value: string) => {
-          setTempSearchState(prev => ({
+          setTempSearchState((prev) => ({
                ...prev,
                searchFields: {
                     ...prev.searchFields,
@@ -288,7 +297,7 @@ export function DataTableToolbar<TData>({
 
      // 更新临时筛选值
      const updateTempFilter = React.useCallback((columnId: string, value: string[]) => {
-          setTempSearchState(prev => ({
+          setTempSearchState((prev) => ({
                ...prev,
                filters: {
                     ...prev.filters,
@@ -328,7 +337,7 @@ export function DataTableToolbar<TData>({
           })
 
           // 清除表格中的搜索字段
-          effectiveSearchFields.forEach(field => {
+          effectiveSearchFields.forEach((field) => {
                const column = table.getColumn(field.columnId)
                if (column) {
                     column.setFilterValue(undefined)
@@ -336,7 +345,7 @@ export function DataTableToolbar<TData>({
           })
 
           // 清除表格中的筛选字段
-          filters.forEach(filter => {
+          filters.forEach((filter) => {
                const column = table.getColumn(filter.columnId)
                if (column) {
                     column.setFilterValue(undefined)
@@ -347,119 +356,160 @@ export function DataTableToolbar<TData>({
           onManualSearch?.()
      }, [effectiveSearchFields, filters, table, onManualSearch])
 
+     // 单行布局 - 所有元素都在一行
      return (
-          <div className='flex flex-col gap-4'>
-               {/* 搜索区域：多个搜索框或全局搜索 */}
-               <div className='flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4'>
-                     {/* 多个搜索字段模式 */}
-                     {effectiveSearchFields.length > 0 &&
-                          effectiveSearchFields.map((field) => {
-                               const column = table.getColumn(field.columnId)
-                               if (!column) return null
+          <div className='flex items-center gap-3 overflow-x-auto pb-2'>
+               {/* 搜索字段 */}
+               {effectiveSearchFields.length > 0 && (
+                    <div className='flex flex-shrink-0 items-center gap-2'>
+                         {effectiveSearchFields.map((field) => {
+                              const column = table.getColumn(field.columnId)
+                              if (!column) return null
 
-                               return (
-                                    <div key={field.columnId} className='flex flex-col gap-1'>
-                                         {field.label && <label className='text-muted-foreground text-sm font-medium'>{field.label}</label>}
-                                         <Input
-                                              placeholder={field.placeholder || `Search ${field.columnId}...`}
-                                              value={tempSearchState.searchFields[field.columnId] || ''}
-                                              onChange={(event) => updateTempSearchField(field.columnId, event.target.value)}
-                                              className='h-8 w-full sm:w-[180px] lg:w-[220px]'
-                                              onKeyDown={(event) => {
-                                                   if (event.key === 'Enter') {
-                                                        event.preventDefault()
-                                                        // 应用搜索条件并触发搜索
-                                                        applySearchConditions()
-                                                   }
-                                              }}
-                                         />
-                                    </div>
-                               )
-                          })}
+                              const hasValue = tempSearchState.searchFields[field.columnId]?.trim()
 
-                    {/* 全局搜索模式（当没有指定任何搜索字段时） */}
-                    {effectiveSearchFields.length === 0 && (
-                         <div className='flex-1'>
+                              return (
+                                   <div key={field.columnId} className='flex min-w-0 items-center gap-1.5'>
+                                        {field.label && (
+                                             <label className='text-muted-foreground flex-shrink-0 text-xs font-medium whitespace-nowrap'>{field.label}:</label>
+                                        )}
+                                        <div className='relative'>
+                                             <Input
+                                                  placeholder={field.placeholder || field.label}
+                                                  value={tempSearchState.searchFields[field.columnId] || ''}
+                                                  onChange={(event) => updateTempSearchField(field.columnId, event.target.value)}
+                                                  className={cn(
+                                                       'h-8 w-32 text-sm transition-all duration-200',
+                                                       hasValue && 'border-primary/50 bg-primary/5',
+                                                       'focus:border-primary focus:ring-primary/20 focus:ring-1'
+                                                  )}
+                                                  onKeyDown={(event) => {
+                                                       if (event.key === 'Enter') {
+                                                            event.preventDefault()
+                                                            applySearchConditions()
+                                                       }
+                                                  }}
+                                             />
+                                             {hasValue && (
+                                                  <div className='absolute top-1/2 right-2 -translate-y-1/2'>
+                                                       <div className='bg-primary h-1.5 w-1.5 rounded-full'></div>
+                                                  </div>
+                                             )}
+                                        </div>
+                                   </div>
+                              )
+                         })}
+                    </div>
+               )}
+
+               {/* 全局搜索模式 */}
+               {effectiveSearchFields.length === 0 && (
+                    <div className='flex flex-shrink-0 items-center gap-1.5'>
+                         <label className='text-muted-foreground flex-shrink-0 text-xs font-medium whitespace-nowrap'>搜索:</label>
+                         <div className='relative'>
                               <Input
                                    placeholder={globalSearchPlaceholder}
                                    value={table.getState().globalFilter ?? ''}
                                    onChange={(event) => table.setGlobalFilter(event.target.value)}
-                                   className='h-8 w-full sm:w-[200px] lg:w-[300px]'
+                                   className='focus:border-primary focus:ring-primary/20 h-8 w-40 pr-3 pl-8 text-sm transition-all duration-200 focus:ring-1'
                               />
-                         </div>
-                    )}
-               </div>
-
-               {/* 过滤器和操作区域 */}
-               <div className='flex flex-col-reverse items-start justify-between gap-3 sm:flex-row sm:items-center'>
-                    {/* 左侧：过滤器和重置按钮 */}
-                    <div className='flex flex-1 flex-wrap items-center gap-2'>
-                         {/* 多选过滤器组 */}
-                         <div className='flex flex-wrap gap-2'>
-                              {filters.map((filter) => {
-                                   const column = table.getColumn(filter.columnId)
-                                   if (!column) return null
-                                   return (
-                                        <DataTableFacetedFilter 
-                                             key={filter.columnId} 
-                                             column={column} 
-                                             title={filter.title} 
-                                             options={filter.options}
-                                             tempValue={tempSearchState.filters[filter.columnId] || []}
-                                             onTempValueChange={(value) => updateTempFilter(filter.columnId, value)}
-                                        />
-                                   )
-                              })}
-                         </div>
-
-                          {/* 重置按钮 */}
-                          {isFiltered && (
-                               <Button
-                                    variant='ghost'
-                                    onClick={() => {
-                                         table.resetColumnFilters()
-                                         table.setGlobalFilter('')
-                                    }}
-                                    className='h-8 px-2 lg:px-3'
-                               >
-                                    重置
-                                    <Cross2Icon className='ms-2 h-4 w-4' />
-                               </Button>
-                          )}
-                          
-                          {/* 清除搜索按钮 */}
-                          {(Object.keys(tempSearchState.searchFields).length > 0 || Object.keys(tempSearchState.filters).length > 0) && (
-                               <Button
-                                    variant='ghost'
-                                    onClick={clearTempSearchConditions}
-                                    className='h-8 px-2 lg:px-3'
-                                    title='清除所有搜索条件'
-                               >
-                                    清除搜索
-                                    <Cross2Icon className='ms-2 h-4 w-4' />
-                               </Button>
-                          )}
-                    </div>
-
-                    {/* 右侧：列显示选项控制和统一搜索按钮 */}
-                    <div className='flex items-center gap-2'>
-                         {/* 统一搜索按钮 */}
-                         {onManualSearch && (
-                              <Button
-                                   variant='default'
-                                   size='sm'
-                                   onClick={applySearchConditions}
-                                   disabled={isLoading}
-                                   className='h-8 px-4'
+                              <svg
+                                   className='text-muted-foreground absolute top-1/2 left-2 h-3 w-3 -translate-y-1/2'
+                                   fill='none'
+                                   stroke='currentColor'
+                                   viewBox='0 0 24 24'
                               >
-                                   <svg className={cn('h-4 w-4 mr-1', isLoading && 'animate-spin')} fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' />
-                                   </svg>
-                                   搜索
-                              </Button>
-                         )}
-                         <DataTableViewOptions table={table} />
+                                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' />
+                              </svg>
+                         </div>
                     </div>
+               )}
+
+               {/* 筛选器 */}
+               {filters.length > 0 && (
+                    <div className='border-border ml-1 flex flex-shrink-0 items-center gap-2 border-l pl-3'>
+                         {filters.map((filter) => {
+                              const column = table.getColumn(filter.columnId)
+                              if (!column) return null
+
+                              const hasFilterValue = tempSearchState.filters[filter.columnId]?.length > 0
+
+                              return (
+                                   <DataTableFacetedFilter
+                                        key={filter.columnId}
+                                        column={column}
+                                        title={filter.title}
+                                        options={filter.options}
+                                        tempValue={tempSearchState.filters[filter.columnId] || []}
+                                        onTempValueChange={(value) => updateTempFilter(filter.columnId, value)}
+                                        hasFilterValue={hasFilterValue}
+                                   />
+                              )
+                         })}
+                    </div>
+               )}
+
+               {/* 操作按钮 */}
+               <div className='border-border ml-1 flex flex-shrink-0 items-center gap-1.5 border-l pl-3'>
+                    {/* 重置按钮 */}
+                    {isFiltered && (
+                         <Button
+                              variant='ghost'
+                              size='sm'
+                              onClick={() => {
+                                   table.resetColumnFilters()
+                                   table.setGlobalFilter('')
+                              }}
+                              className='text-muted-foreground hover:text-foreground h-7 px-2'
+                              title='重置筛选条件'
+                         >
+                              <svg className='h-3 w-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                   <path
+                                        strokeLinecap='round'
+                                        strokeLinejoin='round'
+                                        strokeWidth={2}
+                                        d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'
+                                   />
+                              </svg>
+                         </Button>
+                    )}
+
+                    {/* 清除搜索按钮 */}
+                    {(Object.keys(tempSearchState.searchFields).length > 0 || Object.keys(tempSearchState.filters).length > 0) && (
+                         <Button
+                              variant='ghost'
+                              size='sm'
+                              onClick={clearTempSearchConditions}
+                              className='text-muted-foreground hover:text-destructive hover:border-destructive/50 h-7 px-2'
+                              title='清除所有搜索条件'
+                         >
+                              <svg className='h-3 w-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
+                              </svg>
+                         </Button>
+                    )}
+
+                    {/* 统一搜索按钮 */}
+                    {onManualSearch && (
+                         <Button
+                              onClick={applySearchConditions}
+                              disabled={isLoading}
+                              className={cn(
+                                   'h-8 px-3 font-medium shadow-sm transition-all duration-200',
+                                   'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800',
+                                   'border-0 text-white hover:shadow-md',
+                                   isLoading && 'cursor-not-allowed opacity-75'
+                              )}
+                         >
+                              <svg className={cn('mr-1 h-3.5 w-3.5', isLoading && 'animate-spin')} fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' />
+                              </svg>
+                              <span className='text-xs'>{isLoading ? '搜索中...' : '搜索'}</span>
+                         </Button>
+                    )}
+
+                    {/* 视图选项 */}
+                    <DataTableViewOptions table={table} />
                </div>
           </div>
      )
