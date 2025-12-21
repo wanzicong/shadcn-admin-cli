@@ -14,9 +14,10 @@ import {
 } from '@tanstack/react-table'
 import { DataTablePagination } from '@/develop/(components)/data-table'
 import { DataTableToolbar } from '@/develop/(components)/data-table/toolbar-server'
-import { type NavigateFn, useTableUrlState } from '@/develop/(views)/official/users/search/use-table-url-state-server.ts'
 import { cn } from '@/develop/(lib)/utils.ts'
 import { type UserQueryParams, type UserRole, type UserStatus } from '@/develop/(services)/api'
+import { type NavigateFn, useTableUrlState } from '@/develop/(views)/official/users/search/use-table-url-state-server.ts'
+import { Button } from '@/components/ui/button.tsx'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
 import { roles } from '../data/data.ts'
 import { type User } from '../data/schema.ts'
@@ -86,7 +87,7 @@ export function UsersTable({ search, navigate }: DataTableProps) {
 
      // alert(userSearchParams.username)
      const { data, isLoading, isError } = useQuery({
-          queryKey: ['demos', userSearchParams],
+          queryKey: ['users', userSearchParams],
           queryFn: () => usersApi.getUsers(userSearchParams),
      })
 
@@ -184,18 +185,57 @@ export function UsersTable({ search, navigate }: DataTableProps) {
 
      // ============= 副作用 =============
      useEffect(() => {
-          ensurePageInRange(table.getPageCount())
+          // 确保当前页码在有效范围内
+          ensurePageInRange(totalPages, { resetTo: 'first' })
      }, [table, ensurePageInRange, totalPages]) // 添加 totalPages 依赖
 
      // ============= 渲染逻辑 =============
      // 现在可以在 Hook 之后处理条件渲染
 
      if (isLoading) {
-          return <div className='flex h-64 items-center justify-center'>加载中...</div>
+          return (
+               <div className='flex h-64 flex-col items-center justify-center gap-4'>
+                    <div className='flex items-center gap-2'>
+                         <div className='border-primary h-6 w-6 animate-spin rounded-full border-b-2'></div>
+                         <span className='text-muted-foreground'>加载用户数据中...</span>
+                    </div>
+                    <div className='text-muted-foreground text-xs'>正在获取第 {pagination.pageIndex + 1} 页数据，请稍候</div>
+               </div>
+          )
      }
 
      if (isError) {
-          return <div className='flex h-64 items-center justify-center text-red-500'>加载数据时出错</div>
+          return (
+               <div className='flex h-64 flex-col items-center justify-center gap-4'>
+                    <div className='text-destructive flex items-center gap-2'>
+                         <svg className='h-6 w-6' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                              <path
+                                   strokeLinecap='round'
+                                   strokeLinejoin='round'
+                                   strokeWidth={2}
+                                   d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z'
+                              />
+                         </svg>
+                         <span>加载数据时出错</span>
+                    </div>
+                    <div className='space-y-2 text-center'>
+                         <p className='text-muted-foreground text-sm'>无法获取用户数据，请检查网络连接后重试</p>
+                         <div className='flex justify-center gap-2'>
+                              <Button variant='outline' size='sm' onClick={() => window.location.reload()}>
+                                   <svg className='mr-1 h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                        <path
+                                             strokeLinecap='round'
+                                             strokeLinejoin='round'
+                                             strokeWidth={2}
+                                             d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'
+                                        />
+                                   </svg>
+                                   刷新页面
+                              </Button>
+                         </div>
+                    </div>
+               </div>
+          )
      }
 
      // 注意：这里不能有 if (!data) 的检查，因为我们已经使用了 data?.list || []
@@ -239,6 +279,41 @@ export function UsersTable({ search, navigate }: DataTableProps) {
                          },
                     ]}
                />
+
+               {/* 状态信息栏 */}
+               {!isLoading && !isError && (
+                    <div className='text-muted-foreground bg-muted/30 flex items-center justify-between rounded-md px-2 py-1 text-xs'>
+                         <div className='flex items-center gap-4'>
+                              <span>
+                                   共 {total} 个用户
+                                   {total > 0 && (
+                                        <>
+                                             ，第 {pagination.pageIndex + 1} 页， 每页 {pagination.pageSize} 条
+                                        </>
+                                   )}
+                              </span>
+                              {columnFilters.length > 0 && (
+                                   <span className='flex items-center gap-1'>
+                                        <svg className='h-3 w-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                             <path
+                                                  strokeLinecap='round'
+                                                  strokeLinejoin='round'
+                                                  strokeWidth={2}
+                                                  d='M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z'
+                                             />
+                                        </svg>
+                                        已应用筛选条件
+                                   </span>
+                              )}
+                         </div>
+                         {isLoading && (
+                              <div className='flex items-center gap-1'>
+                                   <div className='border-primary h-3 w-3 animate-spin rounded-full border-b-2'></div>
+                                   加载中
+                              </div>
+                         )}
+                    </div>
+               )}
 
                {/* 数据表格 */}
                <div className='overflow-hidden rounded-md border'>
@@ -285,8 +360,50 @@ export function UsersTable({ search, navigate }: DataTableProps) {
                                    ))
                               ) : (
                                    <TableRow>
-                                        <TableCell colSpan={columns.length} className='h-24 text-center'>
-                                             {userData.length === 0 ? '暂无数据' : '无匹配结果'}
+                                        <TableCell colSpan={columns.length} className='h-32 text-center'>
+                                             <div className='flex flex-col items-center gap-2 py-8'>
+                                                  {userData.length === 0 ? (
+                                                       <>
+                                                            <svg
+                                                                 className='text-muted-foreground h-12 w-12'
+                                                                 fill='none'
+                                                                 stroke='currentColor'
+                                                                 viewBox='0 0 24 24'
+                                                            >
+                                                                 <path
+                                                                      strokeLinecap='round'
+                                                                      strokeLinejoin='round'
+                                                                      strokeWidth={1}
+                                                                      d='M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z'
+                                                                 />
+                                                            </svg>
+                                                            <div className='space-y-1'>
+                                                                 <p className='text-muted-foreground font-medium'>暂无用户数据</p>
+                                                                 <p className='text-muted-foreground text-xs'>系统中还没有用户，点击上方按钮添加新用户</p>
+                                                            </div>
+                                                       </>
+                                                  ) : (
+                                                       <>
+                                                            <svg
+                                                                 className='text-muted-foreground h-12 w-12'
+                                                                 fill='none'
+                                                                 stroke='currentColor'
+                                                                 viewBox='0 0 24 24'
+                                                            >
+                                                                 <path
+                                                                      strokeLinecap='round'
+                                                                      strokeLinejoin='round'
+                                                                      strokeWidth={1}
+                                                                      d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'
+                                                                 />
+                                                            </svg>
+                                                            <div className='space-y-1'>
+                                                                 <p className='text-muted-foreground font-medium'>未找到匹配的用户</p>
+                                                                 <p className='text-muted-foreground text-xs'>请尝试调整搜索条件或筛选条件</p>
+                                                            </div>
+                                                       </>
+                                                  )}
+                                             </div>
                                         </TableCell>
                                    </TableRow>
                               )}
@@ -295,7 +412,15 @@ export function UsersTable({ search, navigate }: DataTableProps) {
                </div>
 
                {/* 表格分页 */}
-               <DataTablePagination table={table} className='mt-auto' />
+               <div className='mt-auto'>
+                    {isLoading && (
+                         <div className='text-muted-foreground flex items-center justify-center py-2 text-sm'>
+                              <div className='border-primary mr-2 h-4 w-4 animate-spin rounded-full border-b-2'></div>
+                              更新分页信息中...
+                         </div>
+                    )}
+                    <DataTablePagination table={table} />
+               </div>
 
                {/* 批量操作 */}
                <DataTableBulkActions table={table} />
