@@ -1,3 +1,4 @@
+import * as React from 'react'
 import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
 import { MixerHorizontalIcon } from '@radix-ui/react-icons'
 import { type Table } from '@tanstack/react-table'
@@ -27,6 +28,52 @@ type DataTableViewOptionsProps<TData> = {
  * @returns 列显示选项组件
  */
 export function DataTableViewOptions<TData>({ table }: DataTableViewOptionsProps<TData>) {
+     /**
+      * 获取列的显示名称
+      * 优先使用列定义的 header，如果没有则使用列 ID
+      */
+     const getColumnDisplayName = (column: unknown): string => {
+          // 类型守卫：确保 column 是有效的列对象
+          if (!column || typeof column !== 'object') return 'Unknown'
+
+          const col = column as Record<string, unknown>
+
+          // 尝试从 columnDef 中获取 header
+          if (col.columnDef) {
+               const columnDef = col.columnDef as Record<string, unknown>
+               if (columnDef.header) {
+                    // 如果 header 是字符串，直接返回
+                    if (typeof columnDef.header === 'string') {
+                         return columnDef.header
+                    }
+                    // 如果 header 是函数，尝试获取返回值
+                    if (typeof columnDef.header === 'function') {
+                         // 尝试调用函数获取标题
+                         try {
+                              const result = columnDef.header({ column })
+                              // 如果结果是 React 元素，尝试提取文本
+                              if (React.isValidElement(result)) {
+                                   // 从 DataTableColumnHeader 的 title prop 获取
+                                   if (result.props?.title && typeof result.props.title === 'string') {
+                                        return result.props.title
+                                   }
+                                   // 如果有 children，尝试提取
+                                   if (result.props?.children) {
+                                        return String(result.props.children)
+                                   }
+                              }
+                         } catch {
+                              // 如果获取失败，使用列 ID
+                         }
+                    }
+               }
+          }
+
+          // 默认返回列 ID（首字母大写）
+          const colId = typeof col.id === 'string' ? col.id : 'Unknown'
+          return colId.charAt(0).toUpperCase() + colId.slice(1)
+     }
+
      return (
           <DropdownMenu modal={false}>
                {/* 触发按钮：显示"View"文本和图标（移动端隐藏） */}
@@ -48,6 +95,8 @@ export function DataTableViewOptions<TData>({ table }: DataTableViewOptionsProps
                          // 过滤：只显示有访问器函数且可以隐藏的列（排除操作列等）
                          .filter((column) => typeof column.accessorFn !== 'undefined' && column.getCanHide())
                          .map((column) => {
+                              const displayName = getColumnDisplayName(column)
+
                               return (
                                    <DropdownMenuCheckboxItem
                                         key={column.id}
@@ -57,7 +106,7 @@ export function DataTableViewOptions<TData>({ table }: DataTableViewOptionsProps
                                         // 切换列的可见性
                                         onCheckedChange={(value) => column.toggleVisibility(!!value)}
                                    >
-                                        {column.id}
+                                        {displayName}
                                    </DropdownMenuCheckboxItem>
                               )
                          })}
