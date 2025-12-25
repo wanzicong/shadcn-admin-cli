@@ -257,6 +257,10 @@ type DataTableToolbarProps<TData> = {
      onManualSearch?: () => void
      /** 是否正在加载中 */
      isLoading?: boolean
+     /** 查询后是否保留搜索条件（默认 true） */
+     preserveSearchAfterQuery?: boolean
+     /** 是否显示保留搜索条件的开关（默认 false） */
+     showPreserveToggle?: boolean
 }
 
 /**
@@ -285,7 +289,12 @@ export function DataTableToolbar<TData>({
      searchFields = [],
      filters = [],
      onManualSearch,
+     preserveSearchAfterQuery = true,
+     showPreserveToggle = false,
 }: DataTableToolbarProps<TData>) {
+     // 保留搜索条件的状态
+     const [preserveSearch, setPreserveSearch] = React.useState(preserveSearchAfterQuery)
+
      // 检查是否有任何过滤条件被应用（列过滤或全局过滤）
      const isFiltered = table.getState().columnFilters.length > 0 || table.getState().globalFilter
 
@@ -397,9 +406,17 @@ export function DataTableToolbar<TData>({
                }
           })
 
+          // 如果不保留搜索条件，清空临时状态
+          if (!preserveSearch) {
+               setTempSearchState({
+                    searchFields: {},
+                    filters: {},
+               })
+          }
+
           // 触发手动搜索回调（重置到第一页）
           onManualSearch?.()
-     }, [tempSearchState, table, onManualSearch])
+     }, [tempSearchState, table, onManualSearch, preserveSearch])
 
      // 清除所有搜索条件（优化：统一清除逻辑）
      const clearAllConditions = React.useCallback(() => {
@@ -532,6 +549,26 @@ export function DataTableToolbar<TData>({
 
                     {/* 操作按钮区域 */}
                     <div className='flex items-center gap-2'>
+                         {/* 保留搜索条件开关 */}
+                         {showPreserveToggle && (
+                              <div className='flex items-center gap-2 border-r pr-2'>
+                                   <label
+                                        htmlFor='preserve-search'
+                                        className='text-muted-foreground cursor-pointer text-xs whitespace-nowrap'
+                                        title='查询后是否保留搜索条件'
+                                   >
+                                        保留条件
+                                   </label>
+                                   <input
+                                        id='preserve-search'
+                                        type='checkbox'
+                                        checked={preserveSearch}
+                                        onChange={(e) => setPreserveSearch(e.target.checked)}
+                                        className='border-primary h-4 w-4 rounded border focus:ring-primary focus:ring-2'
+                                   />
+                              </div>
+                         )}
+
                          {/* 统一查询按钮 */}
                          <Button
                               onClick={applySearchConditions}

@@ -53,13 +53,15 @@ export function DataTableViewOptions<TData>({ table }: DataTableViewOptionsProps
                               const result = columnDef.header({ column })
                               // 如果结果是 React 元素，尝试提取文本
                               if (React.isValidElement(result)) {
+                                   // 安全地访问 props
+                                   const props = result.props as Record<string, unknown> | undefined
                                    // 从 DataTableColumnHeader 的 title prop 获取
-                                   if (result.props?.title && typeof result.props.title === 'string') {
-                                        return result.props.title
+                                   if (props?.title && typeof props.title === 'string') {
+                                        return props.title
                                    }
                                    // 如果有 children，尝试提取
-                                   if (result.props?.children) {
-                                        return String(result.props.children)
+                                   if (props?.children) {
+                                        return String(props.children)
                                    }
                               }
                          } catch {

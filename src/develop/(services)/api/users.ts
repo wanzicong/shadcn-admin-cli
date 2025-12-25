@@ -56,70 +56,70 @@ export class UsersService {
                console.log('📤 API Request - getUsers:', cleanParams)
           }
           
-          return post<PaginatedResponse<User>>('/users', cleanParams)
+          return post<PaginatedResponse<User>>('/api/users', cleanParams)
      }
 
      /**
       * 获取单个用户详情
       */
      static async getUser(params: { user_id: string }): Promise<User> {
-          return post<User>('/users/detail', params)
+          return post<User>('/api/users/detail', params)
      }
 
      /**
       * 创建新用户
       */
      static async createUser(data: UserCreate): Promise<User> {
-          return post<User>('/users/create', { user_data: data })
+          return post<User>('/api/users/create', { user_data: data })
      }
 
      /**
       * 更新用户信息
       */
      static async updateUser(userId: string, data: UserUpdate): Promise<User> {
-          return post<User>('/users/update', { user_id: userId, user_data: data })
+          return post<User>('/api/users/update', { user_id: userId, user_data: data })
      }
 
      /**
       * 删除单个用户
       */
      static async deleteUser(userId: string): Promise<{ message: string }> {
-          return post<{ message: string }>('/users/delete', { user_id: userId })
+          return post<{ message: string }>('/api/users/delete', { user_id: userId })
      }
 
      /**
       * 批量删除用户
       */
      static async bulkDeleteUsers(data: BulkDeleteRequest): Promise<BulkOperationResponse> {
-          return post<BulkOperationResponse>('/users/bulk-delete', data)
+          return post<BulkOperationResponse>('/api/users/bulk-delete', data)
      }
 
      /**
       * 邀请用户
       */
      static async inviteUser(data: UserInviteRequest): Promise<UserInviteResponse> {
-          return post<UserInviteResponse>('/users/invite', data)
+          return post<UserInviteResponse>('/api/users/invite', data)
      }
 
      /**
       * 激活用户
       */
      static async activateUser(userId: string): Promise<{ message: string }> {
-          return post<{ message: string }>('/users/activate', { user_id: userId })
+          return post<{ message: string }>('/api/users/activate', { user_id: userId })
      }
 
      /**
       * 暂停用户
       */
      static async suspendUser(userId: string): Promise<{ message: string }> {
-          return post<{ message: string }>('/users/suspend', { user_id: userId })
+          return post<{ message: string }>('/api/users/suspend', { user_id: userId })
      }
 
      /**
       * 获取用户统计信息
       */
      static async getUserStats(params?: Record<string, unknown>): Promise<UserStats> {
-          return post<UserStats>('/users/stats', params)
+          return post<UserStats>('/api/users/stats', params)
      }
 }
 

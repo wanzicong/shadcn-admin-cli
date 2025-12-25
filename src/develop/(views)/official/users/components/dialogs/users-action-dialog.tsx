@@ -1,17 +1,21 @@
 'use client'
 
+import * as React from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { showSubmittedData } from '@/develop/(lib)/show-submitted-data.tsx'
+import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button.tsx'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog.tsx'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx'
 import { Input } from '@/components/ui/input.tsx'
 import { PasswordInput } from '@/components/password-input.tsx'
 import { SelectDropdown } from '@/components/select-dropdown.tsx'
+import { LoaderCircle } from '@/components/loader-circle.tsx'
 import { roles } from '../../data/data.ts'
 import { type User } from '../../data/schema.ts'
+import { usersApi } from '../../services/user-services.ts'
 
 const formSchema = z
      .object({
@@ -87,6 +91,9 @@ type UserActionDialogProps = {
 
 export function UsersActionDialog({ currentRow, open, onOpenChange }: UserActionDialogProps) {
      const isEdit = !!currentRow
+     const queryClient = useQueryClient()
+     const [isSubmitting, setIsSubmitting] = React.useState(false)
+
      const form = useForm<UserForm>({
           resolver: zodResolver(formSchema),
           defaultValues: isEdit
@@ -109,10 +116,34 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UserAction
                  },
      })
 
-     const onSubmit = (values: UserForm) => {
-          form.reset()
-          showSubmittedData(values)
-          onOpenChange(false)
+     const onSubmit = async (values: UserForm) => {
+          setIsSubmitting(true)
+          try {
+               if (isEdit && currentRow) {
+                    // 更新用户
+                    const { confirmPassword, isEdit, ...updateData } = values
+                    await usersApi.updateUser(currentRow.id, updateData)
+                    toast.success('用户更新成功')
+               } else {
+                    // 创建新用户
+                    const { confirmPassword, isEdit, ...createData } = values
+                    await usersApi.createUser(createData)
+                    toast.success('用户创建成功')
+               }
+
+               // 刷新用户列表
+               queryClient.invalidateQueries({ queryKey: ['users'] })
+
+               form.reset()
+               onOpenChange(false)
+          } catch (error) {
+               // eslint-disable-next-line no-console
+               console.error('操作失败:', error)
+               const errorMessage = error instanceof Error ? error.message : '操作失败，请重试'
+               toast.error(errorMessage)
+          } finally {
+               setIsSubmitting(false)
+          }
      }
 
      const isPasswordTouched = !!form.formState.dirtyFields.password
@@ -121,8 +152,10 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UserAction
           <Dialog
                open={open}
                onOpenChange={(state) => {
-                    form.reset()
-                    onOpenChange(state)
+                    if (!isSubmitting) {
+                         form.reset()
+                         onOpenChange(state)
+                    }
                }}
           >
                <DialogContent className='sm:max-w-lg'>
@@ -143,7 +176,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UserAction
                                              <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
                                                   <FormLabel className='col-span-2 text-end'>名字</FormLabel>
                                                   <FormControl>
-                                                       <Input placeholder='请输入名字' className='col-span-4' autoComplete='off' {...field} />
+                                                       <Input placeholder='请输入名字' className='col-span-4' autoComplete='off' {...field} disabled={isSubmitting} />
                                                   </FormControl>
                                                   <FormMessage className='col-span-4 col-start-3' />
                                              </FormItem>
@@ -156,7 +189,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UserAction
                                              <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
                                                   <FormLabel className='col-span-2 text-end'>姓氏</FormLabel>
                                                   <FormControl>
-                                                       <Input placeholder='请输入姓氏' className='col-span-4' autoComplete='off' {...field} />
+                                                       <Input placeholder='请输入姓氏' className='col-span-4' autoComplete='off' {...field} disabled={isSubmitting} />
                                                   </FormControl>
                                                   <FormMessage className='col-span-4 col-start-3' />
                                              </FormItem>
@@ -169,7 +202,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UserAction
                                              <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
                                                   <FormLabel className='col-span-2 text-end'>用户名</FormLabel>
                                                   <FormControl>
-                                                       <Input placeholder='请输入用户名' className='col-span-4' {...field} />
+                                                       <Input placeholder='请输入用户名' className='col-span-4' {...field} disabled={isSubmitting} />
                                                   </FormControl>
                                                   <FormMessage className='col-span-4 col-start-3' />
                                              </FormItem>
@@ -182,7 +215,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UserAction
                                              <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
                                                   <FormLabel className='col-span-2 text-end'>邮箱</FormLabel>
                                                   <FormControl>
-                                                       <Input placeholder='example@email.com' className='col-span-4' {...field} />
+                                                       <Input placeholder='example@email.com' className='col-span-4' {...field} disabled={isSubmitting} />
                                                   </FormControl>
                                                   <FormMessage className='col-span-4 col-start-3' />
                                              </FormItem>
@@ -195,7 +228,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UserAction
                                              <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
                                                   <FormLabel className='col-span-2 text-end'>电话号码</FormLabel>
                                                   <FormControl>
-                                                       <Input placeholder='请输入电话号码' className='col-span-4' {...field} />
+                                                       <Input placeholder='请输入电话号码' className='col-span-4' {...field} disabled={isSubmitting} />
                                                   </FormControl>
                                                   <FormMessage className='col-span-4 col-start-3' />
                                              </FormItem>
@@ -212,6 +245,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UserAction
                                                        onValueChange={field.onChange}
                                                        placeholder='请选择角色'
                                                        className='col-span-4'
+                                                       disabled={isSubmitting}
                                                        items={roles.map(({ label, value }) => ({
                                                             label,
                                                             value,
@@ -228,7 +262,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UserAction
                                              <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
                                                   <FormLabel className='col-span-2 text-end'>密码</FormLabel>
                                                   <FormControl>
-                                                       <PasswordInput placeholder='请输入密码' className='col-span-4' {...field} />
+                                                       <PasswordInput placeholder='请输入密码' className='col-span-4' {...field} disabled={isSubmitting} />
                                                   </FormControl>
                                                   <FormMessage className='col-span-4 col-start-3' />
                                              </FormItem>
@@ -242,7 +276,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UserAction
                                                   <FormLabel className='col-span-2 text-end'>确认密码</FormLabel>
                                                   <FormControl>
                                                        <PasswordInput
-                                                            disabled={!isPasswordTouched}
+                                                            disabled={!isPasswordTouched || isSubmitting}
                                                             placeholder='请再次输入密码'
                                                             className='col-span-4'
                                                             {...field}
@@ -256,8 +290,15 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UserAction
                          </Form>
                     </div>
                     <DialogFooter>
-                         <Button type='submit' form='user-form'>
-                              保存更改
+                         <Button type='submit' form='user-form' disabled={isSubmitting}>
+                              {isSubmitting ? (
+                                   <>
+                                        <LoaderCircle className='mr-2 h-4 w-4' />
+                                        {isEdit ? '更新中...' : '创建中...'}
+                                   </>
+                              ) : (
+                                   '保存更改'
+                              )}
                          </Button>
                     </DialogFooter>
                </DialogContent>
