@@ -29,6 +29,8 @@ type DataTableFacetedFilterProps<TData, TValue> = {
      onTempValueChange?: (value: string[]) => void
      /** 是否有筛选值 */
      hasFilterValue?: boolean
+     /** 是否有待应用的更改 */
+     isPending?: boolean
 }
 
 /**
@@ -44,6 +46,7 @@ export function DataTableFacetedFilter<TData, TValue>({
      tempValue = [],
      onTempValueChange,
      hasFilterValue = false,
+     isPending = false,
 }: DataTableFacetedFilterProps<TData, TValue>) {
      // 获取每个选项的唯一值及其对应的数据数量（用于显示计数）
      const facets = column?.getFacetedUniqueValues()
@@ -61,15 +64,21 @@ export function DataTableFacetedFilter<TData, TValue>({
                          size='sm'
                          className={cn(
                               'h-8 min-w-[80px] border-dashed transition-all duration-200',
-                              hasActiveFilter
-                                   ? 'border-orange-300 bg-orange-50 text-orange-700 hover:bg-orange-100 dark:border-orange-600 dark:bg-orange-950/30 dark:text-orange-300'
-                                   : 'hover:border-orange-200 hover:bg-orange-50/50'
+                              isPending
+                                   ? 'border-orange-500 bg-orange-100 text-orange-800 hover:bg-orange-200 dark:border-orange-400 dark:bg-orange-950/50 dark:text-orange-300'
+                                   : hasActiveFilter
+                                   ? 'border-primary bg-primary/10 text-primary hover:bg-primary/20 dark:border-primary/50 dark:bg-primary/5'
+                                   : 'hover:border-muted-foreground/30 hover:bg-muted/50'
                          )}
                     >
                          <div className='flex items-center gap-1'>
-                              {hasActiveFilter ? (
+                              {isPending ? (
                                    <div className='flex items-center gap-1'>
                                         <div className='h-1.5 w-1.5 animate-pulse rounded-full bg-orange-500'></div>
+                                   </div>
+                              ) : hasActiveFilter ? (
+                                   <div className='flex items-center gap-1'>
+                                        <div className='bg-primary h-1.5 w-1.5 rounded-full dark:bg-primary-foreground'></div>
                                    </div>
                               ) : (
                                    <PlusCircledIcon className='size-3' />
@@ -81,14 +90,26 @@ export function DataTableFacetedFilter<TData, TValue>({
                               <>
                                    <Separator orientation='vertical' className='mx-1 h-4' />
                                    {/* 移动端：只显示选中数量 */}
-                                   <Badge variant='secondary' className='rounded-full px-1.5 py-0.5 text-xs font-medium lg:hidden'>
+                                   <Badge
+                                        variant='secondary'
+                                        className={cn(
+                                             'rounded-full px-1.5 py-0.5 text-xs font-medium lg:hidden',
+                                             isPending && 'border-orange-400 bg-orange-200 text-orange-900'
+                                        )}
+                                   >
                                         {selectedValues.size}
                                    </Badge>
                                    {/* 桌面端：显示选中项的标签或数量 */}
                                    <div className='hidden space-x-1 lg:flex'>
                                         {selectedValues.size > 2 ? (
                                              // 选中超过 2 项时，只显示数量
-                                             <Badge variant='secondary' className='rounded-full px-1.5 py-0.5 text-xs font-medium'>
+                                             <Badge
+                                                  variant='secondary'
+                                                  className={cn(
+                                                       'rounded-full px-1.5 py-0.5 text-xs font-medium',
+                                                       isPending && 'border-orange-400 bg-orange-200 text-orange-900'
+                                                  )}
+                                             >
                                                   {selectedValues.size} 项
                                              </Badge>
                                         ) : (
@@ -98,7 +119,12 @@ export function DataTableFacetedFilter<TData, TValue>({
                                                   .map((option) => (
                                                        <Badge
                                                             key={option.value}
-                                                            className='rounded-full border-orange-200 bg-orange-100 px-1.5 py-0.5 text-xs font-medium text-orange-800'
+                                                            className={cn(
+                                                                 'rounded-full px-1.5 py-0.5 text-xs font-medium',
+                                                                 isPending
+                                                                      ? 'border-orange-400 bg-orange-200 text-orange-900'
+                                                                      : 'border-primary/30 bg-primary/20 text-primary'
+                                                            )}
                                                        >
                                                             {option.label}
                                                        </Badge>
@@ -234,10 +260,10 @@ type DataTableToolbarProps<TData> = {
 }
 
 /**
- * 数据表格工具栏组件（单行版本）
+ * 数据表格工具栏组件（优化版本）
  *
- * 提供表格的搜索、过滤和重置功能，所有元素都在同一行显示
- * 包括：搜索框、筛选器、操作按钮
+ * 提供表格的搜索、过滤和重置功能，采用响应式布局
+ * 优化：即时搜索、简化状态管理、更好的移动端体验
  *
  * @template TData 表格数据的类型
  * @param props 组件属性
@@ -259,7 +285,6 @@ export function DataTableToolbar<TData>({
      searchFields = [],
      filters = [],
      onManualSearch,
-     isLoading = false,
 }: DataTableToolbarProps<TData>) {
      // 检查是否有任何过滤条件被应用（列过滤或全局过滤）
      const isFiltered = table.getState().columnFilters.length > 0 || table.getState().globalFilter
@@ -278,13 +303,61 @@ export function DataTableToolbar<TData>({
           return searchFields
      }, [searchKey, searchPlaceholder, searchFields])
 
-     // 临时搜索状态管理
-     const [tempSearchState, setTempSearchState] = React.useState<TempSearchState>({
-          searchFields: {},
-          filters: {},
+     // 优化：临时搜索状态管理 - 同步初始化
+     const [tempSearchState, setTempSearchState] = React.useState<TempSearchState>(() => {
+          const initialSearchFields: Record<string, string> = {}
+          const initialFilters: Record<string, string[]> = {}
+
+          // 从表格当前状态初始化
+          effectiveSearchFields.forEach((field) => {
+               const column = table.getColumn(field.columnId)
+               const value = column?.getFilterValue() as string
+               if (value) initialSearchFields[field.columnId] = value
+          })
+
+          filters.forEach((filter) => {
+               const column = table.getColumn(filter.columnId)
+               const value = column?.getFilterValue() as string[]
+               if (value && value.length > 0) initialFilters[filter.columnId] = value
+          })
+
+          return { searchFields: initialSearchFields, filters: initialFilters }
      })
 
-     // 更新临时搜索字段值
+     // 检查是否有待应用的搜索条件（临时状态与表格状态不一致）
+     const hasPendingChanges = React.useMemo(() => {
+          // 检查搜索字段
+          for (const [columnId, tempValue] of Object.entries(tempSearchState.searchFields)) {
+               const column = table.getColumn(columnId)
+               const currentValue = column?.getFilterValue() as string
+               if (tempValue !== currentValue) return true
+          }
+
+          // 检查筛选字段
+          for (const [columnId, tempValues] of Object.entries(tempSearchState.filters)) {
+               const column = table.getColumn(columnId)
+               const currentValues = column?.getFilterValue() as string[]
+               if (!currentValues && tempValues.length > 0) return true
+               if (currentValues && JSON.stringify(tempValues.sort()) !== JSON.stringify(currentValues.sort())) return true
+          }
+
+          // 检查是否有表格有值但临时状态没有的
+          for (const field of effectiveSearchFields) {
+               const column = table.getColumn(field.columnId)
+               const currentValue = column?.getFilterValue() as string
+               if (currentValue && !tempSearchState.searchFields[field.columnId]) return true
+          }
+
+          for (const filter of filters) {
+               const column = table.getColumn(filter.columnId)
+               const currentValues = column?.getFilterValue() as string[]
+               if (currentValues && currentValues.length > 0 && !tempSearchState.filters[filter.columnId]) return true
+          }
+
+          return false
+     }, [tempSearchState, table, effectiveSearchFields, filters])
+
+     // 更新临时搜索字段值（不立即应用）
      const updateTempSearchField = React.useCallback((columnId: string, value: string) => {
           setTempSearchState((prev) => ({
                ...prev,
@@ -295,7 +368,7 @@ export function DataTableToolbar<TData>({
           }))
      }, [])
 
-     // 更新临时筛选值
+     // 更新临时筛选值（不立即应用）
      const updateTempFilter = React.useCallback((columnId: string, value: string[]) => {
           setTempSearchState((prev) => ({
                ...prev,
@@ -306,7 +379,7 @@ export function DataTableToolbar<TData>({
           }))
      }, [])
 
-     // 应用临时搜索条件到表格
+     // 应用搜索条件到表格并重置到第一页
      const applySearchConditions = React.useCallback(() => {
           // 应用搜索字段
           Object.entries(tempSearchState.searchFields).forEach(([columnId, value]) => {
@@ -324,64 +397,58 @@ export function DataTableToolbar<TData>({
                }
           })
 
-          // 触发手动搜索
+          // 触发手动搜索回调（重置到第一页）
           onManualSearch?.()
      }, [tempSearchState, table, onManualSearch])
 
-     // 清除临时搜索条件
-     const clearTempSearchConditions = React.useCallback(() => {
+     // 清除所有搜索条件（优化：统一清除逻辑）
+     const clearAllConditions = React.useCallback(() => {
           // 清除临时状态
           setTempSearchState({
                searchFields: {},
                filters: {},
           })
 
-          // 清除表格中的搜索字段
-          effectiveSearchFields.forEach((field) => {
-               const column = table.getColumn(field.columnId)
-               if (column) {
-                    column.setFilterValue(undefined)
-               }
-          })
+          // 清除表格状态
+          table.resetColumnFilters()
+          table.setGlobalFilter('')
 
-          // 清除表格中的筛选字段
-          filters.forEach((filter) => {
-               const column = table.getColumn(filter.columnId)
-               if (column) {
-                    column.setFilterValue(undefined)
-               }
-          })
-
-          // 触发手动搜索以更新显示
+          // 触发搜索更新
           onManualSearch?.()
-     }, [effectiveSearchFields, filters, table, onManualSearch])
+     }, [table, onManualSearch])
 
-     // 单行布局 - 所有元素都在一行
+     // 优化：响应式布局 - 桌面端多行，移动端垂直堆叠
      return (
-          <div className='flex items-center gap-3 overflow-x-auto pb-2'>
-               {/* 搜索字段 */}
+          <div className='space-y-3'>
+               {/* 第一行：搜索字段 */}
                {effectiveSearchFields.length > 0 && (
-                    <div className='flex flex-shrink-0 items-center gap-2'>
+                    <div className='flex flex-wrap items-center gap-3'>
                          {effectiveSearchFields.map((field) => {
                               const column = table.getColumn(field.columnId)
                               if (!column) return null
 
-                              const hasValue = tempSearchState.searchFields[field.columnId]?.trim()
+                              const tempValue = tempSearchState.searchFields[field.columnId] || ''
+                              const currentValue = column?.getFilterValue() as string
+                              const hasValue = tempValue?.trim()
+                              const hasPendingValue = hasValue && tempValue !== currentValue
 
                               return (
-                                   <div key={field.columnId} className='flex min-w-0 items-center gap-1.5'>
+                                   <div key={field.columnId} className='flex min-w-0 items-center gap-2'>
                                         {field.label && (
-                                             <label className='text-muted-foreground flex-shrink-0 text-xs font-medium whitespace-nowrap'>{field.label}:</label>
+                                             <label className='text-muted-foreground flex-shrink-0 text-sm font-medium whitespace-nowrap'>
+                                                  {field.label}:
+                                             </label>
                                         )}
                                         <div className='relative'>
                                              <Input
                                                   placeholder={field.placeholder || field.label}
-                                                  value={tempSearchState.searchFields[field.columnId] || ''}
+                                                  value={tempValue}
                                                   onChange={(event) => updateTempSearchField(field.columnId, event.target.value)}
                                                   className={cn(
-                                                       'h-8 w-32 text-sm transition-all duration-200',
-                                                       hasValue && 'border-primary/50 bg-primary/5',
-                                                       'focus:border-primary focus:ring-primary/20 focus:ring-1'
+                                                       'h-9 w-full min-w-[140px] max-w-[200px] text-sm transition-all duration-200',
+                                                       'focus-visible:ring-primary/20',
+                                                       hasPendingValue && 'border-orange-400 bg-orange-50/50',
+                                                       hasValue && !hasPendingValue && 'border-primary/50 bg-primary/5'
                                                   )}
                                                   onKeyDown={(event) => {
                                                        if (event.key === 'Enter') {
@@ -390,8 +457,13 @@ export function DataTableToolbar<TData>({
                                                        }
                                                   }}
                                              />
-                                             {hasValue && (
-                                                  <div className='absolute top-1/2 right-2 -translate-y-1/2'>
+                                             {hasPendingValue && (
+                                                  <div className='absolute right-3 top-1/2 -translate-y-1/2' title='待应用'>
+                                                       <div className='bg-orange-500 h-1.5 w-1.5 animate-pulse rounded-full'></div>
+                                                  </div>
+                                             )}
+                                             {hasValue && !hasPendingValue && (
+                                                  <div className='absolute right-3 top-1/2 -translate-y-1/2' title='已应用'>
                                                        <div className='bg-primary h-1.5 w-1.5 rounded-full'></div>
                                                   </div>
                                              )}
@@ -404,17 +476,16 @@ export function DataTableToolbar<TData>({
 
                {/* 全局搜索模式 */}
                {effectiveSearchFields.length === 0 && (
-                    <div className='flex flex-shrink-0 items-center gap-1.5'>
-                         <label className='text-muted-foreground flex-shrink-0 text-xs font-medium whitespace-nowrap'>搜索:</label>
-                         <div className='relative'>
+                    <div className='flex items-center gap-2'>
+                         <div className='relative flex-1 max-w-sm'>
                               <Input
                                    placeholder={globalSearchPlaceholder}
                                    value={table.getState().globalFilter ?? ''}
                                    onChange={(event) => table.setGlobalFilter(event.target.value)}
-                                   className='focus:border-primary focus:ring-primary/20 h-8 w-40 pr-3 pl-8 text-sm transition-all duration-200 focus:ring-1'
+                                   className='h-9 pl-9 pr-4 text-sm'
                               />
                               <svg
-                                   className='text-muted-foreground absolute top-1/2 left-2 h-3 w-3 -translate-y-1/2'
+                                   className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2'
                                    fill='none'
                                    stroke='currentColor'
                                    viewBox='0 0 24 24'
@@ -425,92 +496,142 @@ export function DataTableToolbar<TData>({
                     </div>
                )}
 
-               {/* 筛选器 */}
-               {filters.length > 0 && (
-                    <div className='border-border ml-1 flex flex-shrink-0 items-center gap-2 border-l pl-3'>
-                         {filters.map((filter) => {
-                              const column = table.getColumn(filter.columnId)
-                              if (!column) return null
+               {/* 第二行：筛选器和操作按钮 */}
+               <div className='flex flex-wrap items-center justify-between gap-3'>
+                    {/* 筛选器区域 */}
+                    {filters.length > 0 && (
+                         <div className='flex flex-wrap items-center gap-2'>
+                              <span className='text-muted-foreground text-xs font-medium'>筛选:</span>
+                              {filters.map((filter) => {
+                                   const column = table.getColumn(filter.columnId)
+                                   if (!column) return null
 
-                              const hasFilterValue = tempSearchState.filters[filter.columnId]?.length > 0
+                                   const tempValues = tempSearchState.filters[filter.columnId] || []
+                                   const currentValues = column?.getFilterValue() as string[]
+                                   const hasFilterValue = tempValues.length > 0
+                                   const hasPendingFilter =
+                                        hasFilterValue &&
+                                        (!currentValues ||
+                                             JSON.stringify(tempValues.sort()) !== JSON.stringify(currentValues.sort()))
+
+                                   return (
+                                        <DataTableFacetedFilter
+                                             key={filter.columnId}
+                                             column={column}
+                                             title={filter.title}
+                                             options={filter.options}
+                                             tempValue={tempValues}
+                                             onTempValueChange={(value) => updateTempFilter(filter.columnId, value)}
+                                             hasFilterValue={hasFilterValue}
+                                             isPending={hasPendingFilter}
+                                        />
+                                   )
+                              })}
+                         </div>
+                    )}
+
+                    {/* 操作按钮区域 */}
+                    <div className='flex items-center gap-2'>
+                         {/* 统一查询按钮 */}
+                         <Button
+                              onClick={applySearchConditions}
+                              disabled={!hasPendingChanges}
+                              className={cn(
+                                   'h-8 px-4 text-xs font-medium shadow-sm transition-all duration-200',
+                                   'bg-primary hover:bg-primary/90 text-primary-foreground',
+                                   'disabled:opacity-50 disabled:cursor-not-allowed',
+                                   hasPendingChanges && 'animate-pulse'
+                              )}
+                              title={hasPendingChanges ? '有未应用的筛选条件' : '查询'}
+                         >
+                              <svg className='mr-1.5 h-3.5 w-3.5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' />
+                              </svg>
+                              查询
+                         </Button>
+
+                         {/* 清除按钮 */}
+                         {isFiltered && (
+                              <Button
+                                   variant='outline'
+                                   size='sm'
+                                   onClick={clearAllConditions}
+                                   className='h-8 text-xs'
+                                   title='清除所有筛选条件'
+                              >
+                                   <svg className='mr-1.5 h-3.5 w-3.5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
+                                   </svg>
+                                   清除筛选
+                              </Button>
+                         )}
+
+                         {/* 视图选项 */}
+                         <DataTableViewOptions table={table} />
+                    </div>
+               </div>
+
+               {/* 已选筛选条件提示条 */}
+               {(isFiltered || hasPendingChanges) && (
+                    <div className='bg-muted/50 flex flex-wrap items-center gap-2 rounded-md border px-3 py-2 text-xs'>
+                         <span className='text-muted-foreground font-medium'>
+                              {hasPendingChanges ? '待应用筛选:' : '已应用筛选:'}
+                         </span>
+                         {/* 显示搜索条件 */}
+                         {Object.entries(tempSearchState.searchFields).map(([key, value]) => {
+                              if (!value) return null
+                              const field = effectiveSearchFields.find((f) => f.columnId === key)
+                              const column = table.getColumn(key)
+                              const currentValue = column?.getFilterValue() as string
+                              const isPending = value !== currentValue
 
                               return (
-                                   <DataTableFacetedFilter
-                                        key={filter.columnId}
-                                        column={column}
-                                        title={filter.title}
-                                        options={filter.options}
-                                        tempValue={tempSearchState.filters[filter.columnId] || []}
-                                        onTempValueChange={(value) => updateTempFilter(filter.columnId, value)}
-                                        hasFilterValue={hasFilterValue}
-                                   />
+                                   <Badge
+                                        key={key}
+                                        variant={isPending ? 'outline' : 'secondary'}
+                                        className={cn('gap-1', isPending && 'border-orange-400 bg-orange-50 text-orange-700')}
+                                   >
+                                        <span>{field?.label || key}:</span>
+                                        <span className='font-medium'>{value}</span>
+                                        {isPending && (
+                                             <svg className='h-3 w-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+                                             </svg>
+                                        )}
+                                   </Badge>
+                              )
+                         })}
+                         {/* 显示筛选条件 */}
+                         {Object.entries(tempSearchState.filters).map(([key, values]) => {
+                              if (!values || values.length === 0) return null
+                              const filter = filters.find((f) => f.columnId === key)
+                              const labels = values
+                                   .map((v) => filter?.options.find((o) => o.value === v)?.label || v)
+                                   .join(', ')
+                              const column = table.getColumn(key)
+                              const currentValues = column?.getFilterValue() as string[]
+                              const isPending =
+                                   !currentValues ||
+                                   JSON.stringify(values.sort()) !== JSON.stringify(currentValues.sort())
+
+                              return (
+                                   <Badge
+                                        key={key}
+                                        variant={isPending ? 'outline' : 'secondary'}
+                                        className={cn('gap-1', isPending && 'border-orange-400 bg-orange-50 text-orange-700')}
+                                   >
+                                        <span>{filter?.title || key}:</span>
+                                        <span className='font-medium'>{labels}</span>
+                                        {isPending && (
+                                             <svg className='h-3 w-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+                                             </svg>
+                                        )}
+                                   </Badge>
                               )
                          })}
                     </div>
                )}
-
-               {/* 操作按钮 */}
-               <div className='border-border ml-1 flex flex-shrink-0 items-center gap-1.5 border-l pl-3'>
-                    {/* 重置按钮 */}
-                    {isFiltered && (
-                         <Button
-                              variant='ghost'
-                              size='sm'
-                              onClick={() => {
-                                   table.resetColumnFilters()
-                                   table.setGlobalFilter('')
-                              }}
-                              className='text-muted-foreground hover:text-foreground h-7 px-2'
-                              title='重置筛选条件'
-                         >
-                              <svg className='h-3 w-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                                   <path
-                                        strokeLinecap='round'
-                                        strokeLinejoin='round'
-                                        strokeWidth={2}
-                                        d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'
-                                   />
-                              </svg>
-                         </Button>
-                    )}
-
-                    {/* 清除搜索按钮 */}
-                    {(Object.keys(tempSearchState.searchFields).length > 0 || Object.keys(tempSearchState.filters).length > 0) && (
-                         <Button
-                              variant='ghost'
-                              size='sm'
-                              onClick={clearTempSearchConditions}
-                              className='text-muted-foreground hover:text-destructive hover:border-destructive/50 h-7 px-2'
-                              title='清除所有搜索条件'
-                         >
-                              <svg className='h-3 w-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
-                              </svg>
-                         </Button>
-                    )}
-
-                    {/* 统一搜索按钮 */}
-                    {onManualSearch && (
-                         <Button
-                              onClick={applySearchConditions}
-                              disabled={isLoading}
-                              className={cn(
-                                   'h-8 px-3 font-medium shadow-sm transition-all duration-200',
-                                   'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800',
-                                   'border-0 text-white hover:shadow-md',
-                                   isLoading && 'cursor-not-allowed opacity-75'
-                              )}
-                         >
-                              <svg className={cn('mr-1 h-3.5 w-3.5', isLoading && 'animate-spin')} fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' />
-                              </svg>
-                              <span className='text-xs'>{isLoading ? '搜索中...' : '搜索'}</span>
-                         </Button>
-                    )}
-
-                    {/* 视图选项 */}
-                    <DataTableViewOptions table={table} />
-               </div>
           </div>
      )
 }

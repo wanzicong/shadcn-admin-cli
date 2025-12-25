@@ -191,7 +191,6 @@ export function UsersTable({ search, navigate }: DataTableProps) {
 
      // ============= 表格实例创建 =============
      // useReactTable 必须在所有条件下都调用
-     // eslint-disable-next-line react-hooks/rules-of-hooks
      const table = useReactTable(tableOptions2)
 
      // ============= 副作用 =============
@@ -258,10 +257,7 @@ export function UsersTable({ search, navigate }: DataTableProps) {
                {/* 表格工具栏 */}
                 <DataTableToolbar
                      table={table}
-                     // searchPlaceholder='筛选用户...'
-                     // searchKey='phoneNumber'
                      onManualSearch={handleManualSearch}
-                     isLoading={isLoading}
                      searchFields={[
                           {
                                columnId: 'phoneNumber',
@@ -293,70 +289,20 @@ export function UsersTable({ search, navigate }: DataTableProps) {
                      ]}
                 />
 
-                {/* 状态信息栏 */}
-                {!isLoading && !isError && (
-                     <div className='text-muted-foreground bg-muted/30 flex items-center justify-between rounded-md px-2 py-1 text-xs'>
-                          <div className='flex items-center gap-4'>
-                               <span>
-                                    共 {total} 个用户
-                                    {total > 0 && (
-                                         <>
-                                              ，第 {pagination.pageIndex + 1} 页， 每页 {pagination.pageSize} 条
-                                         </>
-                                    )}
-                               </span>
-                               {/* 显示搜索条件 */}
-                               {(() => {
-                                    const searchConditions = []
-                                    const usernameFilter = table.getColumn('username')?.getFilterValue() as string
-                                    const phoneFilter = table.getColumn('phoneNumber')?.getFilterValue() as string
-                                    
-                                    if (usernameFilter) {
-                                         searchConditions.push(`姓名: ${usernameFilter}`)
-                                    }
-                                    if (phoneFilter) {
-                                         searchConditions.push(`电话: ${phoneFilter}`)
-                                    }
-                                    if (columnFilters.length > 0) {
-                                         searchConditions.push('已筛选')
-                                    }
-                                    
-                                    return searchConditions.length > 0 && (
-                                         <span className='flex items-center gap-1'>
-                                              <svg className='h-3 w-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                                                   <path
-                                                        strokeLinecap='round'
-                                                        strokeLinejoin='round'
-                                                        strokeWidth={2}
-                                                        d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'
-                                                   />
-                                              </svg>
-                                              <span>搜索: {searchConditions.join(', ')}</span>
-                                         </span>
-                                    )
-                               })()}
-                               {columnFilters.length > 0 && (
-                                    <span className='flex items-center gap-1'>
-                                         <svg className='h-3 w-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                                              <path
-                                                   strokeLinecap='round'
-                                                   strokeLinejoin='round'
-                                                   strokeWidth={2}
-                                                   d='M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z'
-                                              />
-                                         </svg>
-                                         已应用筛选条件
-                                    </span>
-                               )}
-                          </div>
-                          {isLoading && (
-                               <div className='flex items-center gap-1'>
-                                    <div className='border-primary h-3 w-3 animate-spin rounded-full border-b-2'></div>
-                                    加载中
-                               </div>
-                          )}
-                     </div>
-                )}
+               {/* 简化的状态信息栏 */}
+               {!isLoading && !isError && (
+                    <div className='text-muted-foreground bg-muted/30 flex items-center justify-between rounded-md px-3 py-2 text-xs'>
+                         <span>
+                              共 <span className='font-semibold text-foreground'>{total}</span> 个用户
+                              {total > 0 && (
+                                   <>
+                                        ，第 <span className='font-semibold text-foreground'>{pagination.pageIndex + 1}</span> 页，
+                                        每页 <span className='font-semibold text-foreground'>{pagination.pageSize}</span> 条
+                                   </>
+                              )}
+                         </span>
+                    </div>
+               )}
 
                {/* 数据表格 */}
                <div className='overflow-hidden rounded-md border'>
