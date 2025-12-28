@@ -8,11 +8,11 @@ import { FontProvider } from '@/develop/(context)/font-provider.tsx'
 import { ThemeProvider } from '@/develop/(context)/theme-provider.tsx'
 import { handleServerError } from '@/develop/(lib)/handle-server-error.ts'
 import { useAuthStore } from '@/develop/(stores)/auth-store.ts'
+// Styles
+import '@/static/styles/index.css'
 import { toast } from 'sonner'
 // Generated Routes
 import { routeTree } from './routeTree.gen'
-// Styles
-import '@/static/styles/index.css'
 
 const queryClient = new QueryClient({
      defaultOptions: {

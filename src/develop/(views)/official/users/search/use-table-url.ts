@@ -122,39 +122,39 @@ export function useTableUrlState(params: UseTableUrlStateParams): UseTableUrlSta
 
      const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(initialColumnFilters)
 
-    // ============= 分页初始化 =============
+     // ============= 分页初始化 =============
      const pagination: PaginationState = useMemo(() => {
-         const rawPage = (search as SearchRecord)[pageKey]
-         const rawPageSize = (search as SearchRecord)[pageSizeKey]
-         
-         // 参数验证和默认值处理
-         const pageNum = typeof rawPage === 'number' ? Math.max(1, rawPage) : defaultPage
-         const pageSizeNum = typeof rawPageSize === 'number' ? Math.max(1, Math.min(rawPageSize, 100)) : defaultPageSize
-         
-         // 确保页码索引从0开始，但实际页码从1开始
-         return { 
-              pageIndex: Math.max(0, pageNum - 1), 
-              pageSize: pageSizeNum 
-         }
+          const rawPage = (search as SearchRecord)[pageKey]
+          const rawPageSize = (search as SearchRecord)[pageSizeKey]
+
+          // 参数验证和默认值处理
+          const pageNum = typeof rawPage === 'number' ? Math.max(1, rawPage) : defaultPage
+          const pageSizeNum = typeof rawPageSize === 'number' ? Math.max(1, Math.min(rawPageSize, 100)) : defaultPageSize
+
+          // 确保页码索引从0开始，但实际页码从1开始
+          return {
+               pageIndex: Math.max(0, pageNum - 1),
+               pageSize: pageSizeNum,
+          }
      }, [search, pageKey, pageSizeKey, defaultPage, defaultPageSize])
 
-    const onPaginationChange: OnChangeFn<PaginationState> = (updater) => {
-         const next = typeof updater === 'function' ? updater(pagination) : updater
-         const nextPage = next.pageIndex + 1
-         const nextPageSize = next.pageSize
-         
-         // 参数验证：确保页码和页面大小在合理范围内
-         const validatedPage = Math.max(1, Math.min(nextPage, 1000)) // 最大页码限制为1000
-         const validatedPageSize = Math.max(1, Math.min(nextPageSize, 100)) // 最大页面大小限制为100
-         
-         navigate({
-              search: (prev) => ({
-                   ...(prev as SearchRecord),
-                   // 只有当页码不是默认值时才添加到URL
-                   [pageKey]: validatedPage === defaultPage ? undefined : validatedPage,
-                   [pageSizeKey]: validatedPageSize === defaultPageSize ? undefined : validatedPageSize,
-              }),
-         })
+     const onPaginationChange: OnChangeFn<PaginationState> = (updater) => {
+          const next = typeof updater === 'function' ? updater(pagination) : updater
+          const nextPage = next.pageIndex + 1
+          const nextPageSize = next.pageSize
+
+          // 参数验证：确保页码和页面大小在合理范围内
+          const validatedPage = Math.max(1, Math.min(nextPage, 1000)) // 最大页码限制为1000
+          const validatedPageSize = Math.max(1, Math.min(nextPageSize, 100)) // 最大页面大小限制为100
+
+          navigate({
+               search: (prev) => ({
+                    ...(prev as SearchRecord),
+                    // 只有当页码不是默认值时才添加到URL
+                    [pageKey]: validatedPage === defaultPage ? undefined : validatedPage,
+                    [pageSizeKey]: validatedPageSize === defaultPageSize ? undefined : validatedPageSize,
+               }),
+          })
      }
 
      // ============= 全局筛选初始化 =============
@@ -288,25 +288,25 @@ export function useTableUrlState(params: UseTableUrlStateParams): UseTableUrlSta
      }
 
      // ============= 辅助函数 =============
-    const ensurePageInRange = (pageCount: number, opts: { resetTo?: 'first' | 'last' } = { resetTo: 'first' }) => {
-         const currentPage = (search as SearchRecord)[pageKey]
-         let pageNum = typeof currentPage === 'number' ? currentPage : defaultPage
-         
-         // 确保页码在有效范围内
-         pageNum = Math.max(1, Math.min(pageNum, pageCount || 1))
-         
-         // 如果当前页码超出范围，则重置到合理位置
-         if (pageCount > 0 && (pageNum > pageCount || pageNum < 1)) {
-              const resetPage = opts.resetTo === 'last' ? pageCount : 1
-              navigate({
-                   replace: true,
-                   search: (prev) => ({
-                        ...(prev as SearchRecord),
-                        // 重置到第一页或最后一页
-                        [pageKey]: resetPage === defaultPage ? undefined : resetPage,
-                   }),
-              })
-         }
+     const ensurePageInRange = (pageCount: number, opts: { resetTo?: 'first' | 'last' } = { resetTo: 'first' }) => {
+          const currentPage = (search as SearchRecord)[pageKey]
+          let pageNum = typeof currentPage === 'number' ? currentPage : defaultPage
+
+          // 确保页码在有效范围内
+          pageNum = Math.max(1, Math.min(pageNum, pageCount || 1))
+
+          // 如果当前页码超出范围，则重置到合理位置
+          if (pageCount > 0 && (pageNum > pageCount || pageNum < 1)) {
+               const resetPage = opts.resetTo === 'last' ? pageCount : 1
+               navigate({
+                    replace: true,
+                    search: (prev) => ({
+                         ...(prev as SearchRecord),
+                         // 重置到第一页或最后一页
+                         [pageKey]: resetPage === defaultPage ? undefined : resetPage,
+                    }),
+               })
+          }
      }
 
      // ============= 返回值 =============

@@ -49,8 +49,7 @@ export function UsersMultiDeleteDialog<TData>({ open, onOpenChange, table }: Use
                disabled={value.trim() !== CONFIRM_WORD}
                title={
                     <span className='text-destructive'>
-                         <AlertTriangle className='stroke-destructive me-1 inline-block' size={18} /> 删除 {selectedRows.length}{' '}
-                         个用户
+                         <AlertTriangle className='stroke-destructive me-1 inline-block' size={18} /> 删除 {selectedRows.length} 个用户
                     </span>
                }
                desc={

@@ -13,9 +13,9 @@ import {
      type TableOptions,
 } from '@tanstack/react-table'
 import { DataTablePagination } from '@/develop/(components)/data-table'
-import { DataTableToolbar } from '@/develop/(views)/official/users/search/search-form.tsx'
 import { cn } from '@/develop/(lib)/utils.ts'
 import { type UserQueryParams, type UserRole, type UserStatus } from '@/develop/(services)/api'
+import { DataTableToolbar } from '@/develop/(views)/official/users/search/search-form.tsx'
 import { type NavigateFn, useTableUrlState } from '@/develop/(views)/official/users/search/use-table-url.ts'
 import { Button } from '@/components/ui/button.tsx'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
@@ -71,8 +71,8 @@ export function UsersTable({ search, navigate }: DataTableProps) {
           },
      })
 
-      // ============= 手动搜索处理 =============
-      const handleManualSearch = useCallback(() => {
+     // ============= 手动搜索处理 =============
+     const handleManualSearch = useCallback(() => {
           // 手动搜索时重置到第一页并重新触发查询
           navigate({
                search: (prev) => ({
@@ -80,27 +80,27 @@ export function UsersTable({ search, navigate }: DataTableProps) {
                     page: 1, // 重置到第一页
                }),
           })
-      }, [navigate])
+     }, [navigate])
 
-      // ============= 数据查询 Hook =============
-      // 必须放在所有其他 Hook 之后，但在条件语句之前
-      const userSearchParams: UserQueryParams = {
-           page: search.page as number,
-           page_size: search.pageSize as number,
-           ...(sorting.length > 0 && {
-                sort_by: sorting[0].id,
-                sort_order: sorting[0].desc ? 'desc' : 'asc',
-           }),
-           username: search.username as string,
-           ...search,
-           ...transformFilters(search),
-      }
+     // ============= 数据查询 Hook =============
+     // 必须放在所有其他 Hook 之后，但在条件语句之前
+     const userSearchParams: UserQueryParams = {
+          page: search.page as number,
+          page_size: search.pageSize as number,
+          ...(sorting.length > 0 && {
+               sort_by: sorting[0].id,
+               sort_order: sorting[0].desc ? 'desc' : 'asc',
+          }),
+          username: search.username as string,
+          ...search,
+          ...transformFilters(search),
+     }
 
-      // alert(userSearchParams.username)
-      const { data, isLoading, isError } = useQuery({
-           queryKey: ['users', userSearchParams],
-           queryFn: () => usersApi.getUsers(userSearchParams),
-      })
+     // alert(userSearchParams.username)
+     const { data, isLoading, isError } = useQuery({
+          queryKey: ['users', userSearchParams],
+          queryFn: () => usersApi.getUsers(userSearchParams),
+     })
 
      // 转换筛选参数的辅助函数
      function transformFilters(searchParams: Record<string, unknown>): Partial<UserQueryParams> {
@@ -191,6 +191,7 @@ export function UsersTable({ search, navigate }: DataTableProps) {
 
      // ============= 表格实例创建 =============
      // useReactTable 必须在所有条件下都调用
+     // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table 与 React Compiler 不兼容是已知的
      const table = useReactTable(tableOptions2)
 
      // ============= 副作用 =============
@@ -255,49 +256,49 @@ export function UsersTable({ search, navigate }: DataTableProps) {
      return (
           <div className={cn('max-sm:has-[div[role="toolbar"]]:mb-16', 'flex flex-1 flex-col gap-4')}>
                {/* 表格工具栏 */}
-                <DataTableToolbar
-                     table={table}
-                     onManualSearch={handleManualSearch}
-                     searchFields={[
-                          {
-                               columnId: 'phoneNumber',
-                               placeholder: '电话号码...',
-                               label: '电话号码',
-                          },
-                          {
-                               columnId: 'username',
-                               placeholder: '姓名...',
-                               label: '姓名',
-                          },
-                     ]}
-                     filters={[
-                          {
-                               columnId: 'status',
-                               title: '状态',
-                               options: [
-                                    { label: '活跃', value: 'active' },
-                                    { label: '非活跃', value: 'inactive' },
-                                    { label: '已邀请', value: 'invited' },
-                                    { label: '已暂停', value: 'suspended' },
-                               ],
-                          },
-                          {
-                               columnId: 'role',
-                               title: '角色',
-                               options: roles.map((role) => ({ ...role })),
-                          },
-                     ]}
-                />
+               <DataTableToolbar
+                    table={table}
+                    onManualSearch={handleManualSearch}
+                    searchFields={[
+                         {
+                              columnId: 'phoneNumber',
+                              placeholder: '电话号码...',
+                              label: '电话号码',
+                         },
+                         {
+                              columnId: 'username',
+                              placeholder: '姓名...',
+                              label: '姓名',
+                         },
+                    ]}
+                    filters={[
+                         {
+                              columnId: 'status',
+                              title: '状态',
+                              options: [
+                                   { label: '活跃', value: 'active' },
+                                   { label: '非活跃', value: 'inactive' },
+                                   { label: '已邀请', value: 'invited' },
+                                   { label: '已暂停', value: 'suspended' },
+                              ],
+                         },
+                         {
+                              columnId: 'role',
+                              title: '角色',
+                              options: roles.map((role) => ({ ...role })),
+                         },
+                    ]}
+               />
 
                {/* 简化的状态信息栏 */}
                {!isLoading && !isError && (
                     <div className='text-muted-foreground bg-muted/30 flex items-center justify-between rounded-md px-3 py-2 text-xs'>
                          <span>
-                              共 <span className='font-semibold text-foreground'>{total}</span> 个用户
+                              共 <span className='text-foreground font-semibold'>{total}</span> 个用户
                               {total > 0 && (
                                    <>
-                                        ，第 <span className='font-semibold text-foreground'>{pagination.pageIndex + 1}</span> 页，
-                                        每页 <span className='font-semibold text-foreground'>{pagination.pageSize}</span> 条
+                                        ，第 <span className='text-foreground font-semibold'>{pagination.pageIndex + 1}</span> 页， 每页{' '}
+                                        <span className='text-foreground font-semibold'>{pagination.pageSize}</span> 条
                                    </>
                               )}
                          </span>

@@ -9,7 +9,7 @@ import type { RequestConfig, RequestError, ResponseData } from './types'
  */
 export function requestInterceptor(config: InternalAxiosRequestConfig): InternalAxiosRequestConfig {
      const requestConfig = config as InternalAxiosRequestConfig & RequestConfig
-     const { needToken = false } = requestConfig  // 默认不需要 token
+     const { needToken = false } = requestConfig // 默认不需要 token
 
      // 移除 token 认证，用于测试环境
      if (needToken) {

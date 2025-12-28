@@ -28,7 +28,9 @@
       "Bash(cat \"/d/WorkeSpaceCoding/node/shadcn-admin-cli/src/develop/\\(layout\\)/types.ts\")",
       "Bash(npx tsc:*)",
       "Bash(npm run type-check:*)",
-      "Bash(dir /b \"C:\\\\Users\\\\13608\\\\.claude\\\\plugins\\\\marketplaces\\\\claude-plugins-official\\\\plugins\")"
+      "Bash(dir /b \"C:\\\\Users\\\\13608\\\\.claude\\\\plugins\\\\marketplaces\\\\claude-plugins-official\\\\plugins\")",
+      "Bash(dir /b \"c:\\\\Users\\\\13608\\\\.cursor\\\\worktrees\\\\shadcn-admin-cli\\\\pqd\\\\src\\\\develop\\\\\\(views\\)\\\\official\\\\users\\\\components\")",
+      "Bash(npm run lint:*)"
     ],
     "deny": [],
     "ask": [],

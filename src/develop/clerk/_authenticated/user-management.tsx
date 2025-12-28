@@ -4,12 +4,11 @@ import { Header } from '@/develop/(layout)/header.tsx'
 import { Main } from '@/develop/(layout)/main.tsx'
 import { UsersDialogs } from '@/develop/(views)/official/users/components/dialogs/users-dialogs.tsx'
 import { UsersPrimaryButtons } from '@/develop/(views)/official/users/components/users-primary-buttons'
-import { UsersTable } from '@/develop/(views)/official/users/components/users-table'
+import { UsersTable } from '@/develop/(views)/official/users/components/users-table-servers'
 import { UsersProvider } from '@/develop/(views)/official/users/context/users-provider.tsx'
-import { users } from '@/develop/(views)/official/users/data/users'
+import { ClerkLogo } from '@/static/assets/clerk-logo'
 import { SignedIn, useAuth, UserButton } from '@clerk/clerk-react'
 import { ExternalLink, Loader2 } from 'lucide-react'
-import { ClerkLogo } from '@/static/assets/clerk-logo'
 import { Button } from '@/components/ui/button'
 import { LearnMore } from '@/components/learn-more'
 import { Search } from '@/components/search'
@@ -75,7 +74,7 @@ function UserManagement() {
                                    <UsersPrimaryButtons />
                               </div>
                               <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12'>
-                                   <UsersTable data={users} navigate={navigate} search={search} />
+                                   <UsersTable navigate={navigate} search={search} />
                               </div>
                          </Main>
 

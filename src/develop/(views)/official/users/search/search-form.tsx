@@ -67,8 +67,8 @@ export function DataTableFacetedFilter<TData, TValue>({
                               isPending
                                    ? 'border-orange-500 bg-orange-100 text-orange-800 hover:bg-orange-200 dark:border-orange-400 dark:bg-orange-950/50 dark:text-orange-300'
                                    : hasActiveFilter
-                                   ? 'border-primary bg-primary/10 text-primary hover:bg-primary/20 dark:border-primary/50 dark:bg-primary/5'
-                                   : 'hover:border-muted-foreground/30 hover:bg-muted/50'
+                                     ? 'border-primary bg-primary/10 text-primary hover:bg-primary/20 dark:border-primary/50 dark:bg-primary/5'
+                                     : 'hover:border-muted-foreground/30 hover:bg-muted/50'
                          )}
                     >
                          <div className='flex items-center gap-1'>
@@ -78,7 +78,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                                    </div>
                               ) : hasActiveFilter ? (
                                    <div className='flex items-center gap-1'>
-                                        <div className='bg-primary h-1.5 w-1.5 rounded-full dark:bg-primary-foreground'></div>
+                                        <div className='bg-primary dark:bg-primary-foreground h-1.5 w-1.5 rounded-full'></div>
                                    </div>
                               ) : (
                                    <PlusCircledIcon className='size-3' />
@@ -452,9 +452,7 @@ export function DataTableToolbar<TData>({
                               return (
                                    <div key={field.columnId} className='flex min-w-0 items-center gap-2'>
                                         {field.label && (
-                                             <label className='text-muted-foreground flex-shrink-0 text-sm font-medium whitespace-nowrap'>
-                                                  {field.label}:
-                                             </label>
+                                             <label className='text-muted-foreground flex-shrink-0 text-sm font-medium whitespace-nowrap'>{field.label}:</label>
                                         )}
                                         <div className='relative'>
                                              <Input
@@ -462,7 +460,7 @@ export function DataTableToolbar<TData>({
                                                   value={tempValue}
                                                   onChange={(event) => updateTempSearchField(field.columnId, event.target.value)}
                                                   className={cn(
-                                                       'h-9 w-full min-w-[140px] max-w-[200px] text-sm transition-all duration-200',
+                                                       'h-9 w-full max-w-[200px] min-w-[140px] text-sm transition-all duration-200',
                                                        'focus-visible:ring-primary/20',
                                                        hasPendingValue && 'border-orange-400 bg-orange-50/50',
                                                        hasValue && !hasPendingValue && 'border-primary/50 bg-primary/5'
@@ -475,12 +473,12 @@ export function DataTableToolbar<TData>({
                                                   }}
                                              />
                                              {hasPendingValue && (
-                                                  <div className='absolute right-3 top-1/2 -translate-y-1/2' title='待应用'>
-                                                       <div className='bg-orange-500 h-1.5 w-1.5 animate-pulse rounded-full'></div>
+                                                  <div className='absolute top-1/2 right-3 -translate-y-1/2' title='待应用'>
+                                                       <div className='h-1.5 w-1.5 animate-pulse rounded-full bg-orange-500'></div>
                                                   </div>
                                              )}
                                              {hasValue && !hasPendingValue && (
-                                                  <div className='absolute right-3 top-1/2 -translate-y-1/2' title='已应用'>
+                                                  <div className='absolute top-1/2 right-3 -translate-y-1/2' title='已应用'>
                                                        <div className='bg-primary h-1.5 w-1.5 rounded-full'></div>
                                                   </div>
                                              )}
@@ -494,12 +492,12 @@ export function DataTableToolbar<TData>({
                {/* 全局搜索模式 */}
                {effectiveSearchFields.length === 0 && (
                     <div className='flex items-center gap-2'>
-                         <div className='relative flex-1 max-w-sm'>
+                         <div className='relative max-w-sm flex-1'>
                               <Input
                                    placeholder={globalSearchPlaceholder}
                                    value={table.getState().globalFilter ?? ''}
                                    onChange={(event) => table.setGlobalFilter(event.target.value)}
-                                   className='h-9 pl-9 pr-4 text-sm'
+                                   className='h-9 pr-4 pl-9 text-sm'
                               />
                               <svg
                                    className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2'
@@ -527,9 +525,7 @@ export function DataTableToolbar<TData>({
                                    const currentValues = column?.getFilterValue() as string[]
                                    const hasFilterValue = tempValues.length > 0
                                    const hasPendingFilter =
-                                        hasFilterValue &&
-                                        (!currentValues ||
-                                             JSON.stringify(tempValues.sort()) !== JSON.stringify(currentValues.sort()))
+                                        hasFilterValue && (!currentValues || JSON.stringify(tempValues.sort()) !== JSON.stringify(currentValues.sort()))
 
                                    return (
                                         <DataTableFacetedFilter
@@ -564,7 +560,7 @@ export function DataTableToolbar<TData>({
                                         type='checkbox'
                                         checked={preserveSearch}
                                         onChange={(e) => setPreserveSearch(e.target.checked)}
-                                        className='border-primary h-4 w-4 rounded border focus:ring-primary focus:ring-2'
+                                        className='border-primary focus:ring-primary h-4 w-4 rounded border focus:ring-2'
                                    />
                               </div>
                          )}
@@ -576,7 +572,7 @@ export function DataTableToolbar<TData>({
                               className={cn(
                                    'h-8 px-4 text-xs font-medium shadow-sm transition-all duration-200',
                                    'bg-primary hover:bg-primary/90 text-primary-foreground',
-                                   'disabled:opacity-50 disabled:cursor-not-allowed',
+                                   'disabled:cursor-not-allowed disabled:opacity-50',
                                    hasPendingChanges && 'animate-pulse'
                               )}
                               title={hasPendingChanges ? '有未应用的筛选条件' : '查询'}
@@ -589,13 +585,7 @@ export function DataTableToolbar<TData>({
 
                          {/* 清除按钮 */}
                          {isFiltered && (
-                              <Button
-                                   variant='outline'
-                                   size='sm'
-                                   onClick={clearAllConditions}
-                                   className='h-8 text-xs'
-                                   title='清除所有筛选条件'
-                              >
+                              <Button variant='outline' size='sm' onClick={clearAllConditions} className='h-8 text-xs' title='清除所有筛选条件'>
                                    <svg className='mr-1.5 h-3.5 w-3.5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                                         <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
                                    </svg>
@@ -611,9 +601,7 @@ export function DataTableToolbar<TData>({
                {/* 已选筛选条件提示条 */}
                {(isFiltered || hasPendingChanges) && (
                     <div className='bg-muted/50 flex flex-wrap items-center gap-2 rounded-md border px-3 py-2 text-xs'>
-                         <span className='text-muted-foreground font-medium'>
-                              {hasPendingChanges ? '待应用筛选:' : '已应用筛选:'}
-                         </span>
+                         <span className='text-muted-foreground font-medium'>{hasPendingChanges ? '待应用筛选:' : '已应用筛选:'}</span>
                          {/* 显示搜索条件 */}
                          {Object.entries(tempSearchState.searchFields).map(([key, value]) => {
                               if (!value) return null
@@ -632,7 +620,12 @@ export function DataTableToolbar<TData>({
                                         <span className='font-medium'>{value}</span>
                                         {isPending && (
                                              <svg className='h-3 w-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                                                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+                                                  <path
+                                                       strokeLinecap='round'
+                                                       strokeLinejoin='round'
+                                                       strokeWidth={2}
+                                                       d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+                                                  />
                                              </svg>
                                         )}
                                    </Badge>
@@ -642,14 +635,10 @@ export function DataTableToolbar<TData>({
                          {Object.entries(tempSearchState.filters).map(([key, values]) => {
                               if (!values || values.length === 0) return null
                               const filter = filters.find((f) => f.columnId === key)
-                              const labels = values
-                                   .map((v) => filter?.options.find((o) => o.value === v)?.label || v)
-                                   .join(', ')
+                              const labels = values.map((v) => filter?.options.find((o) => o.value === v)?.label || v).join(', ')
                               const column = table.getColumn(key)
                               const currentValues = column?.getFilterValue() as string[]
-                              const isPending =
-                                   !currentValues ||
-                                   JSON.stringify(values.sort()) !== JSON.stringify(currentValues.sort())
+                              const isPending = !currentValues || JSON.stringify(values.sort()) !== JSON.stringify(currentValues.sort())
 
                               return (
                                    <Badge
@@ -661,7 +650,12 @@ export function DataTableToolbar<TData>({
                                         <span className='font-medium'>{labels}</span>
                                         {isPending && (
                                              <svg className='h-3 w-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                                                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+                                                  <path
+                                                       strokeLinecap='round'
+                                                       strokeLinejoin='round'
+                                                       strokeWidth={2}
+                                                       d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+                                                  />
                                              </svg>
                                         )}
                                    </Badge>

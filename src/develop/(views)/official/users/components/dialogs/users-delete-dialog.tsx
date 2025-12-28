@@ -56,8 +56,8 @@ export function UsersDeleteDialog({ open, onOpenChange, currentRow }: UserDelete
                     <div className='space-y-4'>
                          {/* 删除确认信息 */}
                          <p className='mb-2'>
-                              您确定要删除 <span className='font-bold'>{currentRow.username}</span> 吗？此操作将永久从系统中移除
-                              角色为 <span className='font-bold'>{currentRow.role.toUpperCase()}</span> 的用户。此操作无法撤销。
+                              您确定要删除 <span className='font-bold'>{currentRow.username}</span> 吗？此操作将永久从系统中移除 角色为{' '}
+                              <span className='font-bold'>{currentRow.role.toUpperCase()}</span> 的用户。此操作无法撤销。
                          </p>
 
                          {/* 安全确认输入 */}

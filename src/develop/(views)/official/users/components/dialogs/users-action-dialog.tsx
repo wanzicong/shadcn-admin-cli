@@ -5,18 +5,18 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
+import type { UserCreate, UserUpdate, UserRole } from '@/develop/(services)/api/types'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button.tsx'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog.tsx'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx'
 import { Input } from '@/components/ui/input.tsx'
+import { LoaderCircle } from '@/components/loader-circle.tsx'
 import { PasswordInput } from '@/components/password-input.tsx'
 import { SelectDropdown } from '@/components/select-dropdown.tsx'
-import { LoaderCircle } from '@/components/loader-circle.tsx'
 import { roles } from '../../data/data.ts'
 import { type User } from '../../data/schema.ts'
 import { usersApi } from '../../services/user-services.ts'
-import type { UserCreate, UserUpdate, UserRole } from '@/develop/(services)/api/types'
 
 const formSchema = z
      .object({
@@ -195,7 +195,13 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UserAction
                                              <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
                                                   <FormLabel className='col-span-2 text-end'>名字</FormLabel>
                                                   <FormControl>
-                                                       <Input placeholder='请输入名字' className='col-span-4' autoComplete='off' {...field} disabled={isSubmitting} />
+                                                       <Input
+                                                            placeholder='请输入名字'
+                                                            className='col-span-4'
+                                                            autoComplete='off'
+                                                            {...field}
+                                                            disabled={isSubmitting}
+                                                       />
                                                   </FormControl>
                                                   <FormMessage className='col-span-4 col-start-3' />
                                              </FormItem>
@@ -208,7 +214,13 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UserAction
                                              <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
                                                   <FormLabel className='col-span-2 text-end'>姓氏</FormLabel>
                                                   <FormControl>
-                                                       <Input placeholder='请输入姓氏' className='col-span-4' autoComplete='off' {...field} disabled={isSubmitting} />
+                                                       <Input
+                                                            placeholder='请输入姓氏'
+                                                            className='col-span-4'
+                                                            autoComplete='off'
+                                                            {...field}
+                                                            disabled={isSubmitting}
+                                                       />
                                                   </FormControl>
                                                   <FormMessage className='col-span-4 col-start-3' />
                                              </FormItem>

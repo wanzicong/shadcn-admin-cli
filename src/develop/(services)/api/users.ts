@@ -49,13 +49,13 @@ export class UsersService {
                     cleanParams.sort_order = String(params.sort_order)
                }
           }
-          
+
           // 开发环境打印请求参数
           if (import.meta.env.DEV) {
                // eslint-disable-next-line no-console
                console.log('📤 API Request - getUsers:', cleanParams)
           }
-          
+
           return post<PaginatedResponse<User>>('/api/users', cleanParams)
      }
 

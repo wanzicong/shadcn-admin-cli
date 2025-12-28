@@ -21,9 +21,7 @@ export function encodeQueryParams(params: Record<string, unknown>): Record<strin
                encoded[key] = encodeURIComponent(value)
           } else if (Array.isArray(value)) {
                // 对数组中的每个字符串元素进行编码
-               encoded[key] = value.map(item => 
-                    typeof item === 'string' ? encodeURIComponent(item) : item
-               )
+               encoded[key] = value.map((item) => (typeof item === 'string' ? encodeURIComponent(item) : item))
           } else if (typeof value === 'object') {
                // 递归处理嵌套对象
                encoded[key] = encodeQueryParams(value as Record<string, unknown>)
@@ -59,7 +57,7 @@ export function decodeQueryParams(params: Record<string, unknown>): Record<strin
                }
           } else if (Array.isArray(value)) {
                // 对数组中的每个字符串元素进行解码
-               decoded[key] = value.map(item => {
+               decoded[key] = value.map((item) => {
                     if (typeof item === 'string') {
                          try {
                               return decodeURIComponent(item)
@@ -117,7 +115,7 @@ export function stringifyQueryParams(params: Record<string, unknown>): string {
 
           if (Array.isArray(value)) {
                // 处理数组参数
-               value.forEach(item => {
+               value.forEach((item) => {
                     if (item !== undefined && item !== null) {
                          searchParams.append(key, String(item))
                     }

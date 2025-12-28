@@ -51,9 +51,7 @@ export function UsersInviteDialog({ open, onOpenChange }: UserInviteDialogProps)
                          <DialogTitle className='flex items-center gap-2'>
                               <MailPlus /> 邀请用户
                          </DialogTitle>
-                         <DialogDescription>
-                              通过发送邮件邀请来邀请新用户加入您的团队。分配角色以定义其访问级别。
-                         </DialogDescription>
+                         <DialogDescription>通过发送邮件邀请来邀请新用户加入您的团队。分配角色以定义其访问级别。</DialogDescription>
                     </DialogHeader>
                     <Form {...form}>
                          <form id='user-invite-form' onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
@@ -96,11 +94,7 @@ export function UsersInviteDialog({ open, onOpenChange }: UserInviteDialogProps)
                                         <FormItem className=''>
                                              <FormLabel>描述（可选）</FormLabel>
                                              <FormControl>
-                                                  <Textarea
-                                                       className='resize-none'
-                                                       placeholder='为您的邀请添加个人备注（可选）'
-                                                       {...field}
-                                                  />
+                                                  <Textarea className='resize-none' placeholder='为您的邀请添加个人备注（可选）' {...field} />
                                              </FormControl>
                                              <FormMessage />
                                         </FormItem>
