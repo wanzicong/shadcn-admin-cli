@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import useDialogState from '@/develop/(hooks)/use-dialog-state.tsx'
 import { type UsersDialogType } from '@/develop/(views)/official/users/context/users-context-types.tsx'
-import { type User } from '../data/schema.ts'
+import { type User } from '@/develop/(views)/official/users/services/data/schema.ts'
 import { UsersContext } from './users-context.tsx'
 
 // 用户管理状态提供者组件 - 管理用户模块的所有对话框状态和当前操作的用户数据

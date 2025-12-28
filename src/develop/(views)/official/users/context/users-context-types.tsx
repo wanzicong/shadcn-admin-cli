@@ -1,4 +1,4 @@
-import { type User } from '../data/schema.ts'
+import { type User } from '@/develop/(views)/official/users/services/data/schema.ts'
 
 // 用户对话框类型定义
 export type UsersDialogType = 'invite' | 'add' | 'edit' | 'delete'

@@ -16,8 +16,8 @@ import {
      DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx'
 import { useTasks } from '../../context/use-tasks.tsx'
-import { labels } from '../../data/data.tsx'
-import { taskSchema } from '../../data/schema.ts'
+import { labels } from '@/develop/(views)/official/tasks/services/data/data.tsx'
+import { taskSchema } from '@/develop/(views)/official/tasks/services/data/schema.ts'
 
 type DataTableRowActionsProps<TData> = {
      row: Row<TData>

@@ -7,8 +7,8 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button.tsx'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu.tsx'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip.tsx'
-import { priorities, statuses } from '../../data/data.tsx'
-import { type Task } from '../../data/schema.ts'
+import { priorities, statuses } from '@/develop/(views)/official/tasks/services/data/data.tsx'
+import { type Task } from '@/develop/(views)/official/tasks/services/data/schema.ts'
 import { TasksMultiDeleteDialog } from '../dialogs/tasks-multi-delete-dialog.tsx'
 
 type DataTableBulkActionsProps<TData> = {

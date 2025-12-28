@@ -1,4 +1,4 @@
-import { type Task } from '../data/schema.ts'
+import { type Task } from '@/develop/(views)/official/tasks/services/data/schema.ts'
 
 // 任务对话框类型定义
 export type TasksDialogType = 'create' | 'update' | 'delete' | 'import'

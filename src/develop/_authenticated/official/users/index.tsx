@@ -1,7 +1,7 @@
 import z from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
 import { Users } from '@/develop/(views)/official/users'
-import { roles } from '@/develop/(views)/official/users/data/data.ts'
+import { roles } from '@/develop/(views)/official/users/services/data/data.ts'
 
 const usersSearchSchema = z.object({
      page: z.number().optional().catch(1),

@@ -2,8 +2,8 @@ import { type ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/develop/(components)/data-table'
 import { Badge } from '@/components/ui/badge.tsx'
 import { Checkbox } from '@/components/ui/checkbox.tsx'
-import { labels, priorities, statuses } from '../data/data.tsx'
-import { type Task } from '../data/schema.ts'
+import { labels, priorities, statuses } from '@/develop/(views)/official/tasks/services/data/data.tsx'
+import { type Task } from '@/develop/(views)/official/tasks/services/data/schema.ts'
 import { DataTableRowActions } from './actions/data-table-row-actions.tsx'
 
 // 任务表格列定义

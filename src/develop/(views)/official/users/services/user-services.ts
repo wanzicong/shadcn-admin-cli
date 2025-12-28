@@ -10,7 +10,7 @@ import type {
      UserUpdate,
 } from '@/develop/(services)/api/types'
 import { post } from '@/develop/(services)/request'
-import type { User } from '../data/schema'
+import type { User } from '@/develop/(views)/official/users/services/data/schema'
 
 /**
  * 用户管理 API 服务

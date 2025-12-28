@@ -8,7 +8,7 @@ import { TasksDialogs } from './components/dialogs/tasks-dialogs.tsx'
 import { TasksPrimaryButtons } from './components/tasks-primary-buttons.tsx'
 import { TasksTable } from './components/tasks-table.tsx'
 import { TasksProvider } from './context/tasks-provider.tsx'
-import { tasks } from './data/tasks.ts'
+import { tasks } from '@/develop/(views)/official/tasks/services/data/tasks.ts'
 
 export function Tasks() {
      return (

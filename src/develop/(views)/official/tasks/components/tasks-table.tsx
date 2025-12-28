@@ -17,8 +17,8 @@ import { DataTablePagination, DataTableToolbar } from '@/develop/(components)/da
 import { useTableUrlState } from '@/develop/(hooks)/use-table-url-state.ts'
 import { cn } from '@/develop/(lib)/utils.ts'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
-import { priorities, statuses } from '../data/data.tsx'
-import { type Task } from '../data/schema.ts'
+import { priorities, statuses } from '@/develop/(views)/official/tasks/services/data/data.tsx'
+import { type Task } from '@/develop/(views)/official/tasks/services/data/schema.ts'
 import { DataTableBulkActions } from './actions/data-table-bulk-actions.tsx'
 import { tasksColumns as columns } from './tasks-columns.tsx'
 

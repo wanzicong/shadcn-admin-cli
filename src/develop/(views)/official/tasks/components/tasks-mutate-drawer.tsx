@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input.tsx'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group.tsx'
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet.tsx'
 import { SelectDropdown } from '@/components/select-dropdown.tsx'
-import { type Task } from '../data/schema.ts'
+import { type Task } from '@/develop/(views)/official/tasks/services/data/schema.ts'
 
 type TaskMutateDrawerProps = {
      open: boolean

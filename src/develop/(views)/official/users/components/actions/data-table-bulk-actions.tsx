@@ -6,7 +6,7 @@ import { Trash2, UserX, UserCheck, Mail } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button.tsx'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip.tsx'
-import { type User } from '../../data/schema.ts'
+import { type User } from '@/develop/(views)/official/users/services/data/schema.ts'
 import { UsersMultiDeleteDialog } from '../dialogs/users-multi-delete-dialog.tsx'
 
 type DataTableBulkActionsProps<TData> = {

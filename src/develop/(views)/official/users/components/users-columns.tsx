@@ -4,8 +4,8 @@ import { cn } from '@/develop/(lib)/utils.ts'
 import { Badge } from '@/components/ui/badge.tsx'
 import { Checkbox } from '@/components/ui/checkbox.tsx'
 import { LongText } from '@/components/long-text.tsx'
-import { callTypes, roles } from '../data/data.ts'
-import { type User } from '../data/schema.ts'
+import { callTypes, roles } from '@/develop/(views)/official/users/services/data/data.ts'
+import { type User } from '@/develop/(views)/official/users/services/data/schema.ts'
 import { DataTableRowActions } from './actions/data-table-row-actions.tsx'
 
 // 用户表格列定义

@@ -14,8 +14,8 @@ import { Input } from '@/components/ui/input.tsx'
 import { LoaderCircle } from '@/components/loader-circle.tsx'
 import { PasswordInput } from '@/components/password-input.tsx'
 import { SelectDropdown } from '@/components/select-dropdown.tsx'
-import { roles } from '../../data/data.ts'
-import { type User } from '../../data/schema.ts'
+import { roles } from '@/develop/(views)/official/users/services/data/data.ts'
+import { type User } from '@/develop/(views)/official/users/services/data/schema.ts'
 import { usersApi } from '../../services/user-services.ts'
 
 const formSchema = z
