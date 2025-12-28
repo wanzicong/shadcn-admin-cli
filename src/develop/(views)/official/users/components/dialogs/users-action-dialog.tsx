@@ -16,6 +16,7 @@ import { LoaderCircle } from '@/components/loader-circle.tsx'
 import { roles } from '../../data/data.ts'
 import { type User } from '../../data/schema.ts'
 import { usersApi } from '../../services/user-services.ts'
+import type { UserCreate, UserUpdate, UserRole } from '@/develop/(services)/api/types'
 
 const formSchema = z
      .object({
@@ -121,12 +122,30 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UserAction
           try {
                if (isEdit && currentRow) {
                     // 更新用户
-                    const { confirmPassword, isEdit, ...updateData } = values
+                    const { confirmPassword, isEdit, password, ...rest } = values
+
+                    // 构建更新数据
+                    const updateData: UserUpdate = {
+                         ...rest,
+                         role: rest.role as UserRole,
+                         // 仅在密码不为空时更新密码
+                         ...(password ? { password } : {}),
+                    }
+
                     await usersApi.updateUser(currentRow.id, updateData)
                     toast.success('用户更新成功')
                } else {
                     // 创建新用户
-                    const { confirmPassword, isEdit, ...createData } = values
+                    const { confirmPassword, isEdit, ...rest } = values
+
+                    // 构建创建数据
+                    const createData: UserCreate = {
+                         ...rest,
+                         role: rest.role as UserRole,
+                         // 创建用户需要有密码
+                         password: rest.password!,
+                    }
+
                     await usersApi.createUser(createData)
                     toast.success('用户创建成功')
                }

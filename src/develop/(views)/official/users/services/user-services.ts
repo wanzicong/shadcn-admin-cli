@@ -6,6 +6,8 @@ import type {
      BulkDeleteRequest,
      BulkOperationResponse,
      UserStats,
+     UserCreate,
+     UserUpdate,
 } from '@/develop/(services)/api/types'
 import { post } from '@/develop/(services)/request'
 import type { User } from '../data/schema'
@@ -73,14 +75,14 @@ export class UsersService {
      /**
       * 创建新用户
       */
-     static async createUser(data: User): Promise<User> {
+     static async createUser(data: UserCreate): Promise<User> {
           return post<User>('/api/users/create', { user_data: data })
      }
 
      /**
       * 更新用户信息
       */
-     static async updateUser(userId: string, data: User): Promise<User> {
+     static async updateUser(userId: string, data: UserUpdate): Promise<User> {
           return post<User>('/api/users/update', { user_id: userId, user_data: data })
      }
 

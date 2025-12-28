@@ -1,21 +1,38 @@
 {
-  "env": {
-    "ANTHROPIC_AUTH_TOKEN": "548e842b11a0468eb598555334a3e085.AvbhYuvJYqJOuwjV",
-    "ANTHROPIC_BASE_URL": "https://open.bigmodel.cn/api/anthropic",
-    "API_TIMEOUT_MS": "3000000",
-    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-4.5-air",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-4.7",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-4.7"
-  },
   "permissions": {
     "allow": [
       "Bash(tree:*)",
       "Bash(ls:*)",
       "Bash(pnpm type-check)",
-      "Bash(pnpm lint)"
+      "Bash(pnpm lint)",
+      "Skill(code-review:code-review)",
+      "Bash(gh auth status:*)",
+      "Skill(pr-review-toolkit:review-pr)",
+      "Bash(git diff:*)",
+      "WebSearch",
+      "WebFetch(domain:docs.claude.com)",
+      "WebFetch(domain:pypi.org)",
+      "Bash(pip show:*)",
+      "Bash(poetry init --no-interaction --name claude-agent --description \"A Claude-powered coding agent for code review, security analysis, and development tasks\" --author \"Developer <dev@example.com>\" --python \"^3.10\")",
+      "Bash(pip:*)",
+      "Bash(poetry:*)",
+      "Bash(cat:*)",
+      "Bash(python -m pip:*)",
+      "Bash(python -m py_compile:*)",
+      "Bash(python:*)",
+      "Bash(file:*)",
+      "Bash(wc -l:*)",
+      "Bash(find:*)",
+      "Bash(npm ls:*)",
+      "Bash(ls -la /d/WorkeSpaceCoding/node/shadcn-admin-cli/src/develop/\\\\\\(services\\\\\\)/request/)",
+      "Bash(cat \"/d/WorkeSpaceCoding/node/shadcn-admin-cli/src/develop/\\(layout\\)/types.ts\")",
+      "Bash(npx tsc:*)",
+      "Bash(npm run type-check:*)"
     ],
     "deny": [],
     "ask": []
+  },
+  "enabledPlugins": {
+    "Notion@claude-plugins-official": true
   }
 }
